@@ -18,6 +18,8 @@ import qualified Data.Text.IO as T
 import Data.Text (Text)
 -- GUI
 import Graphics.UI.Gtk
+-- liftIO
+import Control.Monad.IO.Class (liftIO)
 -- Clipboard
 import System.Hclip
 -- Files
@@ -103,10 +105,33 @@ runGUI rules = do
     for_ (matchRules query rules) $ \(name, result) ->
       listStoreAppend model (name, result)
 
-  view `on` rowActivated $ \[index] _ -> do
-    row <- listStoreGetValue model index
-    setClipboard (T.unpack (snd row))
-    widgetDestroy window
+  let choose i = do
+        row <- listStoreGetValue model i
+        setClipboard (T.unpack (snd row))
+        widgetDestroy window
+
+  view `on` rowActivated $ \[index] _ -> choose index
+
+  let getSelectedRow = listToMaybe . fst <$> treeViewGetCursor view
+
+  searchEntry `on` keyPressEvent $ do
+    key <- T.unpack <$> eventKeyName
+    mbIndex <- liftIO getSelectedRow
+    rowCount <- liftIO (length <$> listStoreToList model)
+    let indexPrev Nothing  = if rowCount == 0 then [] else [0]
+        indexPrev (Just i) = if i == 0 then [0] else [i-1]
+    let indexNext Nothing  = if rowCount == 0 then [] else [0]
+        indexNext (Just i) = if i == rowCount-1 then [rowCount-1] else [i+1]
+    liftIO $ case key of
+      "Up"   -> do treeViewSetCursor view (indexPrev mbIndex) Nothing
+                   return True
+      "Down" -> do treeViewSetCursor view (indexNext mbIndex) Nothing
+                   return True
+      _other -> return False
+
+  searchEntry `on` entryActivated $ do
+    mbIndex <- getSelectedRow
+    mapM_ choose mbIndex
 
   widgetShowAll window
   mainGUI
