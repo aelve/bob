@@ -11,6 +11,7 @@ maintainer:          yom@artyom.me
 category:            Application
 build-type:          Simple
 extra-source-files:  README.md
+data-files:          rules/*.rules
 cabal-version:       >=1.10
 
 source-repository head
@@ -22,5 +23,7 @@ executable bob
   -- other-modules:       
   -- other-extensions:    
   build-depends:       base >=4.8 && <4.9
+                     , microlens >= 0.3
+                     , text
   hs-source-dirs:      src
   default-language:    Haskell2010
