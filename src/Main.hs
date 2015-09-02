@@ -1,5 +1,8 @@
 {-# LANGUAGE
-RecordWildCards
+RecordWildCards,
+TupleSections,
+OverloadedStrings,
+ExtendedDefaultRules
   #-}
 
 
@@ -34,9 +37,12 @@ data Rule = Rule {
 
 readRule :: Text -> Maybe Rule
 readRule s = case T.lines s of
-  [name, from, to] -> Just Rule {
+  [name, "row", from, to] -> Just Rule {
     ruleName     = name,
     ruleMappings = over (each.both) T.singleton (T.zip from to) }
+  [name, "named", char, names] -> Just Rule {
+    ruleName     = name,
+    ruleMappings = map (,char) (T.words names) }
   _other -> Nothing
 
 readRules :: Text -> [Rule]
