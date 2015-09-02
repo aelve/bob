@@ -17,6 +17,10 @@ import Text.Printf
 import qualified Data.Text as T
 import qualified Data.Text.IO as T
 import Data.Text (Text)
+-- Files
+import System.FilePath
+-- Data files
+import Paths_bob
 
 
 data Rule = Rule {
@@ -43,7 +47,8 @@ matchRules query = mapMaybe (matchRule query)
 
 main :: IO ()
 main = do
-  rules <- readRules <$> T.readFile "rules/rules"
+  dataDir <- getDataDir
+  rules <- readRules <$> T.readFile (dataDir </> "rules/main.rules")
   query <- T.getLine
   putStrLn ""
   for_ (matchRules query rules) $ \(name, result) ->
