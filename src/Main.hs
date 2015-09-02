@@ -18,6 +18,8 @@ import qualified Data.Text.IO as T
 import Data.Text (Text)
 -- GUI
 import Graphics.UI.Gtk
+-- Clipboard
+import System.Hclip
 -- Files
 import System.FilePath
 -- Data files
@@ -100,6 +102,11 @@ runGUI rules = do
     listStoreClear model
     for_ (matchRules query rules) $ \(name, result) ->
       listStoreAppend model (name, result)
+
+  view `on` rowActivated $ \[index] _ -> do
+    row <- listStoreGetValue model index
+    setClipboard (T.unpack (snd row))
+    widgetDestroy window
 
   widgetShowAll window
   mainGUI
