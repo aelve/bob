@@ -1,5 +1,4 @@
 {-# LANGUAGE
-OverloadedStrings,
 RecordWildCards
   #-}
 
@@ -37,7 +36,7 @@ readRule s = case T.lines s of
   _other -> Nothing
 
 readRules :: Text -> [Rule]
-readRules = mapMaybe readRule . T.splitOn "\n\n"
+readRules = mapMaybe readRule . T.splitOn (T.pack "\n\n")
 
 matchRule :: Text -> Rule -> Maybe (Text, Text)
 matchRule query Rule{..} = do
@@ -53,6 +52,12 @@ runGUI rules = do
 
   window <- windowNew
   window `on` objectDestroy $ mainQuit
+  set window [
+    windowTitle := "Bob",
+    windowGravity := GravityCenter,
+    windowWindowPosition := WinPosCenter,
+    windowDefaultWidth := 200,
+    windowDefaultHeight := 200 ]
 
   searchEntry <- entryNew
 
@@ -66,8 +71,8 @@ runGUI rules = do
   colChar <- treeViewColumnNew
   colRule <- treeViewColumnNew
 
-  treeViewColumnSetTitle colChar ("Character" :: Text)
-  treeViewColumnSetTitle colRule ("Rule"      :: Text)
+  treeViewColumnSetTitle colChar "Character"
+  treeViewColumnSetTitle colRule "Rule"
 
   rendererChar <- cellRendererTextNew
   rendererRule <- cellRendererTextNew
