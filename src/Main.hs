@@ -12,6 +12,7 @@ module Main where
 -- General
 import Data.Maybe
 import Data.Foldable
+import Control.Monad
 -- Lenses
 import Lens.Micro hiding (set)
 -- Text
@@ -111,23 +112,27 @@ runGUI rules = do
     for_ (matchRules query rules) $ \(name, result) ->
       listStoreAppend model (name, result)
 
-  let choose i = do
-        row <- listStoreGetValue model i
-        setClipboard (T.unpack (snd row))
-        widgetDestroy window
+  let getVariantsNumber = length <$> listStoreToList model
 
-  view `on` rowActivated $ \[index] _ -> choose index
+  let choose mbIndex = do
+        variantsNumber <- getVariantsNumber
+        unless (variantsNumber == 0) $ do
+          row <- listStoreGetValue model (fromMaybe 0 mbIndex)
+          setClipboard (T.unpack (snd row))
+          widgetDestroy window
+
+  view `on` rowActivated $ \path _ -> choose (listToMaybe path)
 
   let getSelectedRow = listToMaybe . fst <$> treeViewGetCursor view
 
   searchEntry `on` keyPressEvent $ do
     key <- T.unpack <$> eventKeyName
     mbIndex <- liftIO getSelectedRow
-    rowCount <- liftIO (length <$> listStoreToList model)
-    let indexPrev Nothing  = if rowCount == 0 then [] else [0]
-        indexPrev (Just i) = if i == 0 then [0] else [i-1]
-    let indexNext Nothing  = if rowCount == 0 then [] else [0]
-        indexNext (Just i) = if i == rowCount-1 then [rowCount-1] else [i+1]
+    variantsNumber <- liftIO getVariantsNumber
+    let indexPrev Nothing  = if variantsNumber == 0 then [] else [0]
+        indexPrev (Just i) = [max 0 (i-1)]
+    let indexNext Nothing  = if variantsNumber == 0 then [] else [0]
+        indexNext (Just i) = [min (variantsNumber-1) (i+1)]
     liftIO $ case key of
       "Up"   -> do treeViewSetCursor view (indexPrev mbIndex) Nothing
                    return True
@@ -135,9 +140,8 @@ runGUI rules = do
                    return True
       _other -> return False
 
-  searchEntry `on` entryActivated $ do
-    mbIndex <- getSelectedRow
-    mapM_ choose mbIndex
+  searchEntry `on` entryActivated $
+    choose =<< getSelectedRow
 
   widgetShowAll window
   mainGUI
