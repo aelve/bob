@@ -16,7 +16,7 @@ import Data.Traversable
 import Control.Applicative
 import Control.Monad
 -- Lenses
-import Lens.Micro hiding (set)
+import Lens.Micro.GHC hiding (set)
 -- Lists
 import Data.List.Split hiding (oneOf)
 import Data.List (permutations)
@@ -116,14 +116,28 @@ readRule s = case T.lines s of
     -- A matcher is a line + all lines following it that are indented with
     -- spaces.
     let isIndented line = " " `T.isPrefixOf` line
+    -- Let's split the rule into a sequence of matchers.
     let splitter = dropInitBlank $ keepDelimsL $ whenElt (not . isIndented)
     let matchers = split splitter rest
+    -- And parse those matchers.
     let (errors, mappings) = partitionEithers $
           map (readMatcher . mconcat) matchers
+    -- And also find matches assigned to more than one thing (e.g. “<<”
+    -- meaning both ‘↞’ and ‘↢’) – it's allowed in different rules, but not
+    -- in the same rule.
+    let mappingErrors = do
+          let combinedMapping = M.unionsWith (++) $
+                over (each.each) (:[]) mappings
+          (k, vs) <- M.toList combinedMapping
+          guard (length vs /= 1)
+          return $ printf
+            "“%s” in rule “%s” corresponds to more than 1 thing: %s"
+            (T.unpack k) (T.unpack name)
+            (T.unpack (T.intercalate ", " vs))
     let rule = Rule {
           ruleName    = name,
           ruleMapping = mconcat mappings }
-    (errors, Just rule)
+    (mappingErrors ++ errors, Just rule)
 
 readRules :: Text -> ([String], [Rule])
 readRules s = (concatMap fst rules, mapMaybe snd rules)
