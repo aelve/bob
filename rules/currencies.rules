@@ -1,17 +1,11 @@
 pound (currency)
-£ = any  : pound lb sterling gbp l
-£ = perm : l -
+£ = pound lb sterling gbp {l -} l
 
 dollar (currency)
-$ = any  : dollar usd aud cad mxn s
-$ = perm : s |
+$ = dollar usd aud cad mxn {s |} s
 
 euro (currency)
-€ = any  : euro eur e
-€ = perm : e =
-€ = perm : e - -
+€ = euro eur {e =} {e - -} e
 
 yen/yuan (currency)
-¥ = any  : jpy yen cny rmb cnh
-¥ = perm : y =
-¥ = perm : y - -
+¥ = jpy yen cny rmb cnh {y =} {y - -} y

@@ -1,11 +1,11 @@
 superscript
-row 0123456789+=()ni
-    ⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁼⁽⁾ⁿⁱ
+zip "0123456789+=()ni"
+    "⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁼⁽⁾ⁿⁱ"
 
 subscript
-row 0123456789+=()aeoxhklmnpst
-    ₀₁₂₃₄₅₆₇₈₉₊₌₍₎ₐₑₒₓₕₖₗₘₙₚₛₜ
+zip "0123456789+=()aeoxhklmnpst"
+    "₀₁₂₃₄₅₆₇₈₉₊₌₍₎ₐₑₒₓₕₖₗₘₙₚₛₜ"
 
 uppercase
-row abcdefghijklmnopqrstuvwxyz
+zip abcdefghijklmnopqrstuvwxyz
     ABCDEFGHIJKLMNOPQRSTUVWXYZ

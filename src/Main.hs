@@ -13,21 +13,26 @@ import Data.Maybe
 import Data.Either
 import Data.Foldable
 import Data.Traversable
+import Control.Applicative
 import Control.Monad
-import GHC.Exts (fromList)
 -- Lenses
 import Lens.Micro hiding (set)
 -- Lists
-import Data.List.Split
+import Data.List.Split hiding (oneOf)
 import Data.List (permutations)
 -- Text
 import Text.Printf
 import qualified Data.Text as T
 import qualified Data.Text.IO as T
 import Data.Text (Text)
+import Data.Char
+-- Parsing
+import Text.Parsec hiding ((<|>), many)
+import Text.Parsec.Text
 -- Containers
 import qualified Data.Map as M
 import Data.Map (Map)
+import GHC.Exts (fromList)
 -- GUI
 import Graphics.UI.Gtk
 -- liftIO
@@ -43,26 +48,66 @@ import Paths_bob
 
 type Mapping = Map Text Text
 
-mappingFromMany :: [Text] -> Text -> Mapping
-mappingFromMany froms to = fromList (zip froms (repeat to))
+data Generator
+  = Literal Text
+  | Permutation [Text]
+  deriving (Show)
 
-mappingFromPaired :: [Text] -> [Text] -> Mapping
-mappingFromPaired froms tos = fromList (zip froms tos)
+spaced = between spaces spaces
+
+literal :: Parser Text
+literal = spaced $
+  T.pack <$> asum [
+    some literalChar,
+    between (char '"') (char '"') (many quotedChar) ]
+  where
+    literalChar = satisfy $ \x ->
+      or [isSymbol x, isPunctuation x, isAlphaNum x] &&
+      x `notElem` ("\"'()[]{}\\" :: String)
+    quotedChar = satisfy $ \x ->
+      not $ or [isSpace x, x == '"', x == '\\']
+
+generator :: Parser Generator
+generator = spaced $ asum [
+  Literal <$> literal,
+  Permutation <$> between (char '{') (char '}') (some literal) ]
+
+data Matcher
+  = Zip Text Text
+  | ManyToOne [Generator] Text
+  deriving (Show)
+
+evalGenerator :: Generator -> [Text]
+evalGenerator (Literal x) = [x]
+evalGenerator (Permutation xs) = map mconcat (permutations xs)
+
+evalMatcher :: Matcher -> Mapping
+evalMatcher (Zip a b) = fromList (zip (T.chunksOf 1 a) (T.chunksOf 1 b))
+evalMatcher (ManyToOne gs y) = fromList (zip xs (repeat y))
+  where xs = concatMap evalGenerator gs
+
+matcher :: Parser Matcher
+matcher = asum [zipP, manyToOneP]
+  where
+    zipP = do
+      string "zip"
+      a <- literal
+      b <- literal
+      return (Zip a b)
+    manyToOneP = do
+      x <- literal
+      spaced (string "=")
+      g <- many generator
+      return (ManyToOne g x)
 
 data Rule = Rule {
   ruleName    :: Text,
   ruleMapping :: Mapping }
 
 readMatcher :: Text -> Either String Mapping
-readMatcher s = case T.words s of
-  ["row", a, b] ->
-    pure (mappingFromPaired (T.chunksOf 1 a) (T.chunksOf 1 b))
-  (char : "=" : "any" : ":" : rest) ->
-    pure (mappingFromMany rest char)
-  (char : "=" : "perm" : ":" : rest) ->
-    pure (mappingFromMany (map mconcat (permutations rest)) char)
-  _other ->
-    Left ("invalid matcher: " ++ show s)
+readMatcher s = case parse matcher "" s of
+  Left err -> Left (show err)
+  Right m  -> Right (evalMatcher m)
 
 readRule :: Text -> ([String], Maybe Rule)
 readRule s = case T.lines s of
