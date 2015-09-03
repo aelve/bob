@@ -63,7 +63,7 @@ literal = spaced $
   where
     literalChar = satisfy $ \x ->
       or [isSymbol x, isPunctuation x, isAlphaNum x] &&
-      x `notElem` ("\"'()[]{}\\" :: String)
+      x `notElem` ("\"()[]{}" :: String)
     quotedChar = satisfy $ \x ->
       not $ or [isSpace x, x == '"', x == '\\']
 
