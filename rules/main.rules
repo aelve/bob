@@ -1,39 +1,27 @@
 superscript
-row
-123456789+=()n0i
-¹²³⁴⁵⁶⁷⁸⁹⁺⁼⁽⁾ⁿ⁰ⁱ
+row 123456789+=()n0i
+    ¹²³⁴⁵⁶⁷⁸⁹⁺⁼⁽⁾ⁿ⁰ⁱ
 
 subscript
-row
-0123456789+=()aeoxhklmnpst
-₀₁₂₃₄₅₆₇₈₉₊₌₍₎ₐₑₒₓₕₖₗₘₙₚₛₜ
+row 0123456789+=()aeoxhklmnpst
+    ₀₁₂₃₄₅₆₇₈₉₊₌₍₎ₐₑₒₓₕₖₗₘₙₚₛₜ
 
 uppercase
-row
-abcdefghijklmnopqrstuvwxyz
-ABCDEFGHIJKLMNOPQRSTUVWXYZ
+row abcdefghijklmnopqrstuvwxyz
+    ABCDEFGHIJKLMNOPQRSTUVWXYZ
 
 acute accent
-row
-acegiklmnoprsuwyzACEGIKLMNOPRSUWYZ
-áćéǵíḱĺḿńóṕŕśúẃýźÁĆÉǴÍḰĹḾŃÓṔŔŚÚẂÝŹ
+row acegiklmnoprsuwyzACEGIKLMNOPRSUWYZ
+    áćéǵíḱĺḿńóṕŕśúẃýźÁĆÉǴÍḰĹḾŃÓṔŔŚÚẂÝŹ
 
 pound (currency)
-named
-£
-pound lb sterling gbp l
+£ = pound lb sterling gbp l
 
 dollar (currency)
-named
-$
-dollar usd aud cad mxn s s| |s
+$ = dollar usd aud cad mxn s s| |s
 
 euro (currency)
-named
-€
-euro eur e e= =e
+€ = euro eur e e= =e
 
 yen/yuan (currency)
-named
-¥
-jpy yen cny rmb cnh y= =y
+¥ = jpy yen cny rmb cnh y= =y

@@ -1,25 +1,31 @@
 {-# LANGUAGE
 RecordWildCards,
-TupleSections,
 OverloadedStrings,
 ExtendedDefaultRules
   #-}
 
 
-module Main where
+module Main (main) where
 
 
 -- General
 import Data.Maybe
+import Data.Either
 import Data.Foldable
 import Control.Monad
+import GHC.Exts (fromList)
 -- Lenses
 import Lens.Micro hiding (set)
+-- Lists
+import Data.List.Split
 -- Text
 import Text.Printf
 import qualified Data.Text as T
 import qualified Data.Text.IO as T
 import Data.Text (Text)
+-- Containers
+import qualified Data.Map as M
+import Data.Map (Map)
 -- GUI
 import Graphics.UI.Gtk
 -- liftIO
@@ -32,26 +38,48 @@ import System.FilePath
 import Paths_bob
 
 
+type Mapping = Map Text Text
+
+mappingFromMany :: [Text] -> Text -> Mapping
+mappingFromMany froms to = fromList (zip froms (repeat to))
+
+mappingFromPaired :: [Text] -> [Text] -> Mapping
+mappingFromPaired froms tos = fromList (zip froms tos)
+
 data Rule = Rule {
-  ruleName     :: Text,
-  ruleMappings :: [(Text, Text)] }
+  ruleName    :: Text,
+  ruleMapping :: Mapping }
 
-readRule :: Text -> Maybe Rule
+readMatcher :: Text -> Either String Mapping
+readMatcher s = case T.words s of
+  ["row", a, b] -> pure (mappingFromPaired (T.chunksOf 1 a) (T.chunksOf 1 b))
+  (char : "=" : rest) -> pure (mappingFromMany rest char)
+  _other -> Left ("invalid matcher: " ++ show s)
+
+readRule :: Text -> ([String], Maybe Rule)
 readRule s = case T.lines s of
-  [name, "row", from, to] -> Just Rule {
-    ruleName     = name,
-    ruleMappings = over (each.both) T.singleton (T.zip from to) }
-  [name, "named", char, names] -> Just Rule {
-    ruleName     = name,
-    ruleMappings = map (,char) (T.words names) }
-  _other -> Nothing
+  [] -> (["empty rule"], Nothing)
+  (name:rest) -> do
+    -- A matcher is a line + all lines following it that are indented with
+    -- spaces.
+    let isIndented line = " " `T.isPrefixOf` line
+    let splitter = dropInitBlank $ keepDelimsL $ whenElt (not . isIndented)
+    let matchers = split splitter rest
+    let (errors, mappings) = partitionEithers $
+          map (readMatcher . mconcat) matchers
+    let rule = Rule {
+          ruleName    = name,
+          ruleMapping = mconcat mappings }
+    (errors, Just rule)
 
-readRules :: Text -> [Rule]
-readRules = mapMaybe readRule . T.splitOn (T.pack "\n\n")
+readRules :: Text -> ([String], [Rule])
+readRules s = (concatMap fst rules, mapMaybe snd rules)
+  where
+    rules = map readRule (T.splitOn (T.pack "\n\n") s)
 
 matchRule :: Text -> Rule -> Maybe (Text, Text)
 matchRule query Rule{..} = do
-  result <- lookup query ruleMappings
+  result <- M.lookup query ruleMapping
   return (ruleName, result)
 
 matchRules :: Text -> [Rule] -> [(Text, Text)]
@@ -149,5 +177,7 @@ runGUI rules = do
 main :: IO ()
 main = do
   dataDir <- getDataDir
-  rules <- readRules <$> T.readFile (dataDir </> "rules/main.rules")
+  (errors, rules) <- readRules <$>
+    T.readFile (dataDir </> "rules/main.rules")
+  mapM_ putStrLn errors
   runGUI rules

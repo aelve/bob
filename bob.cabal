@@ -24,9 +24,11 @@ executable bob
   -- other-extensions:    
   build-depends:       Hclip == 3.*
                      , base >=4.8 && <4.9
+                     , containers >= 0.5
                      , filepath >= 1.4
                      , gtk3 >= 0.13.8
                      , microlens >= 0.3
+                     , split == 0.2.*
                      , text
                      , transformers >= 0.3
   hs-source-dirs:      src
