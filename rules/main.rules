@@ -15,13 +15,19 @@ row acegiklmnoprsuwyzACEGIKLMNOPRSUWYZ
     áćéǵíḱĺḿńóṕŕśúẃýźÁĆÉǴÍḰĹḾŃÓṔŔŚÚẂÝŹ
 
 pound (currency)
-£ = pound lb sterling gbp l
+£ = any  : pound lb sterling gbp l
+£ = perm : l -
 
 dollar (currency)
-$ = dollar usd aud cad mxn s s| |s
+$ = any  : dollar usd aud cad mxn s
+$ = perm : s |
 
 euro (currency)
-€ = euro eur e e= =e
+€ = any  : euro eur e
+€ = perm : e =
+€ = perm : e - -
 
 yen/yuan (currency)
-¥ = jpy yen cny rmb cnh y= =y
+¥ = any  : jpy yen cny rmb cnh
+¥ = perm : y =
+¥ = perm : y - -

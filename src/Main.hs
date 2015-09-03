@@ -18,6 +18,7 @@ import GHC.Exts (fromList)
 import Lens.Micro hiding (set)
 -- Lists
 import Data.List.Split
+import Data.List (permutations)
 -- Text
 import Text.Printf
 import qualified Data.Text as T
@@ -52,9 +53,14 @@ data Rule = Rule {
 
 readMatcher :: Text -> Either String Mapping
 readMatcher s = case T.words s of
-  ["row", a, b] -> pure (mappingFromPaired (T.chunksOf 1 a) (T.chunksOf 1 b))
-  (char : "=" : rest) -> pure (mappingFromMany rest char)
-  _other -> Left ("invalid matcher: " ++ show s)
+  ["row", a, b] ->
+    pure (mappingFromPaired (T.chunksOf 1 a) (T.chunksOf 1 b))
+  (char : "=" : "any" : ":" : rest) ->
+    pure (mappingFromMany rest char)
+  (char : "=" : "perm" : ":" : rest) ->
+    pure (mappingFromMany (map mconcat (permutations rest)) char)
+  _other ->
+    Left ("invalid matcher: " ++ show s)
 
 readRule :: Text -> ([String], Maybe Rule)
 readRule s = case T.lines s of
