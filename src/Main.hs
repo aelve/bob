@@ -12,6 +12,7 @@ module Main (main) where
 import Data.Maybe
 import Data.Either
 import Data.Foldable
+import Data.Traversable
 import Control.Monad
 import GHC.Exts (fromList)
 -- Lenses
@@ -35,6 +36,7 @@ import Control.Monad.IO.Class (liftIO)
 import System.Hclip
 -- Files
 import System.FilePath
+import System.Directory
 -- Data files
 import Paths_bob
 
@@ -183,7 +185,14 @@ runGUI rules = do
 main :: IO ()
 main = do
   dataDir <- getDataDir
-  (errors, rules) <- readRules <$>
-    T.readFile (dataDir </> "rules/main.rules")
-  mapM_ putStrLn errors
+  ruleFiles <- filter ((== ".rules") . takeExtensions) <$>
+               getDirectoryContents (dataDir </> "rules")
+  rules <- fmap concat . for ruleFiles $ \ruleFile -> do
+    let path = dataDir </> "rules" </> ruleFile
+    (errors, rules) <- readRules <$> T.readFile path
+    unless (null errors) $ do
+      putStrLn ""
+      putStrLn ("errors while parsing rules in " ++ ruleFile)
+      mapM_ (putStrLn . ("  " ++)) errors
+    return rules
   runGUI rules

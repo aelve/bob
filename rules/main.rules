@@ -9,25 +9,3 @@ row 0123456789+=()aeoxhklmnpst
 uppercase
 row abcdefghijklmnopqrstuvwxyz
     ABCDEFGHIJKLMNOPQRSTUVWXYZ
-
-acute accent
-row acegiklmnoprsuwyzACEGIKLMNOPRSUWYZ
-    áćéǵíḱĺḿńóṕŕśúẃýźÁĆÉǴÍḰĹḾŃÓṔŔŚÚẂÝŹ
-
-pound (currency)
-£ = any  : pound lb sterling gbp l
-£ = perm : l -
-
-dollar (currency)
-$ = any  : dollar usd aud cad mxn s
-$ = perm : s |
-
-euro (currency)
-€ = any  : euro eur e
-€ = perm : e =
-€ = perm : e - -
-
-yen/yuan (currency)
-¥ = any  : jpy yen cny rmb cnh
-¥ = perm : y =
-¥ = perm : y - -

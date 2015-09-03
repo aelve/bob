@@ -25,6 +25,7 @@ executable bob
   build-depends:       Hclip == 3.*
                      , base >=4.8 && <4.9
                      , containers >= 0.5
+                     , directory >= 1.2
                      , filepath >= 1.4
                      , gtk3 >= 0.13.8
                      , microlens >= 0.3
