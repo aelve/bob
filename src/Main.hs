@@ -65,8 +65,10 @@ literalP = spaced $
     literalChar = satisfy $ \x ->
       or [isSymbol x, isPunctuation x, isAlphaNum x] &&
       x `notElem` ("\"()[]{}" :: String)
-    quotedChar = satisfy $ \x ->
-      not $ or [isSpace x, x == '"', x == '\\']
+    quotedChar = asum [
+      string "\\\"" >> pure '"',
+      string "\\\\" >> pure '\\',
+      satisfy $ \x -> not $ or [isSpace x, x == '"', x == '\\'] ]
 
 generatorP :: Parser Generator
 generatorP = spaced $ asum [
