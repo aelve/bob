@@ -1,111 +1,111 @@
 dollar
 $ = dollar
-$ = {(s S) (| / "")}
-$ = usd USD
+    {(s S) (| / "")}
+    usd USD
 
 pound
 £ = pound lb
-£ = {(l L) (- "")} # lf
-£ = gbp GBP
+    {(l L) (- "")} # lf
+    gbp GBP
 
 euro
 € = euro
-€ = {(e E c C) (= -- - "")}
-€ = eur EUR
+    {(e E c C) (= -- - "")}
+    eur EUR
 
 colón
 ₡ = colon colón
-₡ = {(c C) (// / "")}
-₡ = crc CRC svc SVC
+    {(c C) (// / "")}
+    crc CRC svc SVC
 
 naira
 ₦ = naira
-₦ = {(n N) (= -- - "")}
-₦ = ngn NGN
+    {(n N) (= -- - "")}
+    ngn NGN
 
 peseta
 ₧ = peseta
-₧ = Pts pts Pt pt
-₧ = esp ESP
+    Pts pts Pt pt
+    esp ESP
 
 cedi
 ₵ = cedi
-₵ = {(c C) (| / "")}
-₵ = ghs GHS
+    {(c C) (| / "")}
+    ghs GHS
 
 peso
 ₱ = peso
-₱ = {(p P) (= -- - "")}
-₱ = php PHP
+    {(p P) (= -- - "")}
+    php PHP
 
 hryvnia
 ₴ = hryvnia hrn
-₴ = {(s S г) (= -- - "")}
-₴ = uah UAH
+    {(s S г) (= -- - "")}
+    uah UAH
 
 tögrög (tugrik)
 ₮ = togrog tögrög tugrik
-₮ = {(t T) (// / "")}
-₮ = mnt MNT
+    {(t T) (// / "")}
+    mnt MNT
 
 dong
 ₫ = dong
-₫ = {d (-_ - _ "")}
-₫ = vnd VND
+    {d (-_ - _ "")}
+    vnd VND
 
 kip
 ₭ = kip
-₭ = {(k K) (- "")}
-₭ = lak LAK
+    {(k K) (- "")}
+    lak LAK
 
 won
 ₩ = won
-₩ = {(w W) (= -- - __ _ "")}
-₩ = krw KRW kpw KPW
+    {(w W) (= -- - __ _ "")}
+    krw KRW kpw KPW
 
 shekel
 ₪ = shekel sheqel nis
-₪ = ils ILS
+    ils ILS
 
 rupee
 ₨ = rupee Rs rs
 
 Indian rupee
 ₹ = rupee
-₹ = inr INR
+    inr INR
 
 austral
 ₳ = austral
-₳ = {(a A) (= -- - "")}
-₳ = ara ARA
+    {(a A) (= -- - "")}
+    ara ARA
 
 yuan / yen
 ¥ = yuan yen
-¥ = {(y Y) (= -- - "")}
-¥ = cny CNY jpy JPY
+    {(y Y) (= -- - "")}
+    cny CNY jpy JPY
 
 baht
 ฿ = baht
-฿ = {(b B) (| / "")}
-฿ = thb THB
+    {(b B) (| / "")}
+    thb THB
 
 guaraní
 ₲ = guarani guaraní
-₲ = {(g G) (| / "")}
-₲ = pyg PYG
+    {(g G) (| / "")}
+    pyg PYG
 
 florin
 ƒ = florin gulden guilder
-ƒ = f fl
+    f fl
 
 cent
 ¢ = cent penny 1/100
-¢ = {c (| / "")}
+    {c (| / "")}
 
 mill
 ₥ = mill mille mil 1/1000
-₥ = {m /} m
+    {m /} m
 
 currency sign
 ¤ = currency
-¤ = {(o O) (x X)}
+    {(o O) (x X)}
