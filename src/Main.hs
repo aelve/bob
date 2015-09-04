@@ -12,6 +12,7 @@ module Main (main) where
 import Data.Maybe
 import Data.Foldable
 import Data.Traversable
+import Data.Monoid
 import Control.Applicative
 import Control.Monad
 -- Lenses
@@ -25,7 +26,7 @@ import qualified Data.Text.IO as T
 import Data.Text (Text)
 import Data.Char
 -- Parsing
-import Text.Parsec hiding ((<|>), many)
+import Text.Parsec hiding ((<|>), many, optional)
 import Text.Parsec.Text
 -- Containers
 import qualified Data.Map as M
@@ -74,7 +75,7 @@ generatorP = spaced $ asum [
   Permutation <$> between (char '{') (char '}') (some generatorP) ]
 
 data Matcher
-  = Zip Text Text
+  = Zip Text Text (Maybe Generator)
   | ManyToOne Generator Text
   deriving (Show)
 
@@ -87,7 +88,14 @@ evalGenerator (Permutation gs) = do
   return (mconcat chosen)
 
 evalMatcher :: Matcher -> Mapping
-evalMatcher (Zip a b) = fromList (zip (T.chunksOf 1 a) (T.chunksOf 1 b))
+evalMatcher (Zip lineA lineB mbGen) = do
+  let as = T.chunksOf 1 lineA
+      bs = T.chunksOf 1 lineB
+  let additions = maybe [""] evalGenerator mbGen
+  fromList $ concat $ do
+    (a, b) <- zip as bs
+    addition <- additions
+    return [(addition <> a, b), (a <> addition, b)]
 evalMatcher (ManyToOne g y) = fromList (zip (evalGenerator g) (repeat y))
 
 matcherP :: Parser Matcher
@@ -95,9 +103,10 @@ matcherP = foldedLine $ asum [zipP, manyToOneP]
   where
     zipP = do
       string "zip"
-      a <- literalP
-      b <- literalP
-      return (Zip a b)
+      lineA <- literalP
+      lineB <- literalP
+      mbGen <- optional generatorP
+      return (Zip lineA lineB mbGen)
     manyToOneP = do
       notFollowedBy space
       x <- literalP
