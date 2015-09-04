@@ -204,8 +204,11 @@ runGUI rules = do
   searchEntry `on` editableChanged $ do
     query <- get searchEntry entryText
     listStoreClear model
-    for_ (matchRules query rules) $ \(name, result) ->
+    let matches = matchRules query rules
+    for_ matches $ \(name, result) ->
       listStoreAppend model (name, result)
+    unless (null matches) $
+      treeViewSetCursor view [0] Nothing
 
   let getVariantsNumber = length <$> listStoreToList model
 
