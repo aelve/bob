@@ -2,3 +2,8 @@ acute accent
 zip acegiklmnoprsuwyzACEGIKLMNOPRSUWYZ
     áćéǵíḱĺḿńóṕŕśúẃýźÁĆÉǴÍḰĹḾŃÓṔŔŚÚẂÝŹ
     (' / , "")
+
+double acute accent
+zip OoUu
+    ŐőŰű
+    ("\"" // ,, = : "")
