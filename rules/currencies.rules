@@ -1,11 +1,94 @@
-pound (currency)
-£ = pound lb sterling gbp {l -} l
+dollar
+$ = dollar {s |} {s /} s
+$ = usd
 
-dollar (currency)
-$ = dollar usd aud cad mxn {s |} s
+pound
+£ = pound lb {l -} l # lf
+£ = gbp
 
-euro (currency)
-€ = euro eur {e =} {e - -} e
+euro
+€ = euro
+€ = {e =} {e - -} {e -} e
+€ = {c =} {c - -} {c -} c
+€ = eur
 
-yen/yuan (currency)
-¥ = jpy yen cny rmb cnh {y =} {y - -} y
+colón
+₡ = colon colón {c / /} {c /} c
+₡ = crc svc
+
+naira
+₦ = naira {n =} {n - -} {n -} n
+₦ = ngn
+
+peseta
+₧ = peseta pts pt
+₧ = esp
+
+cedi
+₵ = cedi {c |} {c /} c
+₵ = ghs
+
+peso
+₱ = peso {p =} {p - -} {p -} p
+₱ = php
+
+hryvnia
+₴ = hryvnia hrn
+₴ = {s =} {s - -} {s -} s
+₴ = {г =} {г - -} {г -} г
+₴ = uah
+
+tögrög (tugrik)
+₮ = togrog tögrög tugrik {t / /} {t /} t
+₮ = mnt
+
+dong
+₫ = dong {d - _} {d _} {d -} d
+₫ = vnd
+
+kip
+₭ = kip {k -} k
+₭ = lak
+
+won
+₩ = won {w =} {w - -} {w -} {w _ _} {w _} w
+₩ = krw kpw
+
+shekel
+₪ = shekel sheqel nis
+₪ = ils
+
+rupee
+₨ = rupee rs
+
+Indian rupee
+₹ = rupee
+₹ = inr
+
+austral
+₳ = austral {a =} {a - -} {a -} a
+₳ = ara
+
+yuan / yen
+¥ = yuan yen {y =} {y - -} {y -} y
+¥ = cny jpy
+
+baht
+฿ = baht {b |} {b /} b
+฿ = thb
+
+guaraní
+₲ = guarani guaraní {g |} {g /} g
+₲ = pyg
+
+florin
+ƒ = florin gulden guilder f fl
+
+cent
+¢ = cent penny 1/100 {c |} {c /} c
+
+mill
+₥ = mill mille mil 1/1000 {m /} m
+
+currency sign
+¤ = currency {o x}
