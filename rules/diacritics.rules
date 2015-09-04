@@ -7,3 +7,8 @@ double acute accent
 zip OoUu
     ŐőŰű
     ("\"" // ,, = : "")
+
+caron
+zip AaIiCcDdEeGgHhjKkLlNnOoRrSsTtUuZz
+    ǍǎǏǐČčĎďĚěǦǧȞȟǰǨǩĽľŇňǑǒŘřŠšŤťǓǔŽž
+    (v u \/ "")
