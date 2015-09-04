@@ -107,6 +107,8 @@ matcherP = foldedLine $ asum [zipP, manyToOneP]
       string "zip"
       lineA <- literalP
       lineB <- literalP
+      when (T.length lineA /= T.length lineB) $
+        fail "lengths of zipped rows don't match"
       mbGen <- optional generatorP
       return (Zip lineA lineB mbGen)
     manyToOneP = do
