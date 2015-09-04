@@ -1,98 +1,98 @@
 dollar
 $ = dollar
 $ = {(s S) (| / "")}
-$ = usd
+$ = usd USD
 
 pound
 £ = pound lb
 £ = {(l L) (- "")} # lf
-£ = gbp
+£ = gbp GBP
 
 euro
 € = euro
 € = {(e E c C) (= -- - "")}
-€ = eur
+€ = eur EUR
 
 colón
 ₡ = colon colón
 ₡ = {(c C) (// / "")}
-₡ = crc svc
+₡ = crc CRC svc SVC
 
 naira
 ₦ = naira
 ₦ = {(n N) (= -- - "")}
-₦ = ngn
+₦ = ngn NGN
 
 peseta
 ₧ = peseta
 ₧ = Pts pts Pt pt
-₧ = esp
+₧ = esp ESP
 
 cedi
 ₵ = cedi
 ₵ = {(c C) (| / "")}
-₵ = ghs
+₵ = ghs GHS
 
 peso
 ₱ = peso
 ₱ = {(p P) (= -- - "")}
-₱ = php
+₱ = php PHP
 
 hryvnia
 ₴ = hryvnia hrn
 ₴ = {(s S г) (= -- - "")}
-₴ = uah
+₴ = uah UAH
 
 tögrög (tugrik)
 ₮ = togrog tögrög tugrik
 ₮ = {(t T) (// / "")}
-₮ = mnt
+₮ = mnt MNT
 
 dong
 ₫ = dong
 ₫ = {d (-_ - _ "")}
-₫ = vnd
+₫ = vnd VND
 
 kip
 ₭ = kip
 ₭ = {(k K) (- "")}
-₭ = lak
+₭ = lak LAK
 
 won
 ₩ = won
 ₩ = {(w W) (= -- - __ _ "")}
-₩ = krw kpw
+₩ = krw KRW kpw KPW
 
 shekel
 ₪ = shekel sheqel nis
-₪ = ils
+₪ = ils ILS
 
 rupee
 ₨ = rupee Rs rs
 
 Indian rupee
 ₹ = rupee
-₹ = inr
+₹ = inr INR
 
 austral
 ₳ = austral
 ₳ = {(a A) (= -- - "")}
-₳ = ara
+₳ = ara ARA
 
 yuan / yen
 ¥ = yuan yen
 ¥ = {(y Y) (= -- - "")}
-¥ = cny jpy
+¥ = cny CNY jpy JPY
 
 baht
 ฿ = baht
 ฿ = {(b B) (| / "")}
-฿ = thb
+฿ = thb THB
 
 guaraní
 ₲ = guarani guaraní
 ₲ = {(g G) (| / "")}
-₲ = pyg
+₲ = pyg PYG
 
 florin
 ƒ = florin gulden guilder
