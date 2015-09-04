@@ -60,15 +60,14 @@ literalP :: Parser Text
 literalP = spaced $
   T.pack <$> asum [
     some literalChar,
-    between (char '"') (char '"') (many quotedChar) ]
+    between (char '\'') (char '\'') (many quotedChar) ]
   where
     literalChar = satisfy $ \x ->
       or [isSymbol x, isPunctuation x, isAlphaNum x] &&
-      x `notElem` ("\"()[]{}" :: String)
+      x `notElem` ("\"'()[]{}" :: String)
     quotedChar = asum [
-      string "\\\"" >> pure '"',
-      string "\\\\" >> pure '\\',
-      satisfy $ \x -> not $ or [isSpace x, x == '"', x == '\\'] ]
+      try (string "''") >> pure '\'',
+      satisfy $ \x -> not $ or [isSpace x, x == '\''] ]
 
 generatorP :: Parser Generator
 generatorP = spaced $ asum [

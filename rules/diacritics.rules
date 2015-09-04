@@ -1,32 +1,32 @@
 diaeresis / umlaut
 zip AaEeHhIiOotUuWwXxYy
     ÄäËëḦḧÏïÖöẗÜüẄẅẌẍŸÿ
-    (: "\"" .. "")
+    (: '"' .. '')
 
 grave accent
 zip AaEeIiNnOoUuWwYy
     ÀàÈèÌìǸǹÒòÙùẀẁỲỳ
-    (` \ "")
+    (` \ '')
 
 acute accent
 zip AaCcEeGgIiKkLlMmNnOoPpRrSsUuWwYyZz
     ÁáĆćÉéǴǵÍíḰḱĹĺḾḿŃńÓóṔṕŔŕŚśÚúẂẃÝýŹź
-    (' / , "")
+    ('''' / , '')
 
 breve
 zip AaEeIiOoUu
     ĂăĔĕĬĭŎŏŬŭ
-    (U u "(" ")" "")
+    (U u '(' ')' '')
 
 circumflex
 zip AaCcEeGgHhIiJjOoSsUuWwYyZz
     ÂâĈĉÊêĜĝĤĥÎîĴĵÔôŜŝÛûŴŵŶŷẐẑ
-    (^ /\ < > "")
+    (^ /\ < > '')
 
 caron
 zip AaIiCcDdEeGgHhjKkLlNnOoRrSsTtUuZz
     ǍǎǏǐČčĎďĚěǦǧȞȟǰǨǩĽľŇňǑǒŘřŠšŤťǓǔŽž
-    (V v \/ < > "")
+    (V v \/ < > '')
 zip dtLl
     ďťĽľ
     (')
@@ -34,14 +34,14 @@ zip dtLl
 double acute accent
 zip OoUu
     ŐőŰű
-    ("\"" // ,, = : "")
+    ('"' // ,, = : '')
 
 double grave accent
 zip AaEeIiOoRrUu
     ȀȁȄȅȈȉȌȍȐȑȔȕ
-    (`` \\ "\"" = : "")
+    (`` \\ '"' = : '')
 
 ring
 zip AaUuwy
     ÅåŮůẘẙ
-    (o O 0 "()" "")
+    (o O 0 '()' '')
