@@ -1,14 +1,47 @@
+diaeresis / umlaut
+zip AaEeHhIiOotUuWwXxYy
+    ÄäËëḦḧÏïÖöẗÜüẄẅẌẍŸÿ
+    (: "\"" .. "")
+
+grave accent
+zip AaEeIiNnOoUuWwYy
+    ÀàÈèÌìǸǹÒòÙùẀẁỲỳ
+    (` \ "")
+
 acute accent
-zip acegiklmnoprsuwyzACEGIKLMNOPRSUWYZ
-    áćéǵíḱĺḿńóṕŕśúẃýźÁĆÉǴÍḰĹḾŃÓṔŔŚÚẂÝŹ
+zip AaCcEeGgIiKkLlMmNnOoPpRrSsUuWwYyZz
+    ÁáĆćÉéǴǵÍíḰḱĹĺḾḿŃńÓóṔṕŔŕŚśÚúẂẃÝýŹź
     (' / , "")
+
+breve
+zip AaEeIiOoUu
+    ĂăĔĕĬĭŎŏŬŭ
+    (U u "(" ")" "")
+
+circumflex
+zip AaCcEeGgHhIiJjOoSsUuWwYyZz
+    ÂâĈĉÊêĜĝĤĥÎîĴĵÔôŜŝÛûŴŵŶŷẐẑ
+    (^ /\ < > "")
+
+caron
+zip AaIiCcDdEeGgHhjKkLlNnOoRrSsTtUuZz
+    ǍǎǏǐČčĎďĚěǦǧȞȟǰǨǩĽľŇňǑǒŘřŠšŤťǓǔŽž
+    (V v \/ < > "")
+zip dtLl
+    ďťĽľ
+    (')
 
 double acute accent
 zip OoUu
     ŐőŰű
     ("\"" // ,, = : "")
 
-caron
-zip AaIiCcDdEeGgHhjKkLlNnOoRrSsTtUuZz
-    ǍǎǏǐČčĎďĚěǦǧȞȟǰǨǩĽľŇňǑǒŘřŠšŤťǓǔŽž
-    (v u \/ "")
+double grave accent
+zip AaEeIiOoRrUu
+    ȀȁȄȅȈȉȌȍȐȑȔȕ
+    (`` \\ "\"" = : "")
+
+ring
+zip AaUuwy
+    ÅåŮůẘẙ
+    (o O 0 "()" "")
