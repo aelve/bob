@@ -99,11 +99,11 @@ florin
     f fl
 
 cent
-¢ = cent penny 1/100
+¢ = cent penny 1/100 0.01 .01
     {c (| / "")}
 
 mill
-₥ = mill mille mil 1/1000
+₥ = mill mille mil 1/1000 0.001 .001
     {m /} m
 
 currency sign
