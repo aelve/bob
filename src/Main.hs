@@ -1,7 +1,8 @@
 {-# LANGUAGE
 RecordWildCards,
 OverloadedStrings,
-ExtendedDefaultRules
+ExtendedDefaultRules,
+ScopedTypeVariables
   #-}
 
 
@@ -50,7 +51,8 @@ type Mapping = Map Text Text
 
 data Generator
   = Literal Text
-  | Permutation [Text]
+  | AnyOf [Generator]
+  | Permutation [Generator]
   deriving (Show)
 
 spaced = between spaces spaces
@@ -70,21 +72,25 @@ literal = spaced $
 generator :: Parser Generator
 generator = spaced $ asum [
   Literal <$> literal,
-  Permutation <$> between (char '{') (char '}') (some literal) ]
+  AnyOf <$> between (char '(') (char ')') (some generator),
+  Permutation <$> between (char '{') (char '}') (some generator) ]
 
 data Matcher
   = Zip Text Text
-  | ManyToOne [Generator] Text
+  | ManyToOne Generator Text
   deriving (Show)
 
 evalGenerator :: Generator -> [Text]
 evalGenerator (Literal x) = [x]
-evalGenerator (Permutation xs) = map mconcat (permutations xs)
+evalGenerator (AnyOf gs) = concatMap evalGenerator gs
+evalGenerator (Permutation gs) = do
+  perm :: [[Text]] <- permutations (map evalGenerator gs)
+  chosen :: [Text] <- sequence perm
+  return (mconcat chosen)
 
 evalMatcher :: Matcher -> Mapping
 evalMatcher (Zip a b) = fromList (zip (T.chunksOf 1 a) (T.chunksOf 1 b))
-evalMatcher (ManyToOne gs y) = fromList (zip xs (repeat y))
-  where xs = concatMap evalGenerator gs
+evalMatcher (ManyToOne g y) = fromList (zip (evalGenerator g) (repeat y))
 
 matcher :: Parser Matcher
 matcher = asum [zipP, manyToOneP]
@@ -98,7 +104,7 @@ matcher = asum [zipP, manyToOneP]
       x <- literal
       spaced (string "=")
       g <- many generator
-      return (ManyToOne g x)
+      return (ManyToOne (AnyOf g) x)
 
 data Rule = Rule {
   ruleName    :: Text,

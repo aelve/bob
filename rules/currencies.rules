@@ -1,57 +1,66 @@
 dollar
-$ = dollar {s |} {s /} s
+$ = dollar
+$ = {(s S) (| / "")}
 $ = usd
 
 pound
-£ = pound lb {l -} l # lf
+£ = pound lb
+£ = {(l L) (- "")} # lf
 £ = gbp
 
 euro
 € = euro
-€ = {e =} {e - -} {e -} e
-€ = {c =} {c - -} {c -} c
+€ = {(e E c C) (= -- - "")}
 € = eur
 
 colón
-₡ = colon colón {c / /} {c /} c
+₡ = colon colón
+₡ = {(c C) (// / "")}
 ₡ = crc svc
 
 naira
-₦ = naira {n =} {n - -} {n -} n
+₦ = naira
+₦ = {(n N) (= -- - "")}
 ₦ = ngn
 
 peseta
-₧ = peseta pts pt
+₧ = peseta
+₧ = Pts pts Pt pt
 ₧ = esp
 
 cedi
-₵ = cedi {c |} {c /} c
+₵ = cedi
+₵ = {(c C) (| / "")}
 ₵ = ghs
 
 peso
-₱ = peso {p =} {p - -} {p -} p
+₱ = peso
+₱ = {(p P) (= -- - "")}
 ₱ = php
 
 hryvnia
 ₴ = hryvnia hrn
-₴ = {s =} {s - -} {s -} s
-₴ = {г =} {г - -} {г -} г
+₴ = {(s S г) (= -- - "")}
 ₴ = uah
 
 tögrög (tugrik)
-₮ = togrog tögrög tugrik {t / /} {t /} t
+₮ = togrog tögrög tugrik
+₮ = {(t T) (// / "")}
 ₮ = mnt
 
 dong
-₫ = dong {d - _} {d _} {d -} d
+₫ = dong
+₫ = {d (-_ - _ "")}
 ₫ = vnd
 
 kip
-₭ = kip {k -} k
+₭ = kip
+₭ = {(k K) (- "")}
 ₭ = lak
 
 won
-₩ = won {w =} {w - -} {w -} {w _ _} {w _} w
+₩ = won
+₩ = {(w W) (= -- - __ _ "")}
 ₩ = krw kpw
 
 shekel
@@ -59,36 +68,44 @@ shekel
 ₪ = ils
 
 rupee
-₨ = rupee rs
+₨ = rupee Rs rs
 
 Indian rupee
 ₹ = rupee
 ₹ = inr
 
 austral
-₳ = austral {a =} {a - -} {a -} a
+₳ = austral
+₳ = {(a A) (= -- - "")}
 ₳ = ara
 
 yuan / yen
-¥ = yuan yen {y =} {y - -} {y -} y
+¥ = yuan yen
+¥ = {(y Y) (= -- - "")}
 ¥ = cny jpy
 
 baht
-฿ = baht {b |} {b /} b
+฿ = baht
+฿ = {(b B) (| / "")}
 ฿ = thb
 
 guaraní
-₲ = guarani guaraní {g |} {g /} g
+₲ = guarani guaraní
+₲ = {(g G) (| / "")}
 ₲ = pyg
 
 florin
-ƒ = florin gulden guilder f fl
+ƒ = florin gulden guilder
+ƒ = f fl
 
 cent
-¢ = cent penny 1/100 {c |} {c /} c
+¢ = cent penny 1/100
+¢ = {c (| / "")}
 
 mill
-₥ = mill mille mil 1/1000 {m /} m
+₥ = mill mille mil 1/1000
+₥ = {m /} m
 
 currency sign
-¤ = currency {o x}
+¤ = currency
+¤ = {(o O) (x X)}
