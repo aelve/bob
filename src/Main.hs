@@ -1,7 +1,6 @@
 {-# LANGUAGE
 RecordWildCards,
 OverloadedStrings,
-ExtendedDefaultRules,
 ScopedTypeVariables
   #-}
 
@@ -11,7 +10,6 @@ module Main (main) where
 
 -- General
 import Data.Maybe
-import Data.Either
 import Data.Foldable
 import Data.Traversable
 import Control.Applicative
@@ -19,7 +17,6 @@ import Control.Monad
 -- Lenses
 import Lens.Micro.GHC hiding (set)
 -- Lists
-import Data.List.Split hiding (oneOf)
 import Data.List (permutations)
 -- Text
 import Text.Printf
@@ -55,10 +52,11 @@ data Generator
   | Permutation [Generator]
   deriving (Show)
 
+spaced :: Parser a -> Parser a
 spaced = between spaces spaces
 
-literal :: Parser Text
-literal = spaced $
+literalP :: Parser Text
+literalP = spaced $
   T.pack <$> asum [
     some literalChar,
     between (char '"') (char '"') (many quotedChar) ]
@@ -69,11 +67,11 @@ literal = spaced $
     quotedChar = satisfy $ \x ->
       not $ or [isSpace x, x == '"', x == '\\']
 
-generator :: Parser Generator
-generator = spaced $ asum [
-  Literal <$> literal,
-  AnyOf <$> between (char '(') (char ')') (some generator),
-  Permutation <$> between (char '{') (char '}') (some generator) ]
+generatorP :: Parser Generator
+generatorP = spaced $ asum [
+  Literal <$> literalP,
+  AnyOf <$> between (char '(') (char ')') (some generatorP),
+  Permutation <$> between (char '{') (char '}') (some generatorP) ]
 
 data Matcher
   = Zip Text Text
@@ -92,63 +90,49 @@ evalMatcher :: Matcher -> Mapping
 evalMatcher (Zip a b) = fromList (zip (T.chunksOf 1 a) (T.chunksOf 1 b))
 evalMatcher (ManyToOne g y) = fromList (zip (evalGenerator g) (repeat y))
 
-matcher :: Parser Matcher
-matcher = asum [zipP, manyToOneP]
+matcherP :: Parser Matcher
+matcherP = foldedLine $ asum [zipP, manyToOneP]
   where
     zipP = do
       string "zip"
-      a <- literal
-      b <- literal
+      a <- literalP
+      b <- literalP
       return (Zip a b)
     manyToOneP = do
-      x <- literal
+      notFollowedBy space
+      x <- literalP
       spaced (string "=")
-      g <- many generator
+      g <- many generatorP
       return (ManyToOne (AnyOf g) x)
 
 data Rule = Rule {
   ruleName    :: Text,
   ruleMapping :: Mapping }
+  deriving (Show)
 
-readMatcher :: Text -> Either String Mapping
-readMatcher s = case parse matcher "" s of
-  Left err -> Left (show err)
-  Right m  -> Right (evalMatcher m)
+ruleP :: Parser Rule
+ruleP = do
+  name <- currentLine
+  mappings <- some (evalMatcher <$> try matcherP)
+  -- Find matches assigned to more than one thing (e.g. “<<” meaning both ‘↞’
+  -- and ‘↢’) – it's allowed in different rules, but not in the same rule.
+  let combinedMapping = M.unionsWith (++) $
+        over (each.each) (:[]) mappings
+  let mappingErrors = do
+        (k, vs) <- M.toList combinedMapping
+        guard (length vs /= 1)
+        return $ printf
+          "“%s” in rule “%s” corresponds to more than 1 thing: %s"
+          (T.unpack k) (T.unpack name)
+          (T.unpack (T.intercalate ", " vs))
+  unless (null mappingErrors) $
+    fail (unlines mappingErrors)
+  return $ Rule {
+    ruleName    = name,
+    ruleMapping = mconcat mappings }
 
-readRule :: Text -> ([String], Maybe Rule)
-readRule s = case T.lines s of
-  [] -> (["empty rule"], Nothing)
-  (name:rest) -> do
-    -- A matcher is a line + all lines following it that are indented with
-    -- spaces.
-    let isIndented line = " " `T.isPrefixOf` line
-    -- Let's split the rule into a sequence of matchers.
-    let splitter = dropInitBlank $ keepDelimsL $ whenElt (not . isIndented)
-    let matchers = split splitter rest
-    -- And parse those matchers.
-    let (errors, mappings) = partitionEithers $
-          map (readMatcher . mconcat) matchers
-    -- And also find matches assigned to more than one thing (e.g. “<<”
-    -- meaning both ‘↞’ and ‘↢’) – it's allowed in different rules, but not
-    -- in the same rule.
-    let mappingErrors = do
-          let combinedMapping = M.unionsWith (++) $
-                over (each.each) (:[]) mappings
-          (k, vs) <- M.toList combinedMapping
-          guard (length vs /= 1)
-          return $ printf
-            "“%s” in rule “%s” corresponds to more than 1 thing: %s"
-            (T.unpack k) (T.unpack name)
-            (T.unpack (T.intercalate ", " vs))
-    let rule = Rule {
-          ruleName    = name,
-          ruleMapping = mconcat mappings }
-    (mappingErrors ++ errors, Just rule)
-
-readRules :: Text -> ([String], [Rule])
-readRules s = (concatMap fst rules, mapMaybe snd rules)
-  where
-    rules = map readRule (T.splitOn (T.pack "\n\n") s)
+rulesP :: Parser [Rule]
+rulesP = ruleP `sepBy1` some newline
 
 matchRule :: Text -> Rule -> Maybe (Text, Text)
 matchRule query Rule{..} = do
@@ -165,7 +149,7 @@ runGUI rules = do
   window <- windowNew
   window `on` objectDestroy $ mainQuit
   set window [
-    windowTitle := "Bob",
+    windowTitle := ("Bob" :: String),
     windowGravity := GravityCenter,
     windowWindowPosition := WinPosCenter,
     windowDefaultWidth := 200,
@@ -183,8 +167,8 @@ runGUI rules = do
   colChar <- treeViewColumnNew
   colRule <- treeViewColumnNew
 
-  treeViewColumnSetTitle colChar "Character"
-  treeViewColumnSetTitle colRule "Rule"
+  treeViewColumnSetTitle colChar ("Character" :: String)
+  treeViewColumnSetTitle colRule ("Rule" :: String)
 
   rendererChar <- cellRendererTextNew
   rendererRule <- cellRendererTextNew
@@ -257,10 +241,29 @@ main = do
                getDirectoryContents (dataDir </> "rules")
   rules <- fmap concat . for ruleFiles $ \ruleFile -> do
     let path = dataDir </> "rules" </> ruleFile
-    (errors, rules) <- readRules <$> T.readFile path
-    unless (null errors) $ do
-      putStrLn ""
-      putStrLn ("errors while parsing rules in " ++ ruleFile)
-      mapM_ (putStrLn . ("  " ++)) errors
-    return rules
+    res <- parse rulesP ruleFile <$> T.readFile path
+    case res of
+      Left err -> putStrLn (show err) >> return []
+      Right rules -> return rules
   runGUI rules
+
+currentLine :: Parser Text
+currentLine = T.pack <$> anyChar `manyTill` try (eof <|> void endOfLine)
+
+-- | Run a parser on the next folded line, where folded line is the current
+-- line + all consecutive lines indented further than the current line.
+foldedLine :: Parser a -> Parser a
+foldedLine p = do
+  initialPos <- getPosition
+  let column = sourceColumn initialPos
+  line <- currentLine
+  rest <- many (replicateM_ column (char ' ') >> currentLine)
+  input <- getInput
+  pos <- getPosition
+  setInput (T.unlines (line : rest))
+  setPosition initialPos
+  result <- p
+  eof
+  setInput input
+  setPosition pos
+  return result

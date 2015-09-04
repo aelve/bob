@@ -30,8 +30,8 @@ executable bob
                      , gtk3 >= 0.13.8
                      , microlens-ghc == 0.3.*
                      , parsec >= 3.1
-                     , split == 0.2.*
                      , text
                      , transformers >= 0.3
   hs-source-dirs:      src
   default-language:    Haskell2010
+  ghc-options:         -Wall -fno-warn-unused-do-bind
