@@ -45,10 +45,18 @@ import System.Directory
 import Paths_bob
 
 
-type Mapping = Map Text Text
+-- | A thing that we use for search (like “->”).
+type Pattern = Text
+
+-- | A thing that we search for (like “→”).
+type Entity = Text
+
+type RuleName = Text
+
+type Mapping = Map Pattern Entity
 
 data Generator
-  = Literal Text
+  = Literal Pattern
   | AnyOf [Generator]
   | Permutation [Generator]
   deriving (Show)
@@ -56,7 +64,7 @@ data Generator
 spaced :: Parser a -> Parser a
 spaced = between spaces spaces
 
-literalP :: Parser Text
+literalP :: Parser Pattern
 literalP = spaced $
   T.pack <$> asum [
     some literalChar,
@@ -77,15 +85,15 @@ generatorP = spaced $ asum [
 
 data Matcher
   = Zip Text Text (Maybe Generator)
-  | ManyToOne Generator Text
+  | ManyToOne Generator Entity
   deriving (Show)
 
-evalGenerator :: Generator -> [Text]
+evalGenerator :: Generator -> [Pattern]
 evalGenerator (Literal x) = [x]
 evalGenerator (AnyOf gs) = concatMap evalGenerator gs
 evalGenerator (Permutation gs) = do
-  perm :: [[Text]] <- permutations (map evalGenerator gs)
-  chosen :: [Text] <- sequence perm
+  perm :: [[Pattern]] <- permutations (map evalGenerator gs)
+  chosen :: [Pattern] <- sequence perm
   return (mconcat chosen)
 
 evalMatcher :: Matcher -> Mapping
@@ -118,7 +126,7 @@ matcherP = foldedLine $ asum [zipP, manyToOneP]
       return (ManyToOne (AnyOf g) x)
 
 data Rule = Rule {
-  ruleName    :: Text,
+  ruleName    :: RuleName,
   ruleMapping :: Mapping }
   deriving (Show)
 
@@ -146,12 +154,12 @@ ruleP = do
 rulesP :: Parser [Rule]
 rulesP = ruleP `sepBy1` some newline
 
-matchRule :: Text -> Rule -> Maybe (Text, Text)
+matchRule :: Pattern -> Rule -> Maybe (RuleName, Entity)
 matchRule query Rule{..} = do
   result <- M.lookup query ruleMapping
   return (ruleName, result)
 
-matchRules :: Text -> [Rule] -> [(Text, Text)]
+matchRules :: Pattern -> [Rule] -> [(RuleName, Entity)]
 matchRules query = mapMaybe (matchRule query)
 
 runGUI :: [Rule] -> IO ()
