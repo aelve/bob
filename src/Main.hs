@@ -161,7 +161,7 @@ runGUI rules = do
   window <- windowNew
   window `on` objectDestroy $ mainQuit
   set window [
-    windowTitle := ("Bob" :: String),
+    windowTitle := ("Bob" :: Text),
     windowGravity := GravityCenter,
     windowWindowPosition := WinPosCenter,
     windowDefaultWidth := 200,
@@ -179,8 +179,8 @@ runGUI rules = do
   colChar <- treeViewColumnNew
   colRule <- treeViewColumnNew
 
-  treeViewColumnSetTitle colChar ("Character" :: String)
-  treeViewColumnSetTitle colRule ("Rule" :: String)
+  treeViewColumnSetTitle colChar ("Character" :: Text)
+  treeViewColumnSetTitle colRule ("Rule" :: Text)
 
   rendererChar <- cellRendererTextNew
   rendererRule <- cellRendererTextNew
