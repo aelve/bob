@@ -61,14 +61,10 @@ data Generator
   | Permutation [Generator]
   deriving (Show)
 
-spaced :: Parser a -> Parser a
-spaced = between spaces spaces
-
 literalP :: Parser Pattern
-literalP = spaced $
-  T.pack <$> asum [
-    some literalChar,
-    between (char '\'') (char '\'') (many quotedChar) ]
+literalP = T.pack <$> asum [
+  some literalChar,
+  between (char '\'') (char '\'') (many quotedChar) ]
   where
     literalChar = satisfy $ \x ->
       or [isSymbol x, isPunctuation x, isAlphaNum x] &&
@@ -78,7 +74,7 @@ literalP = spaced $
       satisfy $ \x -> not $ or [isSpace x, x == '\''] ]
 
 generatorP :: Parser Generator
-generatorP = spaced $ asum [
+generatorP = many (char ' ') *> asum [
   Literal <$> literalP,
   AnyOf <$> between (char '(') (char ')') (some generatorP),
   Permutation <$> between (char '{') (char '}') (some generatorP) ]
@@ -108,21 +104,24 @@ evalMatcher (Zip lineA lineB mbGen) = do
 evalMatcher (ManyToOne g y) = fromList (zip (evalGenerator g) (repeat y))
 
 matcherP :: Parser Matcher
-matcherP = foldedLine $ asum [zipP, manyToOneP]
+matcherP = asum [zipP, manyToOneP]
   where
+    -- Literals/generators/etc can go on a new line, but then they have to be
+    -- indented. 'breaker' is a parser which either parses -a newline + some
+    -- indentation-, or -just some spaces-.
+    breaker = try (newline >> some (char ' ')) <|> some (char ' ')
     zipP = do
       string "zip"
-      lineA <- literalP
-      lineB <- literalP
+      lineA <- breaker *> literalP
+      lineB <- breaker *> literalP
       when (T.length lineA /= T.length lineB) $
         fail "lengths of zipped rows don't match"
-      mbGen <- optional generatorP
+      mbGen <- optional (breaker *> generatorP)
       return (Zip lineA lineB mbGen)
     manyToOneP = do
-      notFollowedBy space
       x <- literalP
-      spaced (string "=")
-      g <- many generatorP
+      breaker *> string "="
+      g <- many (breaker *> generatorP)
       return (ManyToOne (AnyOf g) x)
 
 data Rule = Rule {
@@ -133,7 +132,7 @@ data Rule = Rule {
 ruleP :: Parser Rule
 ruleP = do
   name <- currentLine
-  mappings <- some (evalMatcher <$> try matcherP)
+  mappings <- (evalMatcher <$> matcherP) `endBy1` newline
   -- Find matches assigned to more than one thing (e.g. “<<” meaning both ‘↞’
   -- and ‘↢’) – it's allowed in different rules, but not in the same rule.
   let combinedMapping = M.unionsWith (++) $
@@ -268,22 +267,9 @@ main = do
   runGUI rules
 
 currentLine :: Parser Text
-currentLine = T.pack <$> anyChar `manyTill` try (eof <|> void endOfLine)
+currentLine = asum [
+  endOfLine >> pure "",
+  do x  <- anyChar
+     xs <- anyChar `manyTill` try (eof <|> void endOfLine)
+     pure (T.pack (x:xs)) ]
 
--- | Run a parser on the next folded line, where folded line is the current
--- line + all consecutive lines indented further than the current line.
-foldedLine :: Parser a -> Parser a
-foldedLine p = do
-  initialPos <- getPosition
-  let column = sourceColumn initialPos
-  line <- currentLine
-  rest <- many (replicateM_ column (char ' ') >> currentLine)
-  input <- getInput
-  pos <- getPosition
-  setInput (T.unlines (line : rest))
-  setPosition initialPos
-  result <- p
-  eof
-  setInput input
-  setPosition pos
-  return result
