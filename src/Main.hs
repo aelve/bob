@@ -62,6 +62,7 @@ type Entities = Map Entity [Pattern]
 data Generator
   = Literal Pattern
   | AnyOf [Generator]
+  | Sequence [Generator]
   | Permutation [Generator]
   | Reference Entity
   deriving (Show)
@@ -79,11 +80,16 @@ literalP = T.pack <$> asum [
       satisfy $ \x -> not $ or [isSpace x, x == '\''] ]
 
 generatorP :: WarnParser Generator
-generatorP = asum [
-  Literal <$> literalP,
-  AnyOf <$> inParens (generatorP `sepBy1` some (char ' ')),
-  Permutation <$> inBraces (generatorP `sepBy1` some (char ' ')),
-  Reference <$> inBackticks literalP ]
+generatorP = do
+  let singleGenerator = asum [
+        Literal <$> literalP,
+        AnyOf <$> inParens (generatorP `sepBy1` some (char ' ')),
+        Permutation <$> inBraces (generatorP `sepBy1` some (char ' ')),
+        Reference <$> inBackticks literalP ]
+  gens <- some singleGenerator
+  return $ case gens of
+    [gen] -> gen
+    _     -> Sequence gens
 
 data Matcher
   = Zip Text Text (Maybe Generator)
@@ -93,6 +99,11 @@ data Matcher
 evalGenerator :: Entities -> Generator -> Warn [Pattern]
 evalGenerator _  (Literal x) = return [x]
 evalGenerator es (AnyOf gs) = concat <$> mapM (evalGenerator es) gs
+evalGenerator es (Sequence gs) = do
+  ps :: [[Pattern]] <- mapM (evalGenerator es) gs
+  return $ do
+    chosen :: [Pattern] <- sequence ps
+    return (mconcat chosen)
 evalGenerator es (Permutation gs) = do
   ps :: [[Pattern]] <- mapM (evalGenerator es) gs
   return $ do
