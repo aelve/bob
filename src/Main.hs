@@ -69,7 +69,7 @@ data Generator
 literalP :: WarnParser Pattern
 literalP = T.pack <$> asum [
   some literalChar,
-  between (char '\'') (char '\'') (many quotedChar) ]
+  inSingleQuotes (many quotedChar) ]
   where
     literalChar = satisfy $ \x ->
       or [isSymbol x, isPunctuation x, isAlphaNum x] &&
@@ -79,11 +79,11 @@ literalP = T.pack <$> asum [
       satisfy $ \x -> not $ or [isSpace x, x == '\''] ]
 
 generatorP :: WarnParser Generator
-generatorP = many (char ' ') *> asum [
+generatorP = asum [
   Literal <$> literalP,
-  AnyOf <$> between (char '(') (char ')') (some generatorP),
-  Permutation <$> between (char '{') (char '}') (some generatorP),
-  Reference <$> between (char '`') (char '`') literalP ]
+  AnyOf <$> inParens (generatorP `sepBy1` some (char ' ')),
+  Permutation <$> inBraces (generatorP `sepBy1` some (char ' ')),
+  Reference <$> inBackticks literalP ]
 
 data Matcher
   = Zip Text Text (Maybe Generator)
@@ -332,3 +332,10 @@ warnParse p src s = runParser p' [] src s
 
 invertMap :: Ord b => Map a b -> Map b [a]
 invertMap = M.fromListWith (++) . over (each._2) (:[]) . map swap . M.toList
+
+inParens, inBraces, inSingleQuotes, inBackticks
+  :: WarnParser a -> WarnParser a
+inParens       = between (char '(')  (char ')')
+inBraces       = between (char '{')  (char '}')
+inSingleQuotes = between (char '\'') (char '\'')
+inBackticks    = between (char '`')  (char '`')
