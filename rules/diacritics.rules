@@ -6,7 +6,7 @@ zip AaEeHhIiOotUuWwXxYy
 grave accent
 zip AaEeIiNnOoUuWwYy
     ÀàÈèÌìǸǹÒòÙùẀẁỲỳ
-    (` \ '')
+    ('`' \ '')
 
 acute accent
 zip AaCcEeGgIiKkLlMmNnOoPpRrSsUuWwYyZz
@@ -39,7 +39,7 @@ zip OoUu
 double grave accent
 zip AaEeIiOoRrUu
     ȀȁȄȅȈȉȌȍȐȑȔȕ
-    (`` \\ '"' = : '')
+    ('``' \\ '"' = : '')
 
 ring
 zip AaUuwy

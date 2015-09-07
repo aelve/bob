@@ -29,6 +29,7 @@ executable bob
                      , filepath >= 1.4
                      , gtk3 >= 0.13.8
                      , microlens-ghc == 0.3.*
+                     , mtl >= 2
                      , parsec >= 3.1
                      , text
                      , transformers >= 0.3
