@@ -54,10 +54,14 @@ type Entity = Text
 
 type RuleName = Text
 
-type Mapping = Map Pattern Entity
+-- | Entity corresponding to a pattern (like “→” corresponds to “->”).
+type EntityMap = Map Pattern Entity
 
--- | Inverted 'Mapping' (used for references).
-type Entities = Map Entity [Pattern]
+-- | All patterns that an entity corresponds to (like “->” and “>” to “→”).
+type PatternsMap = Map Entity [Pattern]
+
+patternsUnion :: PatternsMap -> PatternsMap -> PatternsMap
+patternsUnion = M.unionWith union
 
 data Generator
   = Literal Pattern
@@ -96,39 +100,42 @@ data Matcher
   | ManyToOne Generator Entity
   deriving (Show)
 
-evalGenerator :: Entities -> Generator -> Warn [Pattern]
+evalGenerator :: PatternsMap -> Generator -> Warn [Pattern]
 evalGenerator _  (Literal x) = return [x]
-evalGenerator es (AnyOf gs) = concat <$> mapM (evalGenerator es) gs
-evalGenerator es (Sequence gs) = do
-  ps :: [[Pattern]] <- mapM (evalGenerator es) gs
+evalGenerator psm (AnyOf gs) = concat <$> mapM (evalGenerator psm) gs
+evalGenerator psm (Sequence gs) = do
+  ps :: [[Pattern]] <- mapM (evalGenerator psm) gs
   return $ do
     chosen :: [Pattern] <- sequence ps
     return (mconcat chosen)
-evalGenerator es (Permutation gs) = do
-  ps :: [[Pattern]] <- mapM (evalGenerator es) gs
+evalGenerator psm (Permutation gs) = do
+  ps :: [[Pattern]] <- mapM (evalGenerator psm) gs
   return $ do
     perm :: [[Pattern]] <- permutations ps
     chosen :: [Pattern] <- sequence perm
     return (mconcat chosen)
-evalGenerator es (Reference x) = case M.lookup x es of
+evalGenerator em (Reference x) = case M.lookup x em of
   Nothing -> do
     warn (printf "‘%s’ was referenced but wasn't defined yet" (T.unpack x))
     return []
   Just pats -> return pats
 
-evalMatcher :: Entities -> Matcher -> Warn Mapping
-evalMatcher es (Zip lineA lineB mbGen) = do
+evalMatcher
+  :: PatternsMap     -- ^ Already existing patterns
+  -> Matcher         -- ^ Matcher to evaluate
+  -> Warn EntityMap  -- ^ Generated entities
+evalMatcher psm (Zip lineA lineB mbGen) = do
   let as = T.chunksOf 1 lineA
       bs = T.chunksOf 1 lineB
   additions <- case mbGen of
     Nothing  -> return [""]
-    Just gen -> evalGenerator es gen
+    Just gen -> evalGenerator psm gen
   return $ fromList $ concat $ do
     (a, b) <- zip as bs
     addition <- additions
     return [(addition <> a, b), (a <> addition, b), (b, b)]
-evalMatcher es (ManyToOne g y) = do
-  pats <- evalGenerator es g
+evalMatcher psm (ManyToOne g y) = do
+  pats <- evalGenerator psm g
   return $ fromList $ zip (y:pats) (repeat y)
 
 matcherP :: WarnParser Matcher
@@ -153,46 +160,63 @@ matcherP = asum [zipP, manyToOneP]
       return (ManyToOne (AnyOf g) x)
 
 data Rule = Rule {
-  ruleName    :: RuleName,
-  ruleMapping :: Mapping }
+  ruleName     :: RuleName,
+  ruleEntities :: EntityMap }
   deriving (Show)
 
-ruleP :: WarnParser Rule
-ruleP = do
+ruleP :: PatternsMap -> WarnParser Rule
+ruleP scope = do
   name <- currentLine
-  let warningHeader = printf "warnings in rule ‘%s’:" (T.unpack name) :: String
-      nameWarnings = warnCensor $ \ws ->
-        if null ws then [] else warningHeader : map ("  " ++) ws
-  nameWarnings $ do
+  let header = printf "warnings in rule ‘%s’:" (T.unpack name)
+  groupWarnings header $ do
     matchers <- matcherP `endBy1` newline
-    -- Evaluate all matchers, combining generated mappings as we go along and
+    -- Evaluate all matchers, combining generated patterns as we go along and
     -- passing them to each evaluator (so that references could be resolved).
-    let go _ [] = return []
-        go patterns (matcher:rest) = do
-          mapping <- evalMatcher patterns matcher
-          let patterns' = M.unionWith union (invertMap mapping) patterns
-          (mapping:) <$> go patterns' rest
-    mappings <- warnLift $ go mempty matchers
-    -- Find matches assigned to more than one thing (e.g. “<<” meaning both
+    let go :: PatternsMap    -- ^ all entities in scope
+           -> [EntityMap]    -- ^ all generated entity maps so far
+           -> [Matcher]      -- ^ matchers left to process
+           -> Warn [EntityMap]
+        go _psm entityMaps [] = return entityMaps
+        go  psm entityMaps (matcher:rest) = do
+          entityMap <- evalMatcher psm matcher
+          let patternsMap = invertMap entityMap
+          go (psm `patternsUnion` patternsMap) (entityMap:entityMaps) rest
+    entityMaps <- warnLift $ go scope [] matchers
+    -- Find patterns assigned to more than one entity (e.g. “<<” meaning both
     -- ‘↞’ and ‘↢’) – it's allowed in different rules, but not in the same
     -- rule.
-    let combinedMapping = M.unionsWith union $
-          over (each.each) (:[]) mappings
-    for_ (M.toList combinedMapping) $ \(k, vs) ->
+    let combinedEntities :: Map Pattern [Entity]
+        combinedEntities = M.unionsWith union $
+          over (each.each) (:[]) entityMaps
+    -- TODO: find a better name for combinedEntities.
+    for_ (M.toList combinedEntities) $ \(k, vs) ->
       when (length vs /= 1) $
         warnLift $ warn $
           printf "“%s” corresponds to more than 1 thing: %s"
                  (T.unpack k) (T.unpack (T.intercalate ", " vs))
-    return $ Rule {
-      ruleName    = name,
-      ruleMapping = mconcat mappings }
+    -- Return the rule.
+    let rule = Rule {
+          ruleName     = name,
+          ruleEntities = mconcat entityMaps }
+    return rule
 
-rulesP :: WarnParser [Rule]
-rulesP = ruleP `sepBy1` some newline
+ruleFileP :: WarnParser [Rule]
+ruleFileP = do
+  rule1 <- ruleP mempty
+  (rule1:) <$> go (invertMap (ruleEntities rule1))
+  where
+    go psm = asum [
+      -- Either there is a new rule...
+      do some newline
+         rule <- ruleP psm
+         let psm' = psm <> invertMap (ruleEntities rule)
+         (rule:) <$> go psm',
+      -- ...or there isn't.
+      pure [] ]
 
 matchRule :: Pattern -> Rule -> Maybe (RuleName, Entity)
 matchRule query Rule{..} = do
-  result <- M.lookup query ruleMapping
+  result <- M.lookup query ruleEntities
   return (ruleName, result)
 
 matchRules :: Pattern -> [Rule] -> [(RuleName, Entity)]
@@ -297,7 +321,7 @@ main = do
                getDirectoryContents (dataDir </> "rules")
   rules <- fmap concat . for ruleFiles $ \ruleFile -> do
     let path = dataDir </> "rules" </> ruleFile
-    res <- warnParse rulesP ruleFile <$> T.readFile path
+    res <- warnParse ruleFileP ruleFile <$> T.readFile path
     case res of
       Left err -> do
         putStrLn (show err)
@@ -327,13 +351,14 @@ warnLift x = do
   updateState (++ w)
   return a
 
-warnCensor :: ([String] -> [String]) -> WarnParser a -> WarnParser a
-warnCensor f p = do
+groupWarnings :: String -> WarnParser a -> WarnParser a
+groupWarnings title p = do
   old <- getState
   putState []
   a <- p
   new <- getState
-  putState (old ++ f new)
+  unless (null new) $
+    putState (old ++ title : map ("  " ++) new)
   return a
 
 warnParse :: WarnParser a -> SourceName -> Text -> Either ParseError (a, [String])
