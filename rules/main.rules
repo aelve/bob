@@ -5,7 +5,3 @@ zip '0123456789+=()ni'
 subscript
 zip '0123456789+=()aeoxhklmnpst'
     '₀₁₂₃₄₅₆₇₈₉₊₌₍₎ₐₑₒₓₕₖₗₘₙₚₛₜ'
-
-uppercase
-zip abcdefghijklmnopqrstuvwxyz
-    ABCDEFGHIJKLMNOPQRSTUVWXYZ
