@@ -357,8 +357,9 @@ groupWarnings title p = do
   putState []
   a <- p
   new <- getState
-  unless (null new) $
-    putState (old ++ title : map ("  " ++) new)
+  if null new
+    then putState old
+    else putState (old ++ title : map ("  " ++) new)
   return a
 
 warnParse :: WarnParser a -> SourceName -> Text -> Either ParseError (a, [String])
