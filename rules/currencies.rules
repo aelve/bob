@@ -10,7 +10,8 @@ pound
 
 euro
 € = euro
-    {(e E c C) (= -- - '')}
+    {(e E) (= -- - '')}
+    {(c C) (= --)}
     eur EUR
 
 colón
