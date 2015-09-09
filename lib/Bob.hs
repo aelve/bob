@@ -41,7 +41,6 @@ import Text.Parsec hiding ((<|>), many, optional)
 -- Containers
 import qualified Data.Map as M
 import Data.Map (Map)
-import GHC.Exts (fromList)
 -- Files
 import System.FilePath
 import System.Directory
@@ -133,13 +132,13 @@ evalMatcher psm (Zip lineA lineB mbGen) = do
   additions <- case mbGen of
     Nothing  -> return [""]
     Just gen -> evalGenerator psm gen
-  return $ fromList $ concat $ do
+  return $ M.fromList $ concat $ do
     (a, b) <- zip as bs
     addition <- additions
     return [(addition <> a, b), (a <> addition, b), (b, b)]
 evalMatcher psm (ManyToOne g y) = do
   pats <- evalGenerator psm g
-  return $ fromList $ zip (y:pats) (repeat y)
+  return $ M.fromList $ zip (y:pats) (repeat y)
 
 matcherP :: WarnParser Matcher
 matcherP = asum [zipP, manyToOneP]
