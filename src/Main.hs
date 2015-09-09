@@ -12,20 +12,12 @@ module Main (main) where
 -- General
 import Data.Maybe
 import Data.Foldable
-import Data.Traversable
-import Data.Monoid
-import Data.Tuple
-import Control.Applicative
 import Control.Monad
 -- Monads
 import Control.Monad.IO.Class (liftIO)
--- Lists
-import Data.List (permutations, union)
 -- Text
-import Text.Printf
 import qualified Data.Text as T
 import Data.Text (Text)
-import Data.Char
 -- GUI
 import Graphics.UI.Gtk
 -- Clipboard
