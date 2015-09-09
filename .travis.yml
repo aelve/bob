@@ -1,20 +1,31 @@
-language: haskell
+sudo: false
 
 cache:
   directories:
   - .ghc
   - .cabal
 
-ghc:
-- 7.8
+env:
+- CABALVER=1.22 GHCVER=7.10.2 ALEXVER=3.1.4 HAPPYVER=1.19.5
 
 addons:
   apt:
+    sources:
+    - hvr-ghc
     packages:
     - libgtk-3-dev
+    - ghc-7.10.2
+    - cabal-install-1.22
+    - alex-3.1.4
+    - happy-1.19.5
+
+before_install:
+- export PATH=/opt/ghc/$GHCVER/bin:/opt/cabal/$CABALVER/bin:$PATH
+- export PATH=/opt/alex/$ALEXVER/bin:/opt/happy/$HAPPYVER/bin:$PATH
+- travis_retry cabal update
 
 install:
-- type gtk2hsC2hs >/dev/null 2>&1 || { cabal install alex happy; cabal install gtk2hs-buildtools; }
+- type gtk2hsC2hs >/dev/null 2>&1 || { cabal install gtk2hs-buildtools; }
 - cabal install --only-dependencies --enable-tests
 
 script:
