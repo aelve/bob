@@ -19,19 +19,31 @@ main :: IO ()
 main = do
   (rules, mbErrors) <- readRules
   let finds = findsIn rules
+      doesNotFind = doesNotFindIn rules
   defaultMain $ testGroup "Tests" [
     testCase "No warnings when loading rules" $
       mbErrors @?= Nothing,
     testGroup "Arrows" [
-      "<=" `finds` "⇐",
-      ">"  `finds` "→",
-      "->" `finds` "→" ] ]
+      testGroup "finds" [
+        ">"  `finds` "→", "->" `finds` "→",
+        "←→" `finds` "↔", "<>" `finds` "↔",
+        "↑↓" `finds` "↕", "↓↑" `finds` "↕",
+        "<=" `finds` "⇐", "←=" `finds` "⇐" ],
+      testGroup "doesn't find" [
+        "=<" `doesNotFind` "⇐", ">=" `doesNotFind` "⇒" ]
+      ]
+    ]
 
 findsIn :: [Rule] -> Pattern -> Entity -> TestTree
-findsIn rules pattern entity = testCase name $ found @? err
+findsIn rules pattern entity = testCase name $ found @? ""
   where
     name  = printf "‘%s’ finds ‘%s’"
                    (T.unpack pattern) (T.unpack entity)
     found = entity `elem` map snd (matchRules pattern rules)
-    err   = printf "‘%s’ doesn't find ‘%s’"
+
+doesNotFindIn :: [Rule] -> Pattern -> Entity -> TestTree
+doesNotFindIn rules pattern entity = testCase name $ not found @? ""
+  where
+    name  = printf "‘%s’ doesn't find ‘%s’"
                    (T.unpack pattern) (T.unpack entity)
+    found = entity `elem` map snd (matchRules pattern rules)
