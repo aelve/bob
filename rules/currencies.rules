@@ -49,6 +49,16 @@ tögrög (tugrik)
     {(t T) (// / '')}
     mnt MNT
 
+ruble
+₽ = ruble
+    {(p P r R) (- '')} {(р Р) (- '')}
+    rub RUB
+
+Turkish lira
+₺ = lira
+    {(t l L) (= -- - // / '')}
+    trl TRL
+
 dong
 ₫ = dong
     {d (-_ - _ '')}
