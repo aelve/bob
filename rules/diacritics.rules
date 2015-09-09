@@ -18,6 +18,14 @@ zip AaEeIiNnOoUuWwYy
     ÀàÈèÌìǸǹÒòÙùẀẁỲỳ
     ('`' \ '')
 
+stroke
+zip AaCcEeLlOo
+    ȺⱥȻȼɆɇŁłØø
+    (/ - '')
+zip BbDdGgHhIiJjKkPpRrTtYyZz
+    ɃƀĐđǤǥĦħƗɨɈɉꝀꝁⱣᵽɌɍŦŧɎɏƵƶ
+    (- / '')
+
 acute accent
 zip AaCcEeGgIiKkLlMmNnOoPpRrSsUuWwYyZz
     ÁáĆćÉéǴǵÍíḰḱĹĺḾḿŃńÓóṔṕŔŕŚśÚúẂẃÝýŹź
@@ -40,6 +48,16 @@ zip AaIiCcDdEeGgHhjKkLlNnOoRrSsTtUuZz
 zip dtLl
     ďťĽľ
     ('''')
+
+bar
+zip LlUu
+    ȽƚUu
+    (- '')
+
+diagonal stroke
+zip TtKkQqVv
+    ȾⱦꝂꝃꝘꝙꝞꝟ
+    (/ '')
 
 double acute accent
 zip OoUu
