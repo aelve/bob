@@ -20,6 +20,7 @@ addons:
     - happy-1.19.5
 
 before_install:
+- export PATH=$HOME/.cabal/bin:$PATH
 - export PATH=/opt/ghc/$GHCVER/bin:/opt/cabal/$CABALVER/bin:$PATH
 - export PATH=/opt/alex/$ALEXVER/bin:/opt/happy/$HAPPYVER/bin:$PATH
 - travis_retry cabal update
