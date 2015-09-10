@@ -20,8 +20,6 @@ import qualified Data.Text as T
 import Data.Text (Text)
 -- GUI
 import Graphics.UI.Gtk
--- Clipboard
-import System.Hclip
 -- Bob-specific
 import Bob
 
@@ -91,7 +89,9 @@ runGUI rules = do
         variantsNumber <- getVariantsNumber
         unless (variantsNumber == 0) $ do
           row <- listStoreGetValue model (fromMaybe 0 mbIndex)
-          setClipboard (T.unpack (snd row))
+          clipboard <- clipboardGet selectionClipboard
+          clipboardSetText clipboard (snd row)
+          clipboardStore clipboard
           widgetDestroy window
 
   view `on` rowActivated $ \path _ -> choose (listToMaybe path)
