@@ -225,7 +225,7 @@ matchRules :: Pattern -> [Rule] -> [(RuleName, Entity)]
 matchRules query = mapMaybe (matchRule query)
 
 -- | Returns rules and warnings\/parsing errors (if there were any).
-readRules :: IO ([Rule], Maybe String)
+readRules :: IO ([Rule], [String])
 readRules = do
   dataDir <- getDataDir
   ruleFiles <- filter ((== ".rules") . takeExtensions) <$>
@@ -237,8 +237,8 @@ readRules = do
       Left err -> ([], [show err])
       Right (rules, warnings) -> (rules, warnings)
   let rules  = concat (map fst results)
-      errors = concat (map snd results)
-  return (rules, if null errors then Nothing else Just (unlines errors))
+      errors = filter (not . null) (map snd results)
+  return (rules, map unlines errors)
 
 currentLine :: WarnParser Text
 currentLine = asum [

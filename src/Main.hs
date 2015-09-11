@@ -121,8 +121,6 @@ runGUI rules = do
 
 main :: IO ()
 main = do
-  (rules, mbErrors) <- readRules
-  case mbErrors of
-    Nothing     -> return ()
-    Just errors -> putStr errors
+  (rules, errors) <- readRules
+  mapM_ putStrLn errors
   runGUI rules
