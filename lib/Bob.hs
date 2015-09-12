@@ -29,7 +29,10 @@ import Control.Monad.Writer
 -- Lenses
 import Lens.Micro.GHC
 -- Lists
-import Data.List (permutations, union, sortOn)
+import Data.List (permutations, union)
+-- Sorting
+import Data.List (sortOn)
+import Data.Ord (Down(..))
 -- Text
 import Text.Printf
 import qualified Data.Text as T
@@ -56,7 +59,7 @@ type Entity = Text
 
 -- | How well a pattern corresponds to an entity; for instance, “\>=” would
 -- have bad fitness for “⇒”, but “=\>” would have good fitness for “⇒”. The
--- lower the number is, the better.
+-- higher the number is, the better.
 type Fitness = Int
 
 type RuleName = Text
@@ -248,7 +251,8 @@ matchRules :: Pattern -> [Rule] -> [((RuleName, Entity), Fitness)]
 matchRules query = mapMaybe (matchRule query)
 
 matchAndSortRules :: Pattern -> [Rule] -> [(RuleName, Entity)]
-matchAndSortRules query = map fst . sortOn snd . mapMaybe (matchRule query)
+matchAndSortRules query =
+  map fst . sortOn (Down . snd) . mapMaybe (matchRule query)
 
 -- | Returns rules and warnings\/parsing errors (if there were any).
 readRules :: IO ([Rule], [String])
