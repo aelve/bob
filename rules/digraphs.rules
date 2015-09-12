@@ -1,12 +1,12 @@
 digraph
-Ǳ = DZ
-ǲ = Dz
-ǳ = dz
-Ĳ = IJ
-ĳ = ij
-Ǉ = LJ
-ǈ = Lj
-ǉ = lj
-Ǌ = NJ
-ǋ = Nj
-ǌ = nj
+Ǳ = 0: DZ
+ǲ = 0: Dz
+ǳ = 0: dz
+Ĳ = 0: IJ
+ĳ = 0: ij
+Ǉ = 0: LJ
+ǈ = 0: Lj
+ǉ = 0: lj
+Ǌ = 0: NJ
+ǋ = 0: Nj
+ǌ = 0: nj

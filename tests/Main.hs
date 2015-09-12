@@ -40,7 +40,7 @@ main = do
 
   defaultMain $ testGroup "tests" [
     testCase "No warnings when loading rules" $
-      mbErrors @?= Nothing
+      mbErrors @?= []
     ,
 
     testGroup "arrows" [
@@ -69,7 +69,7 @@ findsIn :: [Rule] -> Pattern -> Entity -> TestTree
 findsIn rules pattern entity = testCase name $ found @? ""
   where
     name  = printf "‘%s’ finds ‘%s’" pattern entity
-    found = entity `elem` map snd (matchRules pattern rules)
+    found = entity `elem` map snd (matchAndSortRules pattern rules)
 
 allFindIn :: [Rule] -> [Pattern] -> Entity -> TestTree
 allFindIn rules patterns entity = testGroup name cases
@@ -81,7 +81,7 @@ doesNotFindIn :: [Rule] -> Pattern -> Entity -> TestTree
 doesNotFindIn rules pattern entity = testCase name $ not found @? ""
   where
     name = printf "‘%s’ doesn't find ‘%s’" pattern entity
-    found = entity `elem` map snd (matchRules pattern rules)
+    found = entity `elem` map snd (matchAndSortRules pattern rules)
 
 partialOrderIn :: [Rule] -> Pattern -> [Entity] -> TestTree
 partialOrderIn rules pattern entities = testGroup name tests
@@ -91,7 +91,7 @@ partialOrderIn rules pattern entities = testGroup name tests
     tests = map order (zip entities (tail entities))
     order (e1, e2) = do
       let nameOrder = printf "‘%s’ comes before ‘%s’" e1 e2
-      let matches = map snd (matchRules pattern rules)
+      let matches = map snd (matchAndSortRules pattern rules)
           mbIndex1 = elemIndex e1 matches
           mbIndex2 = elemIndex e2 matches
       testCase nameOrder $ do

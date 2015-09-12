@@ -1,75 +1,75 @@
 diaeresis / umlaut
 zip AaEeHhIiOotUuWwXxYy
     ÄäËëḦḧÏïÖöẗÜüẄẅẌẍŸÿ
-    (: '"' .. '')
+    0: : '"' .. ''
 
 tilde
 zip ANOanoIiUuEeYyVv
     ÃÑÕãñõĨĩŨũẼẽỸỹṼṽ
-    (~ '')
+    0: ~ ''
 
 tilde below
 zip EeIiUu
     ḚḛḬḭṴṵ
-    (~ '')
+    0: ~ ''
 
 grave accent
 zip AaEeIiNnOoUuWwYy
     ÀàÈèÌìǸǹÒòÙùẀẁỲỳ
-    ('`' \ '')
+    0: '`' \ ''
 
 stroke
 zip AaCcEeLlOo
     ȺⱥȻȼɆɇŁłØø
-    (/ - '')
+    0: / - ''
 zip BbDdGgHhIiJjKkPpRrTtYyZz
     ɃƀĐđǤǥĦħƗɨɈɉꝀꝁⱣᵽɌɍŦŧɎɏƵƶ
-    (- / '')
+    0: - / ''
 
 acute accent
 zip AaCcEeGgIiKkLlMmNnOoPpRrSsUuWwYyZz
     ÁáĆćÉéǴǵÍíḰḱĹĺḾḿŃńÓóṔṕŔŕŚśÚúẂẃÝýŹź
-    ('''' / , '')
+    0: '''' / , ''
 
 breve
 zip AaEeIiOoUu
     ĂăĔĕĬĭŎŏŬŭ
-    (U u '(' ')' '')
+    0: U u '(' ')' ''
 
 circumflex
 zip AaCcEeGgHhIiJjOoSsUuWwYyZz
     ÂâĈĉÊêĜĝĤĥÎîĴĵÔôŜŝÛûŴŵŶŷẐẑ
-    (^ /\ < > '')
+    0: ^ /\ < > ''
 
 caron
 zip AaIiCcDdEeGgHhjKkLlNnOoRrSsTtUuZz
     ǍǎǏǐČčĎďĚěǦǧȞȟǰǨǩĽľŇňǑǒŘřŠšŤťǓǔŽž
-    (V v \/ < > '')
+    0: V v \/ < > ''
 zip dtLl
     ďťĽľ
-    ('''')
+    0: ''''
 
 bar
 zip Ll
     Ƚƚ
-    (- '')
+    0: - ''
 
 diagonal stroke
 zip TtKkQqVv
     ȾⱦꝂꝃꝘꝙꝞꝟ
-    (/ '')
+    0: / ''
 
 double acute accent
 zip OoUu
     ŐőŰű
-    ('"' // ,, = : '')
+    0: '"' // ,, = : ''
 
 double grave accent
 zip AaEeIiOoRrUu
     ȀȁȄȅȈȉȌȍȐȑȔȕ
-    ('``' \\ '"' = : '')
+    0: '``' \\ '"' = : ''
 
 ring
 zip AaUuwy
     ÅåŮůẘẙ
-    (o O 0 '()' '')
+    0: o O 0 '()' ''

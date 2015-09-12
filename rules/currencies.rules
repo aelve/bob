@@ -1,122 +1,122 @@
 dollar
-$ = dollar
-    {(s S) (| / '')}
-    usd USD
+$ = 0: dollar
+    0: {(s S) (| / '')}
+    0: usd USD
 
 pound
-£ = pound lb
-    {(l L) (- '')} # lf
-    gbp GBP
+£ = 0: pound lb
+    0: {(l L) (- '')} # lf
+    0: gbp GBP
 
 euro
-€ = euro
-    {(e E) (= -- - '')}
-    {(c C) (= --)}
-    eur EUR
+€ = 0: euro
+    0: {(e E) (= -- - '')}
+    0: {(c C) (= --)}
+    0: eur EUR
 
 colón
-₡ = colon colón
-    {(c C) (// / '')}
-    crc CRC svc SVC
+₡ = 0: colon colón
+    0: {(c C) (// / '')}
+    0: crc CRC svc SVC
 
 naira
-₦ = naira
-    {(n N) (= -- - '')}
-    ngn NGN
+₦ = 0: naira
+    0: {(n N) (= -- - '')}
+    0: ngn NGN
 
 peseta
-₧ = peseta
-    Pts pts Pt pt
-    esp ESP
+₧ = 0: peseta
+    0: Pts pts Pt pt
+    0: esp ESP
 
 cedi
-₵ = cedi
-    {(c C) (| / '')}
-    ghs GHS
+₵ = 0: cedi
+    0: {(c C) (| / '')}
+    0: ghs GHS
 
 peso
-₱ = peso
-    {(p P) (= -- - '')}
-    php PHP
+₱ = 0: peso
+    0: {(p P) (= -- - '')}
+    0: php PHP
 
 hryvnia
-₴ = hryvnia hrn
-    {(s S г) (= -- - '')}
-    uah UAH
+₴ = 0: hryvnia hrn
+    0: {(s S г) (= -- - '')}
+    0: uah UAH
 
 tögrög (tugrik)
-₮ = togrog tögrög tugrik
-    {(t T) (// / '')}
-    mnt MNT
+₮ = 0: togrog tögrög tugrik
+    0: {(t T) (// / '')}
+    0: mnt MNT
 
 ruble
-₽ = ruble
-    {(p P r R) (- '')} {(р Р) (- '')}
-    rub RUB
+₽ = 0: ruble
+    0: {(p P r R) (- '')} {(р Р) (- '')}
+    0: rub RUB
 
 Turkish lira
-₺ = lira
-    {(t l L) (= -- - // / '')}
-    trl TRL
+₺ = 0: lira
+    0: {(t l L) (= -- - // / '')}
+    0: trl TRL
 
 dong
-₫ = dong
-    {d (-_ - _ '')}
-    vnd VND
+₫ = 0: dong
+    0: {d (-_ - _ '')}
+    0: vnd VND
 
 kip
-₭ = kip
-    {(k K) (- '')}
-    lak LAK
+₭ = 0: kip
+    0: {(k K) (- '')}
+    0: lak LAK
 
 won
-₩ = won
-    {(w W) (= -- - __ _ '')}
-    krw KRW kpw KPW
+₩ = 0: won
+    0: {(w W) (= -- - __ _ '')}
+    0: krw KRW kpw KPW
 
 shekel
-₪ = shekel sheqel nis
-    ils ILS
+₪ = 0: shekel sheqel nis
+    0: ils ILS
 
 rupee
-₨ = rupee Rs rs
+₨ = 0: rupee Rs rs
 
 Indian rupee
-₹ = rupee
-    inr INR
+₹ = 0: rupee
+    0: inr INR
 
 austral
-₳ = austral
-    {(a A) (= -- - '')}
-    ara ARA
+₳ = 0: austral
+    0: {(a A) (= -- - '')}
+    0: ara ARA
 
 yuan / yen
-¥ = yuan yen
-    {(y Y) (= -- - '')}
-    cny CNY jpy JPY
+¥ = 0: yuan yen
+    0: {(y Y) (= -- - '')}
+    0: cny CNY jpy JPY
 
 baht
-฿ = baht
-    {(b B) (| / '')}
-    thb THB
+฿ = 0: baht
+    0: {(b B) (| / '')}
+    0: thb THB
 
 guaraní
-₲ = guarani guaraní
-    {(g G) (| / '')}
-    pyg PYG
+₲ = 0: guarani guaraní
+    0: {(g G) (| / '')}
+    0: pyg PYG
 
 florin
-ƒ = florin gulden guilder
-    f fl
+ƒ = 0: florin gulden guilder
+    0: f fl
 
 cent
-¢ = cent penny 1/100 0.01 .01
-    {c (| / '')}
+¢ = 0: cent penny 1/100 0.01 .01
+    0: {c (| / '')}
 
 mill
-₥ = mill mille mil 1/1000 0.001 .001
-    {m /} m
+₥ = 0: mill mille mil 1/1000 0.001 .001
+    0: {m /} m
 
 currency sign
-¤ = currency
-    {(o O) (x X)}
+¤ = 0: currency
+    0: {(o O) (x X)}

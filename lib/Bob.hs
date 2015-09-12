@@ -12,6 +12,7 @@ module Bob
   Rule(..),
   readRules,
   matchRules,
+  matchAndSortRules,
 )
 where
 
@@ -21,7 +22,6 @@ import Data.Maybe
 import Data.Foldable
 import Data.Traversable
 import Data.Monoid
-import Data.Tuple
 import Control.Applicative
 import Control.Monad
 -- Monads
@@ -29,7 +29,7 @@ import Control.Monad.Writer
 -- Lenses
 import Lens.Micro.GHC
 -- Lists
-import Data.List (permutations, union)
+import Data.List (permutations, union, sortOn)
 -- Text
 import Text.Printf
 import qualified Data.Text as T
@@ -54,16 +54,25 @@ type Pattern = Text
 -- | A thing that we search for (like “→”).
 type Entity = Text
 
+-- | How well a pattern corresponds to an entity; for instance, “\>=” would
+-- have bad fitness for “⇒”, but “=\>” would have good fitness for “⇒”. The
+-- lower the number is, the better.
+type Fitness = Int
+
 type RuleName = Text
 
 -- | Entity corresponding to a pattern (like “→” corresponds to “->”).
-type EntityMap = Map Pattern Entity
+type EntityMap = Map Pattern (Entity, Fitness)
 
 -- | All patterns that an entity corresponds to (like “->” and “>” to “→”).
-type PatternsMap = Map Entity [Pattern]
+type PatternsMap = Map Entity [(Pattern, Fitness)]
 
 patternsUnion :: PatternsMap -> PatternsMap -> PatternsMap
 patternsUnion = M.unionWith union
+
+toPatternsMap :: EntityMap -> PatternsMap
+toPatternsMap m = M.fromListWith (++)
+  [(ent, [(pat, fit)]) | (pat, (ent, fit)) <- M.toList m]
 
 data Generator
   = Literal Pattern
@@ -85,21 +94,26 @@ literalP = T.pack <$> asum [
       try (string "''") >> pure '\'',
       satisfy $ \x -> not $ or [isSpace x, x == '\''] ]
 
+fitnessP :: WarnParser Fitness
+fitnessP = read <$> some digit
+
 generatorP :: WarnParser Generator
 generatorP = do
   let singleGenerator = asum [
         Literal <$> literalP,
-        AnyOf <$> inParens (generatorP `sepBy1` some (char ' ')),
-        Permutation <$> inBraces (generatorP `sepBy1` some (char ' ')),
+        AnyOf <$> inParens (generatorP `sepBy1` someSpaces),
+        Permutation <$> inBraces (generatorP `sepBy1` someSpaces),
         Reference <$> inBackticks literalP ]
   gens <- some singleGenerator
   return $ case gens of
     [gen] -> gen
     _     -> Sequence gens
 
+type Generators = [(Generator, Fitness)]
+
 data Matcher
-  = Zip Text Text (Maybe Generator)
-  | ManyToOne Generator Entity
+  = Zip Text Text Generators
+  | ManyToOne Generators Entity
   deriving (Show)
 
 evalGenerator :: PatternsMap -> Generator -> Warn [Pattern]
@@ -120,46 +134,55 @@ evalGenerator em (Reference x) = case M.lookup x em of
   Nothing -> do
     warn (printf "‘%s’ was referenced but wasn't defined yet" (T.unpack x))
     return []
-  Just pats -> return pats
+  Just pats -> return (map fst pats)
+
+evalGenerators :: PatternsMap -> Generators -> Warn [([Pattern], Fitness)]
+evalGenerators psm gens = (each._1) (evalGenerator psm) gens
 
 evalMatcher
   :: PatternsMap     -- ^ Already existing patterns
   -> Matcher         -- ^ Matcher to evaluate
   -> Warn EntityMap  -- ^ Generated entities
-evalMatcher psm (Zip lineA lineB mbGen) = do
+evalMatcher psm (Zip lineA lineB gens) = do
   let as = T.chunksOf 1 lineA
       bs = T.chunksOf 1 lineB
-  additions <- case mbGen of
-    Nothing  -> return [""]
-    Just gen -> evalGenerator psm gen
+  additions <- evalGenerators psm gens
   return $ M.fromList $ concat $ do
     (a, b) <- zip as bs
-    addition <- additions
-    return [(addition <> a, b), (a <> addition, b), (b, b)]
-evalMatcher psm (ManyToOne g y) = do
-  pats <- evalGenerator psm g
-  return $ M.fromList $ zip (y:pats) (repeat y)
+    (patterns, fitness) <- if null additions then [([""], 0)] else additions
+    pattern <- patterns
+    return [(pattern <> a, (b, fitness)), (a <> pattern, (b, fitness))]
+evalMatcher psm (ManyToOne gens entity) = do
+  patternGroups <- evalGenerators psm gens
+  return $ M.fromList $ do
+    (patterns, fitness) <- ([entity], 0) : patternGroups
+    pattern <- patterns
+    return (pattern, (entity, fitness))
+
+generatorLineP :: WarnParser (Generator, Fitness)
+generatorLineP = do
+  fitness <- fitnessP <* char ':'
+  someSpaces
+  gens <- generatorP `sepBy1` someSpaces
+  return (AnyOf gens, fitness)
 
 matcherP :: WarnParser Matcher
 matcherP = asum [zipP, manyToOneP]
   where
-    -- Literals/generators/etc can go on a new line, but then they have to be
-    -- indented. 'breaker' is a parser which either parses -a newline + some
-    -- indentation-, or -just some spaces-.
-    breaker = try (newline >> some (char ' ')) <|> some (char ' ')
+    nextLine = try (newline >> someSpaces)
     zipP = do
-      string "zip"
-      lineA <- breaker *> literalP
-      lineB <- breaker *> literalP
+      string "zip" <* someSpaces
+      lineA <- literalP <* nextLine
+      lineB <- literalP <* nextLine
       when (T.length lineA /= T.length lineB) $
-        fail "lengths of zipped rows don't match"
-      mbGen <- optional (breaker *> generatorP)
-      return (Zip lineA lineB mbGen)
+        warnLift $ warn "lengths of zipped rows don't match"
+      gens <- generatorLineP `sepBy1` nextLine
+      return (Zip lineA lineB gens)
     manyToOneP = do
-      x <- literalP
-      breaker *> string "="
-      g <- many (breaker *> generatorP)
-      return (ManyToOne (AnyOf g) x)
+      x <- literalP <* someSpaces
+      char '=' <* someSpaces
+      gens <- generatorLineP `sepBy1` nextLine
+      return (ManyToOne gens x)
 
 data Rule = Rule {
   ruleName     :: RuleName,
@@ -181,7 +204,7 @@ ruleP scope = do
         go _psm entityMaps [] = return entityMaps
         go  psm entityMaps (matcher:rest) = do
           entityMap <- evalMatcher psm matcher
-          let patternsMap = invertMap entityMap
+          let patternsMap = toPatternsMap entityMap
           go (psm `patternsUnion` patternsMap) (entityMap:entityMaps) rest
     entityMaps <- warnLift $ go scope [] matchers
     -- Find patterns assigned to more than one entity (e.g. “<<” meaning both
@@ -189,7 +212,7 @@ ruleP scope = do
     -- rule.
     let combinedEntities :: Map Pattern [Entity]
         combinedEntities = M.unionsWith union $
-          over (each.each) (:[]) entityMaps
+          over (each.each) (\(e, _) -> [e]) entityMaps
     -- TODO: find a better name for combinedEntities.
     for_ (M.toList combinedEntities) $ \(k, vs) ->
       when (length vs /= 1) $
@@ -205,24 +228,27 @@ ruleP scope = do
 ruleFileP :: WarnParser [Rule]
 ruleFileP = do
   rule1 <- ruleP mempty
-  (rule1:) <$> go (invertMap (ruleEntities rule1))
+  (rule1:) <$> go (toPatternsMap (ruleEntities rule1))
   where
     go psm = asum [
       -- Either there is a new rule...
       do some newline
          rule <- ruleP psm
-         let psm' = psm <> invertMap (ruleEntities rule)
+         let psm' = psm <> toPatternsMap (ruleEntities rule)
          (rule:) <$> go psm',
       -- ...or there isn't.
       pure [] ]
 
-matchRule :: Pattern -> Rule -> Maybe (RuleName, Entity)
+matchRule :: Pattern -> Rule -> Maybe ((RuleName, Entity), Fitness)
 matchRule query Rule{..} = do
-  result <- M.lookup query ruleEntities
-  return (ruleName, result)
+  (entity, fitness) <- M.lookup query ruleEntities
+  return ((ruleName, entity), fitness)
 
-matchRules :: Pattern -> [Rule] -> [(RuleName, Entity)]
+matchRules :: Pattern -> [Rule] -> [((RuleName, Entity), Fitness)]
 matchRules query = mapMaybe (matchRule query)
+
+matchAndSortRules :: Pattern -> [Rule] -> [(RuleName, Entity)]
+matchAndSortRules query = map fst . sortOn snd . mapMaybe (matchRule query)
 
 -- | Returns rules and warnings\/parsing errors (if there were any).
 readRules :: IO ([Rule], [String])
@@ -276,12 +302,12 @@ warnParse p src s = runParser p' [] src s
   where
     p' = liftA2 (,) p getState
 
-invertMap :: Ord b => Map a b -> Map b [a]
-invertMap = M.fromListWith (++) . over (each._2) (:[]) . map swap . M.toList
-
 inParens, inBraces, inSingleQuotes, inBackticks
   :: WarnParser a -> WarnParser a
 inParens       = between (char '(')  (char ')')
 inBraces       = between (char '{')  (char '}')
 inSingleQuotes = between (char '\'') (char '\'')
 inBackticks    = between (char '`')  (char '`')
+
+someSpaces :: WarnParser ()
+someSpaces = void (some (char ' '))

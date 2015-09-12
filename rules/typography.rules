@@ -1,68 +1,68 @@
 ellipsis
-… = ...
+… = 0: ...
 
 asterism
-⁂ = ***
+⁂ = 0: ***
 
 interrobang
-‽ = {? !}
+‽ = 0: {? !}
 
 en dash
-– = - --
+– = 0: - --
 
 em dash
-— = - ---
+— = 0: - ---
 
 horizontal bar
-― = - ---
+― = 0: - ---
 
 figure dash
-‒ = -
+‒ = 0: -
 
 swung dash
-⁓ = {`—` ~} ~~
+⁓ = 0: {`—` ~} ~~
 
 apostrophe
-’ = ''''
+’ = 0: ''''
 
 left single quotation mark
-‘ = '''' '`'
+‘ = 0: '''' '`'
 
 right single quotation mark
-’ = ''''
+’ = 0: ''''
 
 left double quotation mark
-“ = '''''' '"' '``'
+“ = 0: '''''' '"' '``'
 
 right double quotation mark
-” = '''''' '"'
+” = 0: '''''' '"'
 
 left guillemet
-« = << '"'
+« = 0: << '"'
 
 right quillemet
-» = >> '"'
+» = 0: >> '"'
 
 single quotation marks
-‘’ = ''''''
+‘’ = 0: ''''''
 
 double quotation marks
-“” = '""'
+“” = 0: '""'
 
 guillemets
-«» = '""'
+«» = 0: '""'
 
 service mark
-℠ = sm SM
+℠ = 0: sm SM
 
 trademark
-™ = tm TM
+™ = 0: tm TM
 
 copyright
-© = '(c)' '(C)' {(o O) (c C)} c C
+© = 0: '(c)' '(C)' {(o O) (c C)} c C
 
 sound-recording copyright
-℗ = '(p)' '(P)' {(o O) (p P)} p P
+℗ = 0: '(p)' '(P)' {(o O) (p P)} p P
 
 registered trademark
-® = '(r)' '(R)' {(o O) (r R)} r R
+® = 0: '(r)' '(R)' {(o O) (r R)} r R

@@ -77,7 +77,7 @@ runGUI rules = do
   searchEntry `on` editableChanged $ do
     query <- get searchEntry entryText
     listStoreClear model
-    let matches = matchRules query rules
+    let matches = matchAndSortRules query rules
     for_ matches $ \(name, result) ->
       listStoreAppend model (name, result)
     unless (null matches) $
