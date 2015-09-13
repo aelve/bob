@@ -139,8 +139,16 @@ evalGenerator em (Reference x) = case M.lookup x em of
     return []
   Just pats -> return (map fst pats)
 
-evalGenerators :: PatternsMap -> Generators -> Warn [([Pattern], Fitness)]
-evalGenerators psm gens = (each._1) (evalGenerator psm) gens
+evalGenerators :: PatternsMap -> Generators -> Warn [(Pattern, Fitness)]
+evalGenerators psm gens = do
+  groups :: [([Pattern], Fitness)] <- (each._1) (evalGenerator psm) gens
+  -- Now groups have to be expanded, and patterns from later groups should
+  -- replace earlier patterns. See https://github.com/aelve/bob/issues/47.
+  let pats :: [(Pattern, Fitness)]
+      pats = [(p, f) | (ps, f) <- groups, p <- ps]
+  -- To leave only the last occurrence of each pattern it's enough to convert
+  -- the list to a Map and back, because that's how Map's fromList works.
+  return $ M.toList (M.fromList pats)
 
 evalMatcher
   :: PatternsMap     -- ^ Already existing patterns
@@ -152,14 +160,12 @@ evalMatcher psm (Zip lineA lineB gens) = do
   additions <- evalGenerators psm gens
   return $ M.fromList $ concat $ do
     (a, b) <- zip as bs
-    (patterns, fitness) <- if null additions then [([""], 0)] else additions
-    pattern <- patterns
+    (pattern, fitness) <- if null additions then [("", 10)] else additions
     return [(pattern <> a, (b, fitness)), (a <> pattern, (b, fitness))]
 evalMatcher psm (ManyToOne gens entity) = do
-  patternGroups <- evalGenerators psm gens
+  patterns <- evalGenerators psm gens
   return $ M.fromList $ do
-    (patterns, fitness) <- ([entity], 0) : patternGroups
-    pattern <- patterns
+    (pattern, fitness) <- (entity, 10) : patterns
     return (pattern, (entity, fitness))
 
 generatorLineP :: WarnParser (Generator, Fitness)
