@@ -242,7 +242,7 @@ ruleFileP = do
 
 matchRule :: Pattern -> Rule -> [((RuleName, Entity), Fitness)]
 matchRule query Rule{..} = do
-  (entity, fitness) <- fromMaybe [] $ M.lookup query ruleEntities
+  (entity, fitness) <- M.findWithDefault [] query ruleEntities
   return ((ruleName, entity), fitness)
 
 matchRules :: Pattern -> [Rule] -> [((RuleName, Entity), Fitness)]
