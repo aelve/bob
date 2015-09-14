@@ -64,18 +64,18 @@ type Fitness = Int
 
 type RuleName = Text
 
--- | Entity corresponding to a pattern (like “→” corresponds to “->”).
-type EntityMap = Map Pattern (Entity, Fitness)
+-- | Entities corresponding to a pattern (like “->” leads to “→”). There can
+-- be several entities corresponding to a pattern even inside a single rule.
+type EntitiesMap = Map Pattern [(Entity, Fitness)]
 
--- | All patterns that an entity corresponds to (like “->” and “>” to “→”).
+-- | All patterns that an entity corresponds to (like “→” leads to “->”, “>”).
 type PatternsMap = Map Entity [(Pattern, Fitness)]
 
-patternsUnion :: PatternsMap -> PatternsMap -> PatternsMap
-patternsUnion = M.unionWith union
-
-toPatternsMap :: EntityMap -> PatternsMap
-toPatternsMap m = M.fromListWith (++)
-  [(ent, [(pat, fit)]) | (pat, (ent, fit)) <- M.toList m]
+toPatternsMap :: EntitiesMap -> PatternsMap
+toPatternsMap m = M.fromListWith (++) $ do
+  (pattern, entities) <- M.toList m
+  (entity, fitness) <- entities
+  return (entity, [(pattern, fitness)])
 
 data Generator
   = Literal Pattern
@@ -151,9 +151,11 @@ evalGenerators psm gens = do
   return $ M.toList (M.fromList pats)
 
 evalMatcher
-  :: PatternsMap     -- ^ Already existing patterns
-  -> Matcher         -- ^ Matcher to evaluate
-  -> Warn EntityMap  -- ^ Generated entities
+  :: PatternsMap  -- ^ Already existing patterns
+  -> Matcher      -- ^ Matcher to evaluate
+  -- | Generated entities (not in 'EntitiesMap' because for a matcher it's
+  -- guaranteed that each pattern would correspond to a unique entity).
+  -> Warn (Map Pattern (Entity, Fitness))
 evalMatcher psm (Zip lineA lineB gens) = do
   let as = T.chunksOf 1 lineA
       bs = T.chunksOf 1 lineB
@@ -195,7 +197,7 @@ matcherP = asum [zipP, manyToOneP]
 
 data Rule = Rule {
   ruleName     :: RuleName,
-  ruleEntities :: EntityMap }
+  ruleEntities :: EntitiesMap }
   deriving (Show)
 
 ruleP :: PatternsMap -> WarnParser Rule
@@ -207,31 +209,21 @@ ruleP scope = do
     -- Evaluate all matchers, combining generated patterns as we go along and
     -- passing them to each evaluator (so that references could be resolved).
     let go :: PatternsMap    -- ^ all entities in scope
-           -> [EntityMap]    -- ^ all generated entity maps so far
+           -> EntitiesMap    -- ^ all generated entities so far
            -> [Matcher]      -- ^ matchers left to process
-           -> Warn [EntityMap]
-        go _psm entityMaps [] = return entityMaps
-        go  psm entityMaps (matcher:rest) = do
-          entityMap <- evalMatcher psm matcher
-          let patternsMap = toPatternsMap entityMap
-          go (psm `patternsUnion` patternsMap) (entityMap:entityMaps) rest
-    entityMaps <- warnLift $ go scope [] matchers
-    -- Find patterns assigned to more than one entity (e.g. “<<” meaning both
-    -- ‘↞’ and ‘↢’) – it's allowed in different rules, but not in the same
-    -- rule.
-    let combinedEntities :: Map Pattern [Entity]
-        combinedEntities = M.unionsWith union $
-          over (each.each) (\(e, _) -> [e]) entityMaps
-    -- TODO: find a better name for combinedEntities.
-    for_ (M.toList combinedEntities) $ \(k, vs) ->
-      when (length vs /= 1) $
-        warnLift $ warn $
-          printf "“%s” corresponds to more than 1 thing: %s"
-                 (T.unpack k) (T.unpack (T.intercalate ", " vs))
+           -> Warn EntitiesMap
+        go _psm entitiesMap [] = return entitiesMap
+        go  psm entitiesMap (matcher:rest) = do
+          entities <- evalMatcher psm matcher
+          let entityMap = fmap (:[]) entities
+          go (M.unionWith union psm (toPatternsMap entityMap))
+             (M.unionWith union entityMap entitiesMap)
+             rest
+    entitiesMap <- warnLift $ go scope mempty matchers
     -- Return the rule.
     let rule = Rule {
           ruleName     = name,
-          ruleEntities = mconcat entityMaps }
+          ruleEntities = entitiesMap }
     return rule
 
 ruleFileP :: WarnParser [Rule]
@@ -248,17 +240,17 @@ ruleFileP = do
       -- ...or there isn't.
       pure [] ]
 
-matchRule :: Pattern -> Rule -> Maybe ((RuleName, Entity), Fitness)
+matchRule :: Pattern -> Rule -> [((RuleName, Entity), Fitness)]
 matchRule query Rule{..} = do
-  (entity, fitness) <- M.lookup query ruleEntities
+  (entity, fitness) <- fromMaybe [] $ M.lookup query ruleEntities
   return ((ruleName, entity), fitness)
 
 matchRules :: Pattern -> [Rule] -> [((RuleName, Entity), Fitness)]
-matchRules query = mapMaybe (matchRule query)
+matchRules query = concatMap (matchRule query)
 
 matchAndSortRules :: Pattern -> [Rule] -> [(RuleName, Entity)]
 matchAndSortRules query =
-  map fst . sortOn (Down . snd) . mapMaybe (matchRule query)
+  map fst . sortOn (Down . snd) . concatMap (matchRule query)
 
 -- | Returns rules and warnings\/parsing errors (if there were any).
 readRules :: IO ([Rule], [String])
