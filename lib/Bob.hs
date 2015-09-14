@@ -18,7 +18,6 @@ where
 
 
 -- General
-import Data.Maybe
 import Data.Foldable
 import Data.Traversable
 import Data.Monoid
