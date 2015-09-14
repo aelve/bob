@@ -31,122 +31,124 @@ with f = map (uncurry f) . execWriter
 (.=) :: a -> b -> Writer [(a, b)] ()
 (.=) a b = tell [(a, b)]
 
-testFinds :: [Rule] -> Writer [([Pattern], Entity)] () -> TestTree
-testFinds rules = testGroup "finds" . with (allFindIn rules)
+testFoundBy :: [Rule] -> Writer [(Entity, [Pattern])] () -> TestTree
+testFoundBy rules = testGroup "finds" .
+                    with (foundByIn rules)
 
-testBestMatches :: [Rule] -> Writer [([Pattern], Entity)] () -> TestTree
-testBestMatches rules = testGroup "best matches" . with (bestMatchesIn rules)
+testBestMatchedBy :: [Rule] -> Writer [(Entity, [Pattern])] () -> TestTree
+testBestMatchedBy rules = testGroup "best matches" .
+                          with (bestMatchedByIn rules)
 
 arrowsTests :: [Rule] -> TestTree
 arrowsTests rules = testGroup "arrows"
   [ testGroup "ordinary arrows"
-    [ testFinds rules $ do
-        [">", "->", ">-"]      .= "→"
-        ["<", "<-", "-<"]      .= "←"
-        ["v", "V", "|v", "v|"] .= "↓"
-        ["^", "|^", "^|"]      .= "↑"
+    [ testFoundBy rules $ do
+        "→" .= [">", "->", ">-"]
+        "←" .= ["<", "<-", "-<"]
+        "↓" .= ["v", "V", "|v", "v|"]
+        "↑" .= ["^", "|^", "^|"]
         --
-        ["←→", "<>", "→←", "><"]    .= "↔"
-        ["↓↑", "^v", "^|v", "|v|^"] .= "↕"
+        "↔" .= ["←→", "<>", "→←", "><"]
+        "↕" .= ["↓↑", "^v", "^|v", "|v|^"]
         --
-        ["\\^", "^\\", "\\←", "<-\\", "<\\"] .= "↖"
-        ["\\v", "v\\", "\\→", "->\\", "\\>"] .= "↘"
-        ["/^",  "^/",  "/→",  "->/",  "/>"]  .= "↗"
-        ["/v",  "v/",  "/←",  "<-/",  "</"]  .= "↙"
-    , testBestMatches rules $ do
-        ["<"] .= "←"
-        [">"] .= "→"
-        ["v"] .= "↓"
-        ["^"] .= "↑"
+        "↖" .= ["\\^", "^\\", "\\←", "<-\\", "<\\"]
+        "↘" .= ["\\v", "v\\", "\\→", "->\\", "\\>"]
+        "↗" .= ["/^",  "^/",  "/→",  "->/",  "/>"]
+        "↙" .= ["/v",  "v/",  "/←",  "<-/",  "</"]
+    , testBestMatchedBy rules $ do
+        "←" .= ["<"]
+        "→" .= [">"]
+        "↓" .= ["v"]
+        "↑" .= ["^"]
         --
-        ["<->", "<-->"]            .= "↔"
-        ["v^", "^v", "v|^", "^|v"] .= "↕"
+        "↔" .= ["<->", "<-->"]
+        "↕" .= ["v^", "^v", "v|^", "^|v"]
     ]
 
   , testGroup "double arrows"
-    [ testFinds rules $ do
-        ["<=", "←=", "=<"]               .= "⇐"
-        ["=>", "=→", ">="]               .= "⇒"
-        ["=^", "^=", "|^|", "=>^", "^⇐"] .= "⇑"
-        ["=v", "v=", "|v|", "=>v", "v⇐"] .= "⇓"
-        ["<=>", "⇐⇒", "↔=", "=↔"]        .= "⇔"
-    , testBestMatches rules $ do
-        ["<=", "←="]                    .= "⇐"
-        ["=>", "=→"]                    .= "⇒"
-        ["=^", "^=", "|^|", "⇒^", "^⇐"] .= "⇑"
-        ["=v", "v=", "|v|", "⇒v", "v⇐"] .= "⇓"
-        ["⇐⇒", "↔=", "=↔", "<=>"]       .= "⇔"
+    [ testFoundBy rules $ do
+        "⇐" .= ["<=", "←=", "=<"]
+        "⇒" .= ["=>", "=→", ">="]
+        "⇑" .= ["=^", "^=", "|^|", "=>^", "^⇐"]
+        "⇓" .= ["=v", "v=", "|v|", "=>v", "v⇐"]
+        "⇔" .= ["<=>", "⇐⇒", "↔=", "=↔"]
+    , testBestMatchedBy rules $ do
+        "⇐" .= ["<=", "←="]
+        "⇒" .= ["=>", "=→"]
+        "⇑" .= ["=^", "^=", "|^|", "⇒^", "^⇐"]
+        "⇓" .= ["=v", "v=", "|v|", "⇒v", "v⇐"]
+        "⇔" .= ["⇐⇒", "↔=", "=↔", "<=>"]
     ]
 
   , testGroup "crossed arrows"
-    [ testFinds rules $ do
-        ["<-/", "←/", "/←", "</-", "</"]  .= "↚"
-        ["/->", "/→", "→/", "-/>", "/>"]  .= "↛"
-        ["<=/", "/<=", "⇐/", "/⇐", "</="] .= "⇍"
-        ["/=>", "=>/", "/⇒", "⇒/", "=/>"] .= "⇏"
-    , testBestMatches rules $ do
-        ["<-/", "←/", "</-", "</"] .= "↚"
-        ["/->", "/→", "-/>", "/>"] .= "↛"
-        ["<=/", "</=", "⇐/"]       .= "⇍"
-        ["/=>", "=/>", "/⇒"]       .= "⇏"
+    [ testFoundBy rules $ do
+        "↚" .= ["<-/", "←/", "/←", "</-", "</"]
+        "↛" .= ["/->", "/→", "→/", "-/>", "/>"]
+        "⇍" .= ["<=/", "/<=", "⇐/", "/⇐", "</="]
+        "⇏" .= ["/=>", "=>/", "/⇒", "⇒/", "=/>"]
+    , testBestMatchedBy rules $ do
+        "↚" .= ["<-/", "←/", "</-", "</"]
+        "↛" .= ["/->", "/→", "-/>", "/>"]
+        "⇍" .= ["<=/", "</=", "⇐/"]
+        "⇏" .= ["/=>", "=/>", "/⇒"]
     ]
 
   , testGroup "2-headed arrows"
-    [ testFinds rules $ do
-        ["→→", "→>", ">>", "->>", "-»", "→»"] .= "↠"
-        ["←←", "<←", "<<", "<<-", "«-", "«←"] .= "↞"
-        ["^^", "↑↑"]                          .= "↟"
-        ["vv", "↓↓"]                          .= "↡"
-    , testBestMatches rules $ do
-        ["→>", "->>", "-»"] .= "↠"
-        ["<←", "<<-", "«-"] .= "↞"
-        ["^^"]              .= "↟"
-        ["vv"]              .= "↡"
+    [ testFoundBy rules $ do
+        "↠" .= ["→→", "→>", ">>", "->>", "-»", "→»"]
+        "↞" .= ["←←", "<←", "<<", "<<-", "«-", "«←"]
+        "↟" .= ["^^", "↑↑"]
+        "↡" .= ["vv", "↓↓"]
+    , testBestMatchedBy rules $ do
+        "↠" .= ["→>", "->>", "-»"]
+        "↞" .= ["<←", "<<-", "«-"]
+        "↟" .= ["^^"]
+        "↡" .= ["vv"]
     ]
 
   , testGroup "arrows with tail"
-    [ testFinds rules $ do
-        [">>", ">->", ">→", "→>"] .= "↣"
-        ["<<", "<-<", "←<", "<←"] .= "↢"
-    , testBestMatches rules $ do
-        [">->", ">→"] .= "↣"
-        ["<-<", "←<"] .= "↢"
+    [ testFoundBy rules $ do
+        "↣" .= [">>", ">->", ">→", "→>"]
+        "↢" .= ["<<", "<-<", "←<", "<←"]
+    , testBestMatchedBy rules $ do
+        "↣" .= [">->", ">→"]
+        "↢" .= ["<-<", "←<"]
     ]
 
   , testGroup "arrows with bar"
-    [ testFinds rules $ do
-        ["|→", "→|", "|->", "|>"]             .= "↦"
-        ["←|", "|←", "<-|", "<|"]             .= "↤"
-        ["↑_", "_^", "|^_"]                   .= "↥"
-        ["↓_", "_v", "|v_", "vT", "vt", "TV"] .= "↧"
-    , testBestMatches rules $ do
-        ["|→", "→|", "|->", "|>"] .= "↦"
-        ["←|", "|←", "<-|", "<|"] .= "↤"
-        ["↑_", "_^", "|^_"]       .= "↥"
-        ["↓_", "_v", "|v_", "vT"] .= "↧"
+    [ testFoundBy rules $ do
+        "↦" .= ["|→", "→|", "|->", "|>"]
+        "↤" .= ["←|", "|←", "<-|", "<|"]
+        "↥" .= ["↑_", "_^", "|^_"]
+        "↧" .= ["↓_", "_v", "|v_", "vT", "vt", "TV"]
+    , testBestMatchedBy rules $ do
+        "↦" .= ["|→", "→|", "|->", "|>"]
+        "↤" .= ["←|", "|←", "<-|", "<|"]
+        "↥" .= ["↑_", "_^", "|^_"]
+        "↧" .= ["↓_", "_v", "|v_", "vT"]
     ]
 
   , testGroup "paired arrows"
-    [ testFinds rules $ do
-        ["→←", "><", "-><-", "←→", "<>", "<-->"]                      .= "⇄"
-        ["←→", "<>", "<-->", "→←", "><", "-><-"]                      .= "⇆"
-        ["→→", ">>", "->->", "->>", "-->>", "=>>", "=»", "-->", "=>"] .= "⇉"
-        ["←←", "<<", "<-<-", "<<-", "<<--", "<<=", "«=", "<--", "<="] .= "⇇"
+    [ testFoundBy rules $ do
+        "⇄" .= ["→←", "><", "-><-", "←→", "<>", "<-->"]
+        "⇆" .= ["←→", "<>", "<-->", "→←", "><", "-><-"]
+        "⇉" .= ["→→", ">>", "->->", "->>", "-->>", "=>>", "=»", "-->", "=>"]
+        "⇇" .= ["←←", "<<", "<-<-", "<<-", "<<--", "<<=", "«=", "<--", "<="]
         --
-        ["|^v|", "^||v", "↑↓"]                     .= "⇅"
-        ["|v^|", "v||^", "↓↑"]                     .= "⇵"
-        ["↓↓", "vv", "VV", "v||v", "vv||", "||VV"] .= "⇊"
-        ["↑↑", "^^", "^||^", "^^||", "||^^"]       .= "⇈"
-    , testBestMatches rules $ do
-        ["→←", "-><-"]                      .= "⇄"
-        ["←→"]                              .= "⇆"
-        ["→→", "->->", "=»", "=>>", "-->>"] .= "⇉"
-        ["←←", "<-<-", "«=", "<<=", "<<--"] .= "⇇"
+        "⇅" .= ["|^v|", "^||v", "↑↓"]
+        "⇵" .= ["|v^|", "v||^", "↓↑"]
+        "⇊" .= ["↓↓", "vv", "VV", "v||v", "vv||", "||VV"]
+        "⇈" .= ["↑↑", "^^", "^||^", "^^||", "||^^"]
+    , testBestMatchedBy rules $ do
+        "⇄" .= ["→←", "-><-"]
+        "⇆" .= ["←→"]
+        "⇉" .= ["→→", "->->", "=»", "=>>", "-->>"]
+        "⇇" .= ["←←", "<-<-", "«=", "<<=", "<<--"]
         --
-        ["|^v|", "^||v", "↑↓"] .= "⇅"
-        ["|v^|", "v||^", "↓↑"] .= "⇵"
-        ["↓↓", "v||v", "vv||"] .= "⇊"
-        ["↑↑", "^||^", "^^||"] .= "⇈"
+        "⇅" .= ["|^v|", "^||v", "↑↓"]
+        "⇵" .= ["|v^|", "v||^", "↓↑"]
+        "⇊" .= ["↓↓", "v||v", "vv||"]
+        "⇈" .= ["↑↑", "^||^", "^^||"]
     ]
   ]
 
@@ -165,18 +167,17 @@ findsIn rules pattern entity = testCase name $ found @? ""
     name  = printf "‘%s’ finds ‘%s’" pattern entity
     found = entity `elem` map snd (matchAndSortRules pattern rules)
 
--- todo: reverse the order of patterns and entity
-allFindIn :: [Rule] -> [Pattern] -> Entity -> TestTree
-allFindIn rules patterns entity = testGroup name cases
-  where
-    name = printf "finding ‘%s’" entity
-    cases = [findsIn rules pattern entity | pattern <- patterns]
-
 doesNotFindIn :: [Rule] -> Pattern -> Entity -> TestTree
 doesNotFindIn rules pattern entity = testCase name $ not found @? ""
   where
     name = printf "‘%s’ doesn't find ‘%s’" pattern entity
     found = entity `elem` map snd (matchAndSortRules pattern rules)
+
+foundByIn :: [Rule] -> Entity -> [Pattern] -> TestTree
+foundByIn rules entity patterns = testGroup name cases
+  where
+    name = printf "finding ‘%s’" entity
+    cases = [findsIn rules pattern entity | pattern <- patterns]
 
 partialOrderIn :: [Rule] -> Pattern -> [Entity] -> TestTree
 partialOrderIn rules pattern entities = testGroup name tests
@@ -193,15 +194,6 @@ partialOrderIn rules pattern entities = testGroup name tests
         isJust mbIndex2 @? printf "it doesn't even find ‘%s’" e2
         mbIndex1 < mbIndex2 @? ""
 
-bestMatchesIn :: [Rule] -> [Pattern] -> Entity -> TestTree
-bestMatchesIn rules patterns entity
-  | [pattern] <- patterns = bestMatchIn rules pattern entity
-  | otherwise             = testGroup name cases
-  where
-    name = printf "all of %s are best matches for ‘%s’"
-                  (listTexts patterns) entity
-    cases = [bestMatchIn rules pattern entity | pattern <- patterns]
-
 bestMatchIn :: [Rule] -> Pattern -> Entity -> TestTree
 bestMatchIn rules pattern entity = testCase name $ do
   let matches = map snd (matchAndSortRules pattern rules)
@@ -213,6 +205,15 @@ bestMatchIn rules pattern entity = testCase name $ do
     else printf "%s come before ‘%s’"  (listTexts surpassed) entity
   where
     name = printf "‘%s’ finds ‘%s’ as 1st result" pattern entity
+
+bestMatchedByIn :: [Rule] -> Entity -> [Pattern] -> TestTree
+bestMatchedByIn rules entity patterns
+  | [pattern] <- patterns = bestMatchIn rules pattern entity
+  | otherwise             = testGroup name cases
+  where
+    name = printf "all of %s are best matches for ‘%s’"
+                  (listTexts patterns) entity
+    cases = [bestMatchIn rules pattern entity | pattern <- patterns]
 
 listTexts :: [Text] -> Text
 listTexts = T.unwords . map (\s -> "‘" <> s <> "’")
