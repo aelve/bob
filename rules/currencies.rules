@@ -1,122 +1,124 @@
-dollar
-$ = 0: dollar
-    0: {(s S) (| / '')}
-    0: usd USD
-
-pound
-£ = 0: pound lb
-    0: {(l L) (- '')} # lf
-    0: gbp GBP
-
-euro
-€ = 0: euro
-    0: {(e E) (= -- - '')}
-    0: {(c C) (= --)}
-    0: eur EUR
-
-colón
-₡ = 0: colon colón
-    0: {(c C) (// / '')}
-    0: crc CRC svc SVC
-
-naira
-₦ = 0: naira
-    0: {(n N) (= -- - '')}
-    0: ngn NGN
-
-peseta
-₧ = 0: peseta
-    0: Pts pts Pt pt
-    0: esp ESP
-
-cedi
-₵ = 0: cedi
-    0: {(c C) (| / '')}
-    0: ghs GHS
-
-peso
-₱ = 0: peso
-    0: {(p P) (= -- - '')}
-    0: php PHP
-
-hryvnia
-₴ = 0: hryvnia hrn
-    0: {(s S г) (= -- - '')}
-    0: uah UAH
-
-tögrög (tugrik)
-₮ = 0: togrog tögrög tugrik
-    0: {(t T) (// / '')}
-    0: mnt MNT
-
-ruble
-₽ = 0: ruble
-    0: {(p P r R) (- '')} {(р Р) (- '')}
-    0: rub RUB
-
-Turkish lira
-₺ = 0: lira
-    0: {(t l L) (= -- - // / '')}
-    0: trl TRL
-
-dong
-₫ = 0: dong
-    0: {d (-_ - _ '')}
-    0: vnd VND
-
-kip
-₭ = 0: kip
-    0: {(k K) (- '')}
-    0: lak LAK
-
-won
-₩ = 0: won
-    0: {(w W) (= -- - __ _ '')}
-    0: krw KRW kpw KPW
-
-shekel
-₪ = 0: shekel sheqel nis
-    0: ils ILS
-
-rupee
-₨ = 0: rupee Rs rs
-
-Indian rupee
-₹ = 0: rupee
-    0: inr INR
-
-austral
-₳ = 0: austral
-    0: {(a A) (= -- - '')}
-    0: ara ARA
-
-yuan / yen
-¥ = 0: yuan yen
-    0: {(y Y) (= -- - '')}
-    0: cny CNY jpy JPY
-
-baht
-฿ = 0: baht
-    0: {(b B) (| / '')}
-    0: thb THB
-
-guaraní
-₲ = 0: guarani guaraní
-    0: {(g G) (| / '')}
-    0: pyg PYG
-
-florin
-ƒ = 0: florin gulden guilder
-    0: f fl
+currency sign
+¤ = 9: currency
+    9: {(o O) (x X)}
 
 cent
-¢ = 0: cent penny 1/100 0.01 .01
-    0: {c (| / '')}
+¢ = 9: cent penny 1/100 0.01 .01
+    9: {c (| / '')}
+    5: {C (| / '')}
 
 mill
-₥ = 0: mill mille mil 1/1000 0.001 .001
-    0: {m /} m
+₥ = 9: mill mille mil 1/1000 0.001 .001
+    9: {m /} m
 
-currency sign
-¤ = 0: currency
-    0: {(o O) (x X)}
+dollar
+$ = 9: dollar
+    9: {(s S) (|| | / '')}
+    9: usd USD
+
+pound
+£ = 9: pound lb
+    9: {(l L) (- '')} lf Lf #
+    9: gbp GBP
+
+euro
+€ = 9: euro
+    9: {(e E) (= -- - '')}
+    9: {(c C) (= --)}
+    9: eur EUR
+
+colón
+₡ = 9: colon colón
+    9: {(c C) (// / '')}
+    9: crc CRC svc SVC
+
+naira
+₦ = 9: naira
+    9: {(n N) (= -- - '')}
+    9: ngn NGN
+
+peseta
+₧ = 9: peseta
+    9: Pts pts Pt pt
+    9: esp ESP
+
+cedi
+₵ = 9: cedi
+    9: {(c C) (| / '')}
+    9: ghs GHS
+
+peso
+₱ = 9: peso
+    9: {(p P) (= -- - '')}
+    9: php PHP
+
+hryvnia
+₴ = 9: hryvnia hrn
+    9: {(s S г) (= -- - '')}
+    9: uah UAH
+
+tögrög (tugrik)
+₮ = 9: togrog tögrög tugrik
+    9: {T (// / '')}
+    5: {t (// / '')}
+    9: mnt MNT
+
+ruble
+₽ = 9: ruble
+    9: {(r R р Р p P) (= - '')}
+    9: rub RUB
+
+Turkish lira
+₺ = 9: lira
+    9: {(t l L) (= -- - // / '')}
+    9: trl TRL
+
+dong
+₫ = 9: dong
+    9: {d - _} {d (- _ '')}
+    9: vnd VND
+
+kip
+₭ = 9: kip
+    9: {(k K) (- '')}
+    9: lak LAK
+
+won
+₩ = 9: won
+    9: {(w W) (= -- - __ _ '')}
+    9: krw KRW kpw KPW
+
+shekel
+₪ = 9: shekel sheqel nis
+    9: ils ILS
+
+rupee
+₨ = 9: rupee Rs rs
+
+Indian rupee
+₹ = 9: rupee
+    9: inr INR
+
+austral
+₳ = 9: austral
+    9: {(a A) (= -- - '')}
+    9: ara ARA
+
+yuan / yen
+¥ = 9: yuan yen
+    9: {(y Y) (= -- - '')}
+    9: cny CNY jpy JPY
+
+baht
+฿ = 9: baht
+    9: {(b B) (| / '')}
+    9: thb THB
+
+guaraní
+₲ = 9: guarani guaraní
+    9: {(g G) (| / '')}
+    9: pyg PYG
+
+florin
+ƒ = 9: florin gulden guilder
+    9: f fl

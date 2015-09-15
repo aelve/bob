@@ -32,6 +32,7 @@ main = do
     [ testCase "No warnings when loading rules" $
         mbErrors @?= []
     , arrowsTests rules
+    , currenciesTests rules
     ]
 
 -- Here go some utility functions for tests.
@@ -144,6 +145,63 @@ arrowsTests rules = testGroup "arrows"
       "⇈" <-- T.words "^^"
   ]
 
+-- | Tests for @currencies.rules@.
+currenciesTests :: [Rule] -> TestTree
+currenciesTests rules = testGroup "currencies" $ tests rules $ do
+  "¤" <++ T.words "currency  ox  OX"
+  "¤" <-- T.words "Ox  oX"
+  "¢" <++ T.words "cent  penny  c|"
+  "¢" <-- T.words "c  C|  c/  C/  |c  1/100  0.01  .01"
+  "₥" <++ T.words "mill  mille  mil  m/"
+  "₥" <-- T.words "m  /m  1/1000  0.001  .001"
+  "$" <++ T.words "dollar  s|  S|  s||  S||  usd  USD"
+  "$" <-- T.words "s  S  s/  S/"
+  "£" <++ T.words "pound  lb  l-  L-  lf  Lf  gbp  GBP"
+  "£" <-- T.words "l  L  #"
+  "€" <++ T.words "euro  e=  E=  e-  E-  c=  C=  eur  EUR"
+  "€" <-- T.words "e  E  =e  =E  c--  C--"
+  "₡" <++ T.words "colon  colón  c//  C//  crc  CRC  svc  SVC"
+  "₡" <-- T.words "c  C  c/  C/  //c  //C"
+  "₦" <++ T.words "naira  n=  N=  ngn  NGN"
+  "₦" <-- T.words "n  N  =n  =N"
+  "₧" <++ T.words "peseta  Pts  pts  esp  ESP"
+  "₧" <-- T.words "Pt  pt"
+  "₵" <++ T.words "cedi  C|  ghs  GHS"
+  "₵" <-- T.words "c  C  c| |c  |C  c/  C/"
+  "₱" <++ T.words "peso  p=  P=  php  PHP"
+  "₱" <-- T.words "p  P  p-  P-  =p  =P"
+  "₴" <++ T.words "hryvnia  s=  S=  г=  uah  UAH"
+  "₴" <-- T.words "s  S  г  s--  г-  hrn"
+  "₮" <++ T.words "togrog  tögrög  tugrik  T//  mnt  MNT"
+  "₮" <-- T.words "t  T  t/  T/  t//"
+  "₽" <++ T.words "ruble  r-  R-  rub  RUB"
+  "₽" <-- T.words "p  P  p-  P-  p=  P=  r  R"
+  -- these ‘Р’s are Cyrillic
+  "₽" <++ T.words "р=  Р=  р-  Р-"
+  "₽" <-- T.words "р  Р  =р  =Р"
+  "₺" <++ T.words "lira  t=  t//  L=  L//  trl  TRL"
+  "₺" <-- T.words "t  l  L  t/  L/  t-  L-"
+  "₫" <++ T.words "dong  d-_  vnd  VND"
+  "₫" <-- T.words "d  d-  d_  -d  _d  -d_  _d-"
+  "₭" <++ T.words "kip  K-  k-  lak  LAK"
+  "₭" <-- T.words "k  K  -k  -K"
+  "₩" <++ T.words "won  w=  W=  krw  KRW  kpw  KPW"
+  "₩" <-- T.words "w  W  w--  W--  w-  W-  w__  W__  __w  __W  w_  W_"
+  "₪" <++ T.words "shekel  sheqel  nis  ils  ILS"
+  "₨" <++ T.words "rupee  Rs  rs"
+  "₹" <++ T.words "inr  INR"
+  "₹" <-- T.words "rupee"
+  "₳" <++ T.words "austral  A=  ara  ARA"
+  "₳" <-- T.words "a  A  a=  a--  A--  A-"
+  "¥" <++ T.words "yuan  yen  Y=  cny  CNY  jpy  JPY"
+  "¥" <-- T.words "y  Y  y--  Y--  y-  Y-  =y  =Y"
+  "฿" <++ T.words "baht  B|  thb  THB"
+  "฿" <-- T.words "b  B  |B  b/  B/"
+  "₲" <++ T.words "guarani  guaraní  G|  pyg  PYG"
+  "₲" <-- T.words "g  G  |G  g/  G/"
+  "ƒ" <++ T.words "florin  gulden  guilder  fl"
+  "ƒ" <-- T.words "f"
+          
 {- |
 Test that a pattern finds an entity (e.g. “vv” finds “↡”, but doesn't find “ø”).
 -}
