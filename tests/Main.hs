@@ -33,6 +33,7 @@ main = do
         mbErrors @?= []
     , arrowsTests rules
     , currenciesTests rules
+    , weirdTests rules
     ]
 
 -- Here go some utility functions for tests.
@@ -201,7 +202,12 @@ currenciesTests rules = testGroup "currencies" $ tests rules $ do
   "₲" <-- T.words "g  G  |G  g/  G/"
   "ƒ" <++ T.words "florin  gulden  guilder  fl"
   "ƒ" <-- T.words "f"
-          
+
+-- | Tests for @weird.rules@.
+weirdTests :: [Rule] -> TestTree
+weirdTests rules = testGroup "weird rules" $ tests rules $ do
+  "↯" <++ T.words "hp  HP  harry  Harry  potter  Potter"
+
 {- |
 Test that a pattern finds an entity (e.g. “vv” finds “↡”, but doesn't find “ø”).
 -}
