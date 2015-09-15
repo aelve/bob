@@ -222,7 +222,7 @@ bestMatchIn rules pattern entity = testCase name $ do
     name = printf "‘%s’ finds ‘%s’ as 1st result" pattern entity
 
 {- |
-A version of Test that an entity is a best match for all of the given patterns.
+A version of 'bestMatchIn' that does the test for many patterns at once.
 -}
 bestMatchedByIn :: [Rule] -> Entity -> [Pattern] -> TestTree
 bestMatchedByIn rules entity patterns
