@@ -25,6 +25,7 @@ library
                      , containers == 0.5.*
                      , directory == 1.2.*
                      , filepath == 1.4.*
+                     , megaparsec == 4.0.*
                      , microlens-ghc == 0.3.*
                      , mtl == 2.2.*
                      , parsec == 3.1.*

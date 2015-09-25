@@ -1,7 +1,9 @@
 {-# LANGUAGE
 RecordWildCards,
 ScopedTypeVariables,
-OverloadedStrings
+OverloadedStrings,
+RankNTypes,
+FlexibleContexts
   #-}
 
 module Bob
@@ -39,7 +41,9 @@ import qualified Data.Text.IO as T
 import Data.Text (Text)
 import Data.Char
 -- Parsing
-import Text.Parsec hiding ((<|>), many, optional)
+import Text.Megaparsec
+import Text.Megaparsec.Text
+import Text.Megaparsec.Lexer
 -- Containers
 import qualified Data.Map as M
 import Data.Map (Map)
@@ -59,7 +63,7 @@ type Entity = Text
 -- | How well a pattern corresponds to an entity; for instance, “\>=” would
 -- have bad fitness for “⇒”, but “=\>” would have good fitness for “⇒”. The
 -- higher the number is, the better.
-type Fitness = Int
+type Fitness = Integer
 
 type RuleName = Text
 
@@ -97,7 +101,7 @@ literalP = T.pack <$> asum [
       satisfy $ \x -> not $ or [isSpace x, x == '\''] ]
 
 fitnessP :: WarnParser Fitness
-fitnessP = read <$> some digit
+fitnessP = integer
 
 generatorP :: WarnParser Generator
 generatorP = do
@@ -185,7 +189,7 @@ matcherP = asum [zipP, manyToOneP]
       lineA <- literalP <* nextLine
       lineB <- literalP <* nextLine
       when (T.length lineA /= T.length lineB) $
-        warnLift $ warn "lengths of zipped rows don't match"
+        warn "lengths of zipped rows don't match"
       gens <- generatorLineP `sepBy1` nextLine
       return (Zip lineA lineB gens)
     manyToOneP = do
@@ -218,7 +222,7 @@ ruleP scope = do
           go (M.unionWith union psm (toPatternsMap entityMap))
              (M.unionWith union entityMap entitiesMap)
              rest
-    entitiesMap <- warnLift $ go scope mempty matchers
+    entitiesMap <- go scope mempty matchers
     -- Return the rule.
     let rule = Rule {
           ruleName     = name,
@@ -269,39 +273,25 @@ readRules = do
 
 currentLine :: WarnParser Text
 currentLine = asum [
-  endOfLine >> pure "",
+  eol >> pure "",
   do x  <- anyChar
-     xs <- anyChar `manyTill` try (eof <|> void endOfLine)
+     xs <- anyChar `manyTill` try (eof <|> void eol)
      pure (T.pack (x:xs)) ]
 
-type Warn a = Writer [String] a
+type Warn a = forall m. MonadWriter [String] m => m a
 
 warn :: String -> Warn ()
 warn s = tell [s]
 
-type WarnParser a = Parsec Text [String] a
-
-warnLift :: Warn a -> WarnParser a
-warnLift x = do
-  let (a, w) = runWriter x
-  updateState (++ w)
-  return a
+type WarnParser a = WriterT [String] Parser a
 
 groupWarnings :: String -> WarnParser a -> WarnParser a
-groupWarnings title p = do
-  old <- getState
-  putState []
-  a <- p
-  new <- getState
-  if null new
-    then putState old
-    else putState (old ++ title : map ("  " ++) new)
-  return a
+groupWarnings title = censor $ \s ->
+  if null s then [] else title : map ("  " ++) s
 
-warnParse :: WarnParser a -> SourceName -> Text -> Either ParseError (a, [String])
-warnParse p src s = runParser p' [] src s
-  where
-    p' = liftA2 (,) p getState
+warnParse :: WarnParser a -> FilePath -> Text ->
+             Either ParseError (a, [String])
+warnParse = parse . runWriterT
 
 inParens, inBraces, inSingleQuotes, inBackticks
   :: WarnParser a -> WarnParser a
