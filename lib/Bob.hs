@@ -122,8 +122,11 @@ data Matcher
   | ManyToOne Generators Entity
   deriving (Show)
 
-evalGenerator :: PatternsMap -> Generator -> Warn [Pattern]
-evalGenerator _  (Literal x) = return [x]
+evalGenerator
+  :: PatternsMap     -- ^ Already generated patterns (needed for 'Reference')
+  -> Generator       -- ^ Generator to evaluate
+  -> Warn [Pattern]
+evalGenerator _   (Literal x) = return [x]
 evalGenerator psm (AnyOf gs) = concat <$> mapM (evalGenerator psm) gs
 evalGenerator psm (Sequence gs) = do
   ps :: [[Pattern]] <- mapM (evalGenerator psm) gs
@@ -136,13 +139,16 @@ evalGenerator psm (Permutation gs) = do
     perm :: [[Pattern]] <- permutations ps
     chosen :: [Pattern] <- sequence perm
     return (mconcat chosen)
-evalGenerator em (Reference x) = case M.lookup x em of
+evalGenerator psm (Reference x) = case M.lookup x psm of
   Nothing -> do
     warn (printf "‘%s’ was referenced but wasn't defined yet" (T.unpack x))
     return []
   Just pats -> return (map fst pats)
 
-evalGenerators :: PatternsMap -> Generators -> Warn [(Pattern, Fitness)]
+evalGenerators
+  :: PatternsMap                 -- ^ Already generated patterns
+  -> Generators                  -- ^ Pairs of (generator, fitness)
+  -> Warn [(Pattern, Fitness)]
 evalGenerators psm gens = do
   groups :: [([Pattern], Fitness)] <- (each._1) (evalGenerator psm) gens
   -- Now groups have to be expanded, and patterns from later groups should
@@ -154,7 +160,7 @@ evalGenerators psm gens = do
   return $ M.toList (M.fromList pats)
 
 evalMatcher
-  :: PatternsMap  -- ^ Already existing patterns
+  :: PatternsMap  -- ^ Already generated patterns
   -> Matcher      -- ^ Matcher to evaluate
   -- | Generated entities (not in 'EntitiesMap' because for a matcher it's
   -- guaranteed that each pattern would correspond to a unique entity).
