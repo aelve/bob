@@ -211,7 +211,9 @@ diacriticsTests rules = testGroup "diacritics"
       testRows
         "AaEeHhIiOotUuWwXxYy"
         "ÄäËëḦḧÏïÖöẗÜüẄẅẌẍŸÿ"
-        $ \x y -> do y <++ [x <> ":", ":" <> x, x <> "\"", x <> ".."]
+        $ \x y -> do y <++ [x <> ":", ":" <> x,
+                            x <> "\"", "\"" <> x,
+                            x <> "..", ".." <> x]
                      y <-- [x]
   -- We want people to be able to find e.g. “ḛ” quickly if they want to, so
   -- it's a rule of sorts that “e~” means “ẽ” and “~e” means “ḛ”.
