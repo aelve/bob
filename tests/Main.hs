@@ -229,6 +229,13 @@ diacriticsTests rules = testGroup "diacritics"
         "ḚḛḬḭṴṵ"
         $ \x y -> do y <++ ["~" <> x]
                      y <-- [x, x <> "~"]
+  , testGroup "grave accent" $ tests rules $ do
+      testRows
+        "AaEeIiNnOoUuWwYy"
+        "ÀàÈèÌìǸǹÒòÙùẀẁỲỳ"
+        $ \x y -> do y <++ ["`" <> x, x <> "`",
+                            "\\" <> x, x <> "\\"]
+                     y <-- [x]
   ]
   where testRows a b f = zipWithM f (T.chunksOf 1 a) (T.chunksOf 1 b)
 
