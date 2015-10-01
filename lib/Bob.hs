@@ -86,12 +86,13 @@ data Generator
   | Sequence [Generator]
   | Permutation [Generator]
   | Reference Entity
+  | Variable
   deriving (Show)
 
 literalP :: WarnParser Pattern
 literalP = T.pack <$> asum [
   some literalChar,
-  inSingleQuotes (many quotedChar) ]
+  singleQuotes (many quotedChar) ]
   where
     literalChar = satisfy $ \x ->
       or [isSymbol x, isPunctuation x, isAlphaNum x] &&
@@ -107,9 +108,10 @@ generatorP :: WarnParser Generator
 generatorP = do
   let singleGenerator = asum [
         Literal <$> literalP,
-        AnyOf <$> inParens (generatorP `sepBy1` someSpaces),
-        Permutation <$> inBraces (generatorP `sepBy1` someSpaces),
-        Reference <$> inBackticks literalP ]
+        Variable <$ try (string "()"),
+        AnyOf <$> parens (generatorP `sepBy1` someSpaces),
+        Permutation <$> braces (generatorP `sepBy1` someSpaces),
+        Reference <$> backticks literalP ]
   gens <- some singleGenerator
   return $ case gens of
     [gen] -> gen
@@ -118,39 +120,46 @@ generatorP = do
 type Generators = [(Generator, Fitness)]
 
 data Matcher
-  = Zip Text Text Generators
+  = Zip [(Text, Text)] Generators
   | ManyToOne Generators Entity
   deriving (Show)
 
 evalGenerator
   :: PatternsMap     -- ^ Already generated patterns (needed for 'Reference')
+  -> Maybe Text      -- ^ Variable value (needed for 'Variable')
   -> Generator       -- ^ Generator to evaluate
   -> Warn [Pattern]
-evalGenerator _   (Literal x) = return [x]
-evalGenerator psm (AnyOf gs) = concat <$> mapM (evalGenerator psm) gs
-evalGenerator psm (Sequence gs) = do
-  ps :: [[Pattern]] <- mapM (evalGenerator psm) gs
+evalGenerator _   _ (Literal x) = return [x]
+evalGenerator psm var (AnyOf gs) = concat <$> mapM (evalGenerator psm var) gs
+evalGenerator psm var (Sequence gs) = do
+  ps :: [[Pattern]] <- mapM (evalGenerator psm var) gs
   return $ do
     chosen :: [Pattern] <- sequence ps
     return (mconcat chosen)
-evalGenerator psm (Permutation gs) = do
-  ps :: [[Pattern]] <- mapM (evalGenerator psm) gs
+evalGenerator psm var (Permutation gs) = do
+  ps :: [[Pattern]] <- mapM (evalGenerator psm var) gs
   return $ do
     perm :: [[Pattern]] <- permutations ps
     chosen :: [Pattern] <- sequence perm
     return (mconcat chosen)
-evalGenerator psm (Reference x) = case M.lookup x psm of
+evalGenerator psm _ (Reference x) = case M.lookup x psm of
   Nothing -> do
     warn (printf "‘%s’ was referenced but wasn't defined yet" (T.unpack x))
     return []
   Just pats -> return (map fst pats)
+evalGenerator _ var Variable = case var of
+  Nothing -> do
+    warn "there's a variable in the rule but no value provided for it"
+    return []
+  Just x -> return [x]
 
 evalGenerators
   :: PatternsMap                 -- ^ Already generated patterns
+  -> Maybe Text                  -- ^ Variable value
   -> Generators                  -- ^ Pairs of (generator, fitness)
   -> Warn [(Pattern, Fitness)]
-evalGenerators psm gens = do
-  groups :: [([Pattern], Fitness)] <- (each._1) (evalGenerator psm) gens
+evalGenerators psm var gens = do
+  groups :: [([Pattern], Fitness)] <- (each._1) (evalGenerator psm var) gens
   -- Now groups have to be expanded, and patterns from later groups should
   -- replace earlier patterns. See https://github.com/aelve/bob/issues/47.
   let pats :: [(Pattern, Fitness)]
@@ -165,16 +174,13 @@ evalMatcher
   -- | Generated entities (not in 'EntitiesMap' because for a matcher it's
   -- guaranteed that each pattern would correspond to a unique entity).
   -> Warn (Map Pattern (Entity, Fitness))
-evalMatcher psm (Zip lineA lineB gens) = do
-  let as = T.chunksOf 1 lineA
-      bs = T.chunksOf 1 lineB
-  additions <- evalGenerators psm gens
-  return $ M.fromList $ concat $ do
-    (a, b) <- zip as bs
-    (pattern, fitness) <- if null additions then [("", 10)] else additions
-    return [(pattern <> a, (b, fitness)), (a <> pattern, (b, fitness))]
+evalMatcher psm (Zip pairs gens) = do
+  results <- for pairs $ \(a, b) -> do
+    patterns <- evalGenerators psm (Just a) gens
+    return [(pattern, (b, fitness)) | (pattern, fitness) <- patterns]
+  return $ M.fromList (concat results)
 evalMatcher psm (ManyToOne gens entity) = do
-  patterns <- evalGenerators psm gens
+  patterns <- evalGenerators psm Nothing gens
   return $ M.fromList $ do
     (pattern, fitness) <- (entity, 10) : patterns
     return (pattern, (entity, fitness))
@@ -192,12 +198,12 @@ matcherP = asum [zipP, manyToOneP]
     nextLine = try (newline >> someSpaces)
     zipP = do
       string "zip" <* someSpaces
-      lineA <- literalP <* nextLine
-      lineB <- literalP <* nextLine
-      when (T.length lineA /= T.length lineB) $
+      lineA <- (T.chunksOf 1 <$> literalP) <* nextLine
+      lineB <- (T.chunksOf 1 <$> literalP) <* nextLine
+      when (length lineA /= length lineB) $
         warn "lengths of zipped rows don't match"
       gens <- generatorLineP `sepBy1` nextLine
-      return (Zip lineA lineB gens)
+      return (Zip (zip lineA lineB) gens)
     manyToOneP = do
       x <- literalP <* someSpaces
       char '=' <* someSpaces
@@ -299,12 +305,12 @@ warnParse :: WarnParser a -> FilePath -> Text ->
              Either ParseError (a, [String])
 warnParse = parse . runWriterT
 
-inParens, inBraces, inSingleQuotes, inBackticks
+parens, braces, singleQuotes, backticks
   :: WarnParser a -> WarnParser a
-inParens       = between (char '(')  (char ')')
-inBraces       = between (char '{')  (char '}')
-inSingleQuotes = between (char '\'') (char '\'')
-inBackticks    = between (char '`')  (char '`')
+parens       = between (char '(')  (char ')')
+braces       = between (char '{')  (char '}')
+singleQuotes = between (char '\'') (char '\'')
+backticks    = between (char '`')  (char '`')
 
 someSpaces :: WarnParser ()
 someSpaces = void (some (char ' '))

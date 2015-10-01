@@ -33,6 +33,7 @@ main = do
         mbErrors @?= []
     , arrowsTests rules
     , currenciesTests rules
+    , diacriticsTests rules
     , weirdTests rules
     ]
 
@@ -202,6 +203,99 @@ currenciesTests rules = testGroup "currencies" $ tests rules $ do
   "₲" <-- T.words "g  G  |G  g/  G/"
   "ƒ" <++ T.words "florin  gulden  guilder  fl"
   "ƒ" <-- T.words "f"
+
+-- | Tests for @diacritics.rules@.
+diacriticsTests :: [Rule] -> TestTree
+diacriticsTests rules = testGroup "diacritics"
+  [ testGroup "diaeresis" $ tests rules $ do
+      testRows
+        "AaEeHhIiOotUuWwXxYy"
+        "ÄäËëḦḧÏïÖöẗÜüẄẅẌẍŸÿ"
+        $ \x y -> do y <++ [x <> ":", ":" <> x, x <> "\"", x <> ".."]
+                     y <-- [x]
+  -- We want people to be able to find e.g. “ḛ” quickly if they want to, so
+  -- it's a rule of sorts that “e~” means “ẽ” and “~e” means “ḛ”.
+  , testGroup "tilde" $ tests rules $ do
+      testRows
+        "ANOanoIiUuEeYyVv"
+        "ÃÑÕãñõĨĩŨũẼẽỸỹṼṽ"
+        $ \x y -> do y <++ [x <> "~"]
+                     y <-- [x, "~" <> x]
+  , testGroup "tilde below" $ tests rules $ do
+      testRows
+        "EeIiUu"
+        "ḚḛḬḭṴṵ"
+        $ \x y -> do y <++ ["~" <> x]
+                     y <-- [x, x <> "~"]
+  ]
+  where testRows a b f = zipWithM f (T.chunksOf 1 a) (T.chunksOf 1 b)
+
+{-
+
+grave accent
+zip AaEeIiNnOoUuWwYy
+    ÀàÈèÌìǸǹÒòÙùẀẁỲỳ
+    0: '`' \ ''
+
+stroke
+zip AaCcEeLlOo
+    ȺⱥȻȼɆɇŁłØø
+    0: / - ''
+zip BbDdGgHhIiJjKkPpRrTtYyZz
+    ɃƀĐđǤǥĦħƗɨɈɉꝀꝁⱣᵽɌɍŦŧɎɏƵƶ
+    0: - / ''
+
+acute accent
+zip AaCcEeGgIiKkLlMmNnOoPpRrSsUuWwYyZz
+    ÁáĆćÉéǴǵÍíḰḱĹĺḾḿŃńÓóṔṕŔŕŚśÚúẂẃÝýŹź
+    0: '''' / , ''
+
+breve
+zip AaEeIiOoUu
+    ĂăĔĕĬĭŎŏŬŭ
+    0: U u '(' ')' ''
+
+circumflex
+zip AaCcEeGgHhIiJjOoSsUuWwYyZz
+    ÂâĈĉÊêĜĝĤĥÎîĴĵÔôŜŝÛûŴŵŶŷẐẑ
+    0: ^ /\ < > ''
+
+caron
+zip AaIiCcDdEeGgHhjKkLlNnOoRrSsTtUuZz
+    ǍǎǏǐČčĎďĚěǦǧȞȟǰǨǩĽľŇňǑǒŘřŠšŤťǓǔŽž
+    0: V v \/ < > ''
+zip dtLl
+    ďťĽľ
+    0: ''''
+
+bar
+zip Ll
+    Ƚƚ
+    0: - ''
+
+diagonal stroke
+zip TtKkQqVv
+    ȾⱦꝂꝃꝘꝙꝞꝟ
+    0: / ''
+
+double acute accent
+zip OoUu
+    ŐőŰű
+    0: '"' // ,, = : ''
+
+double grave accent
+zip AaEeIiOoRrUu
+    ȀȁȄȅȈȉȌȍȐȑȔȕ
+    0: '``' \\ '"' = : ''
+
+ring
+zip AaUuwy
+    ÅåŮůẘẙ
+    0: o O 0 '()' ''
+
+-}
+
+
 
 -- | Tests for @weird.rules@.
 weirdTests :: [Rule] -> TestTree
