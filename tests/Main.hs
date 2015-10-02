@@ -64,10 +64,10 @@ Test that an entity is the best match for all patterns; see 'bestMatchedByIn'.
 arrowsTests :: [Rule] -> TestTree
 arrowsTests rules = testGroup "arrows"
   [ testGroup "ordinary arrows" $ tests rules $ do
-      "→" <++ T.words ">"
-      "→" <-- T.words "->  >-"
-      "←" <++ T.words "<"
-      "←" <-- T.words "<-  -<"
+      "→" <++ T.words "> ->"
+      "→" <-- T.words ">-"
+      "←" <++ T.words "< <-"
+      "←" <-- T.words "-<"
       "↓" <++ T.words "v  |v  v|"
       "↓" <-- T.words "V"
       "↑" <++ T.words "^  |^  ^|"
