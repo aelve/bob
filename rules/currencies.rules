@@ -78,6 +78,7 @@ ruble
 ₽ = 7: ruble
     6: {(r R р Р p P) (= - '')}
     7: rub RUB
+    8: r R р Р
 
 Turkish lira
 ₺ = 7: lira

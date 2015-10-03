@@ -178,11 +178,11 @@ currenciesTests rules = testGroup "currencies" $ tests rules $ do
   top 2  "¥"  "y--  Y--  =y  =Y"
   best   "₪"  "shekel  sheqel  nis  ils  ILS"
   -- ruble
-  best   "₽"  "ruble  rub  RUB"
+  best   "₽"  "r  R  ruble  rub  RUB"
   top 2  "₽"  "r-  R-  p-  P-"
-  found  "₽"  "p  P  p=  P=  r  R"
-  best   "₽"  "р=  Р=  р-  Р-"   -- these ‘Р’s are Cyrillic
-  found  "₽"  "р  Р  =р  =Р"     -- and these
+  top 3  "₽"  "p  P  p=  P="
+  best   "₽"  "р  Р  р=  Р=  р-  Р-"   -- these ‘Р’s are Cyrillic
+  top 2  "₽"  "=р  =Р"                 -- and these
   -- rare currencies
   best   "₡"  "colon  colón  c//  C//  crc  CRC  svc  SVC"
   found  "₡"  "c  C  c/  C/  //c  //C"
