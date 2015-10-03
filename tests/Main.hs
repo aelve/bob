@@ -281,6 +281,22 @@ diacriticsTests rules = testGroup "diacritics"
                      top 3 y ["/" <> x, x <> "/"]
                      found y [x]
 
+  , testGroup "diagonal stroke" $ tests rules $ do
+      testRows
+        "TtKkQqVv"
+        "ȾⱦꝂꝃꝘꝙꝞꝟ"
+        $ \x y -> do best  y [x <> "/", "/" <> x]
+                     found y [x]
+
+  , testGroup "bar" $ tests rules $ do
+      testRows
+        "Ll"
+        "Ƚƚ"
+        $ \x y -> do best  y ["_" <> x, x <> "_",
+                              "-" <> x]
+                     top 2 y [x <> "-"]
+                     found y [x]
+
   , testGroup "acute accent" $ tests rules $ do
       testRows
         "AaCcEeGgIiKkLlMmNnOoPpRrSsUuWwYyZz"
@@ -326,15 +342,6 @@ diacriticsTests rules = testGroup "diacritics"
         "ďťĽľ"
         $ \x y -> do top 2 y ["'" <> x, x <> "'"]
 
-  , testGroup "bar" $ tests rules $ do
-      testRows
-        "Ll"
-        "Ƚƚ"
-        $ \x y -> do best  y ["_" <> x, x <> "_",
-                              "-" <> x]
-                     top 2 y [x <> "-"]
-                     found y [x]
-
   , testGroup "ring" $ tests rules $ do
       testRows
         "AaUuwy"
@@ -346,29 +353,30 @@ diacriticsTests rules = testGroup "diacritics"
                               "O" <> x, x <> "O"]
                      found y [x]
 
+  , testGroup "double acute accent" $ tests rules $ do
+      testRows
+        "OoUu"
+        "ŐőŰű"
+        $ \x y -> do best  y [x <> ",,", ",," <> x,
+                              x <> "//", "//" <> x]
+                     top 3 y [x <> "\"", "\"" <> x,
+                              x <> "=", "=" <> x,
+                              x <> ":", ":" <> x]
+                     found y [x]
+
+  , testGroup "double grave accent" $ tests rules $ do
+      testRows
+        "AaEeIiOoRrUu"
+        "ȀȁȄȅȈȉȌȍȐȑȔȕ"
+        $ \x y -> do best  y [x <> "``", "``" <> x,
+                              x <> "\\\\", "\\\\" <> x]
+                     top 3 y [x <> "\"", "\"" <> x,
+                              x <> "=", "=" <> x,
+                              x <> ":", ":" <> x]
+                     found y [x]
+
   ]
   where testRows a b f = zipWithM f (T.chunksOf 1 a) (T.chunksOf 1 b)
-
-{-
-
-diagonal stroke
-zip TtKkQqVv
-    ȾⱦꝂꝃꝘꝙꝞꝟ
-    0: / ''
-
-double acute accent
-zip OoUu
-    ŐőŰű
-    0: '"' // ,, = : ''
-
-double grave accent
-zip AaEeIiOoRrUu
-    ȀȁȄȅȈȉȌȍȐȑȔȕ
-    0: '``' \\ '"' = : ''
-
--}
-
-
 
 -- | Tests for @weird.rules@.
 weirdTests :: [Rule] -> TestTree
