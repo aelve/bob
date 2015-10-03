@@ -177,12 +177,14 @@ currenciesTests rules = testGroup "currencies" $ tests rules $ do
   best   "¥"  "y  Y  yuan  yen  Y=  y=  Y-  y-  cny  CNY  jpy  JPY"
   top 2  "¥"  "y--  Y--  =y  =Y"
   best   "₪"  "shekel  sheqel  nis  ils  ILS"
+
   -- ruble
   best   "₽"  "r  R  ruble  rub  RUB"
   top 2  "₽"  "r-  R-  p-  P-"
   top 3  "₽"  "p  P  p=  P="
   best   "₽"  "р  Р  р=  Р=  р-  Р-"   -- these ‘Р’s are Cyrillic
   top 2  "₽"  "=р  =Р"                 -- and these
+
   -- rare currencies
   best   "₡"  "colon  colón  c//  C//  crc  CRC  svc  SVC"
   found  "₡"  "c  C  c/  C/  //c  //C"
@@ -217,6 +219,7 @@ currenciesTests rules = testGroup "currencies" $ tests rules $ do
   found  "₲"  "g  G  |G  g/  G/"
   best   "ƒ"  "florin  gulden  guilder  fl"
   found  "ƒ"  "f"
+
   -- not currencies
   best   "¤"  "currency  ox  OX  Ox  oX"
   best   "¢"  "cent  penny  c/  c|  c"
@@ -236,6 +239,7 @@ diacriticsTests rules = testGroup "diacritics"
                               x <> "\"", "\"" <> x,
                               x <> "..", ".." <> x]
                      found y [x]
+
   -- We want people to be able to find e.g. “ḛ” quickly if they want to, so
   -- it's a rule of sorts that “e~” means “ẽ” and “~e” means “ḛ”.
   , testGroup "tilde" $ tests rules $ do
@@ -252,6 +256,7 @@ diacriticsTests rules = testGroup "diacritics"
         $ \x y -> do best  y ["~" <> x]
                      top 2 y [x <> "~"]
                      found y [x]
+
   , testGroup "grave accent" $ tests rules $ do
       testRows
         "AaEeIiNnOoUuWwYy"
@@ -259,6 +264,7 @@ diacriticsTests rules = testGroup "diacritics"
         $ \x y -> do best  y ["`" <> x, x <> "`",
                               "\\" <> x, x <> "\\"]
                      found y [x]
+
   , testGroup "stroke" $ tests rules $ do
       testRows
         "AaCcEeLlOo"
@@ -274,6 +280,7 @@ diacriticsTests rules = testGroup "diacritics"
                      top 2 y [x <> "-"]
                      top 3 y ["/" <> x, x <> "/"]
                      found y [x]
+
   , testGroup "acute accent" $ tests rules $ do
       testRows
         "AaCcEeGgIiKkLlMmNnOoPpRrSsUuWwYyZz"
@@ -282,6 +289,7 @@ diacriticsTests rules = testGroup "diacritics"
                               "," <> x, x <> ","]
                      top 3 y ["/" <> x, x <> "/"]
                      found y [x]
+
   , testGroup "breve" $ tests rules $ do
       testRows
         "AaEeIiOoUu"
@@ -291,6 +299,7 @@ diacriticsTests rules = testGroup "diacritics"
                      top 2 y ["u" <> x, x <> "u",
                               "U" <> x, x <> "U"]
                      found y [x]
+
   , testGroup "circumflex" $ tests rules $ do
       testRows
         "AaCcEeGgHhIiJjOoSsUuWwYyZz"
