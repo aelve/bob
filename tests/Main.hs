@@ -324,15 +324,20 @@ diacriticsTests rules = testGroup "diacritics"
         "dtLl"
         "ďťĽľ"
         $ \x y -> do top 2 y ["'" <> x, x <> "'"]
+
+  , testGroup "bar" $ tests rules $ do
+      testRows
+        "Ll"
+        "Ƚƚ"
+        $ \x y -> do best  y ["_" <> x, x <> "_",
+                              "-" <> x]
+                     top 2 y [x <> "-"]
+                     found y [x]
+
   ]
   where testRows a b f = zipWithM f (T.chunksOf 1 a) (T.chunksOf 1 b)
 
 {-
-
-bar
-zip Ll
-    Ƚƚ
-    0: - ''
 
 diagonal stroke
 zip TtKkQqVv

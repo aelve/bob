@@ -26,12 +26,12 @@ stroke
 zip AaCcEeLlOo
     ȺⱥȻȼɆɇŁłØø
     7: {/ ()}
-    7: {- ()}
+    6: {- ()}
     3: ()
 zip BbDdGgHhIiJjKkPpRrTtYyZz
     ɃƀĐđǤǥĦħƗɨɈɉꝀꝁⱣᵽɌɍŦŧɎɏƵƶ
     7: {- ()}
-    7: {/ ()}
+    6: {/ ()}
     3: ()
 
 acute accent
@@ -66,7 +66,7 @@ zip dtLl
 bar
 zip Ll
     Ƚƚ
-    7: {(- '') ()}
+    7: {(_ - '') ()}
 
 diagonal stroke
 zip TtKkQqVv
