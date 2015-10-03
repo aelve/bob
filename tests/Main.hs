@@ -1,5 +1,6 @@
 {-# LANGUAGE
-OverloadedStrings
+OverloadedStrings,
+FlexibleInstances
   #-}
 
 {-# OPTIONS_GHC -fno-warn-orphans #-}
@@ -18,6 +19,7 @@ import Control.Monad.Writer
 import Text.Printf
 import qualified Data.Text as T
 import Data.Text (Text)
+import Data.String
 -- Testing
 import Test.Tasty
 import Test.Tasty.HUnit
@@ -49,14 +51,26 @@ tests rules ts = map ($ rules) (execWriter ts)
 {- |
 Test that an entity is found by all patterns; see 'foundByIn'.
 -}
-(<--) :: Entity -> [Pattern] -> Writer [[Rule] -> TestTree] ()
-(<--) a b = tell [\rules -> foundByIn rules a b]
+found :: Entity -> [Pattern] -> Writer [[Rule] -> TestTree] ()
+found e ps = tell [\rules -> foundByIn rules e ps]
 
 {- |
 Test that an entity is the best match for all patterns; see 'bestMatchedByIn'.
 -}
-(<++) :: Entity -> [Pattern] -> Writer [[Rule] -> TestTree] ()
-(<++) a b = tell [\rules -> bestMatchedByIn rules a b]
+best :: Entity -> [Pattern] -> Writer [[Rule] -> TestTree] ()
+best e ps = tell [\rules -> bestMatchedByIn rules e ps]
+
+{- |
+Test that an entity is in top N matches; see 'wellMatchedByIn'.
+-}
+top :: Int -> Entity -> [Pattern] -> Writer [[Rule] -> TestTree] ()
+top n e ps = tell [\rules -> wellMatchedByIn rules e n ps]
+
+-- Here goes an instance that lets us encode lists of patterns as strings
+-- (so, ["a", "b", "c"] becomes "a b c").
+
+instance IsString [Pattern] where
+  fromString = T.words . T.pack
 
 -- Here go tests themselves.
 
@@ -64,145 +78,156 @@ Test that an entity is the best match for all patterns; see 'bestMatchedByIn'.
 arrowsTests :: [Rule] -> TestTree
 arrowsTests rules = testGroup "arrows"
   [ testGroup "ordinary arrows" $ tests rules $ do
-      "→" <++ T.words "> ->"
-      "→" <-- T.words ">-"
-      "←" <++ T.words "< <-"
-      "←" <-- T.words "-<"
-      "↓" <++ T.words "v  |v  v|"
-      "↓" <-- T.words "V"
-      "↑" <++ T.words "^  |^  ^|"
+      best   "→"  ">  ->"
+      top 3  "→"  ">-"
+      best   "←"  "<  <-"
+      top 3  "←"  "-<"
+      best   "↓"  "v  |v  v|"
+      top 3  "↓"  "V"
+      best   "↑"  "^  |^  ^|"
       --
-      "↔" <++ T.words "<->  <-->"
-      "↔" <-- T.words "←→  <>  →←  ><"
-      "↕" <++ T.words "v^  ^v  v|^  ^|v"
-      "↕" <-- T.words "↓↑  ↑↓  |v|^  |^|v"
+      best   "↔"  "<->  <-->"
+      top 2  "↔"  "←→  <>  →←  ><"
+      best   "↕"  "v^  ^v  v|^   ^|v"
+      top 2  "↕"  "↓↑  ↑↓  |v|^  |^|v"
       --
-      "↖" <-- T.words "\\^  ^\\  \\←  <-\\  <\\"
-      "↘" <-- T.words "\\v  v\\  \\→  ->\\  \\>"
-      "↗" <-- T.words "/^   ^/    /→  ->/   />"
-      "↙" <-- T.words "/v   v/    /←  <-/   </"
+      top 2  "↖"  "\\^  ^\\  \\←  <-\\  <\\"
+      top 2  "↘"  "\\v  v\\  \\→  ->\\  \\>"
+      top 2  "↗"  "/^   ^/    /→  ->/   />"
+      top 2  "↙"  "/v   v/    /←  <-/   </"
 
   , testGroup "double arrows" $ tests rules $ do
-      "⇐" <++ T.words "<=  ←="
-      "⇐" <-- T.words "=<"
-      "⇒" <++ T.words "=>  =→"
-      "⇒" <-- T.words ">="
-      "⇔" <++ T.words "<=>  ⇐⇒  ↔=  =↔"
+      best   "⇐"  "<=  ←="
+      top 3  "⇐"  "=<"
+      best   "⇒"  "=>  =→"
+      top 3  "⇒"  ">="
+      best   "⇔"  "<=>  ⇐⇒  ↔=  =↔"
       --
-      "⇑" <++ T.words "=^  ^=  |^|  =>^  ^⇐"
-      "⇓" <++ T.words "=v  v=  |v|  =>v  v⇐"
+      best   "⇑"  "=^  ^=  |^|  =>^  ^⇐"
+      best   "⇓"  "=v  v=  |v|  =>v  v⇐"
 
   , testGroup "crossed arrows" $ tests rules $ do
-      "↚" <++ T.words "<-/  ←/  /←  </-  </"
-      "↚" <-- T.words "/<-"
-      "↛" <++ T.words "/->  /→  →/  -/>  />"
-      "↛" <-- T.words "->/"
+      best   "↚"  "<-/  ←/  /←  </-  </"
+      top 2  "↚"  "/<-"
+      best   "↛"  "/->  /→  →/  -/>  />"
+      top 2  "↛"  "->/"
       --
-      "⇍" <++ T.words "<=/  </=  ⇐/  /⇐"
-      "⇍" <-- T.words "/<="
-      "⇏" <++ T.words "/=>  =/>  ⇒/  /⇒"
-      "⇏" <-- T.words "=>/"
+      best   "⇍"  "<=/  </=  ⇐/  /⇐"
+      top 2  "⇍"  "/<="
+      best   "⇏"  "/=>  =/>  ⇒/  /⇒"
+      top 2  "⇏"  "=>/"
 
   , testGroup "2-headed arrows" $ tests rules $ do
-      "↠" <++ T.words "→>  ->>  -»"
-      "↠" <-- T.words "→→  >>  →»"
-      "↞" <++ T.words "<←  <<-  «-"
-      "↞" <-- T.words "←←  <<  «←"
+      best   "↠"  "→>  ->>  -»"
+      top 2  "↠"  "→→  >>   →»"
+      best   "↞"  "<←  <<-  «-"
+      top 2  "↞"  "←←  <<   «←"
       --
-      "↟" <++ T.words "^^"
-      "↟" <-- T.words "↑↑"
-      "↡" <++ T.words "vv"
-      "↡" <-- T.words "↓↓"
+      best   "↟"  "^^"
+      top 2  "↟"  "↑↑"
+      best   "↡"  "vv"
+      top 2  "↡"  "↓↓"
 
   , testGroup "arrows with tail" $ tests rules $ do
-      "↣" <++ T.words ">->  >→"
-      "↣" <-- T.words ">>  →>"
-      "↢" <++ T.words "<-<  ←<"
-      "↢" <-- T.words "<<  <←"
+      best   "↣"  ">->  >→"
+      top 2  "↣"  ">>   →>"
+      best   "↢"  "<-<  ←<"
+      top 2  "↢"  "<<   <←"
 
   , testGroup "arrows with bar" $ tests rules $ do
-      "↦" <++ T.words "|→  →|  |->  |>"
-      "↤" <++ T.words "←|  |←  <-|  <|"
-      "↥" <++ T.words "↑_  _^  |^_"
-      "↧" <++ T.words "↓_  _v  |v_  vT"
-      "↧" <-- T.words "vt  TV"
+      best   "↦"  "|→  →|  |->  |>"
+      best   "↤"  "←|  |←  <-|  <|"
+      best   "↥"  "↑_  _^  |^_"
+      best   "↧"  "↓_  _v  |v_  vT"
+      top 2  "↧"  "vt  TV"
 
   , testGroup "paired arrows" $ tests rules $ do
-      "⇄" <++ T.words "→←  -><-"
-      "⇄" <-- T.words "><  ←→  <>  <-->"
-      "⇆" <++ T.words "←→"
-      "⇆" <-- T.words "<>  <-->  →←  ><  -><-"
+      best   "⇄"  "→←  -><-"
+      top 2  "⇄"  "><"
+      top 3  "⇄"  "←→  <>  <-->"
+      best   "⇆"  "←→"
+      top 2  "⇆"  "<>  <-->"
+      top 3  "⇆"  "><  -><-  →←"
       --
-      "⇉" <++ T.words "→→  ->->  =»  =>>  -->>"
-      "⇉" <-- T.words ">>  ->>  -->  =>"
-      "⇇" <++ T.words "←←  <-<-  «=  <<=  <<--"
-      "⇇" <-- T.words "<<  <<-  <--  <="
+      best   "⇉"  "→→  ->->  =»  =>>  -->>"
+      top 2  "⇉"  "->>  -->"
+      top 3  "⇉"  ">>  =>"
+      best   "⇇"  "←←  <-<-  «=  <<=  <<--"
+      top 2  "⇇"  "<<-  <--"
+      top 3  "⇇"  "<<  <="
       --
-      "⇅" <++ T.words "|^v|  ^||v  ↑↓"
-      "⇵" <++ T.words "|v^|  v||^  ↓↑"
+      best   "⇅"  "↑↓  |^v|  ^||v"
+      best   "⇵"  "↓↑  |v^|  v||^"
       --
-      "⇊" <++ T.words "↓↓  v||v  vv||"
-      "⇊" <-- T.words "vv  VV  ||VV"
-      "⇈" <++ T.words "↑↑  ^||^  ^^||  ||^^"
-      "⇈" <-- T.words "^^"
+      best   "⇊"  "↓↓  v||v  vv||"
+      top 2  "⇊"  "vv  VV    ||VV"
+      best   "⇈"  "↑↑  ^||^  ^^||  ||^^"
+      top 2  "⇈"  "^^"
   ]
 
 -- | Tests for @currencies.rules@.
 currenciesTests :: [Rule] -> TestTree
 currenciesTests rules = testGroup "currencies" $ tests rules $ do
-  "¤" <++ T.words "currency  ox  OX"
-  "¤" <-- T.words "Ox  oX"
-  "¢" <++ T.words "cent  penny  c|"
-  "¢" <-- T.words "c  C|  c/  C/  |c  1/100  0.01  .01"
-  "₥" <++ T.words "mill  mille  mil  m/"
-  "₥" <-- T.words "m  /m  1/1000  0.001  .001"
-  "$" <++ T.words "dollar  s|  S|  s||  S||  usd  USD"
-  "$" <-- T.words "s  S  s/  S/"
-  "£" <++ T.words "pound  lb  l-  L-  lf  Lf  gbp  GBP"
-  "£" <-- T.words "l  L  #"
-  "€" <++ T.words "euro  e=  E=  e-  E-  c=  C=  eur  EUR"
-  "€" <-- T.words "e  E  =e  =E  c--  C--"
-  "₡" <++ T.words "colon  colón  c//  C//  crc  CRC  svc  SVC"
-  "₡" <-- T.words "c  C  c/  C/  //c  //C"
-  "₦" <++ T.words "naira  n=  N=  ngn  NGN"
-  "₦" <-- T.words "n  N  =n  =N"
-  "₧" <++ T.words "peseta  Pts  pts  esp  ESP"
-  "₧" <-- T.words "Pt  pt"
-  "₵" <++ T.words "cedi  C|  ghs  GHS"
-  "₵" <-- T.words "c  C  c| |c  |C  c/  C/"
-  "₱" <++ T.words "peso  p=  P=  php  PHP"
-  "₱" <-- T.words "p  P  p-  P-  =p  =P"
-  "₴" <++ T.words "hryvnia  s=  S=  г=  uah  UAH"
-  "₴" <-- T.words "s  S  г  s--  г-  hrn"
-  "₮" <++ T.words "togrog  tögrög  tugrik  T//  mnt  MNT"
-  "₮" <-- T.words "t  T  t/  T/  t//"
-  "₽" <++ T.words "ruble  r-  R-  rub  RUB"
-  "₽" <-- T.words "p  P  p-  P-  p=  P=  r  R"
-  -- these ‘Р’s are Cyrillic
-  "₽" <++ T.words "р=  Р=  р-  Р-"
-  "₽" <-- T.words "р  Р  =р  =Р"
-  "₺" <++ T.words "lira  t=  t//  L=  L//  trl  TRL"
-  "₺" <-- T.words "t  l  L  t/  L/  t-  L-"
-  "₫" <++ T.words "dong  d-_  vnd  VND"
-  "₫" <-- T.words "d  d-  d_  -d  _d  -d_  _d-"
-  "₭" <++ T.words "kip  K-  k-  lak  LAK"
-  "₭" <-- T.words "k  K  -k  -K"
-  "₩" <++ T.words "won  w=  W=  krw  KRW  kpw  KPW"
-  "₩" <-- T.words "w  W  w--  W--  w-  W-  w__  W__  __w  __W  w_  W_"
-  "₪" <++ T.words "shekel  sheqel  nis  ils  ILS"
-  "₨" <++ T.words "rupee  Rs  rs"
-  "₹" <++ T.words "inr  INR"
-  "₹" <-- T.words "rupee"
-  "₳" <++ T.words "austral  A=  ara  ARA"
-  "₳" <-- T.words "a  A  a=  a--  A--  A-"
-  "¥" <++ T.words "yuan  yen  Y=  cny  CNY  jpy  JPY"
-  "¥" <-- T.words "y  Y  y--  Y--  y-  Y-  =y  =Y"
-  "฿" <++ T.words "baht  B|  thb  THB"
-  "฿" <-- T.words "b  B  |B  b/  B/"
-  "₲" <++ T.words "guarani  guaraní  G|  pyg  PYG"
-  "₲" <-- T.words "g  G  |G  g/  G/"
-  "ƒ" <++ T.words "florin  gulden  guilder  fl"
-  "ƒ" <-- T.words "f"
+  -- commonly used ones
+  best   "$"  "dollar  s|  S|  s||  S||  usd  USD"
+  found  "$"  "s  S  s/  S/"
+  best   "£"  "pound  lb  lf  Lf  gbp  GBP"
+  top 2  "£"  "l-  L-  #"
+  found  "£"  "l  L"
+  best   "€"  "euro  e=  E=  c=  C=  eur  EUR"
+  top 2  "€"  "e-  E-  =e  =E  c--  C--"
+  found  "€"  "e  E"
+  best   "¥"  "yuan  yen  Y=  cny  CNY  jpy  JPY"
+  found  "¥"  "y  Y  y--  Y--  y-  Y-  =y  =Y"
+  best   "₪"  "shekel  sheqel  nis  ils  ILS"
+  -- ruble
+  best   "₽"  "ruble  rub  RUB"
+  top 2  "₽"  "r-  R-  p-  P-"
+  found  "₽"  "p  P  p=  P=  r  R"
+  best   "₽"  "р=  Р=  р-  Р-"   -- these ‘Р’s are Cyrillic
+  found  "₽"  "р  Р  =р  =Р"     -- and these
+  -- rare currencies
+  best   "₡"  "colon  colón  c//  C//  crc  CRC  svc  SVC"
+  found  "₡"  "c  C  c/  C/  //c  //C"
+  best   "₦"  "naira  n=  N=  ngn  NGN"
+  found  "₦"  "n  N  =n  =N"
+  best   "₧"  "peseta  Pts  pts  esp  ESP"
+  found  "₧"  "Pt  pt"
+  best   "₵"  "cedi  C|  ghs  GHS"
+  found  "₵"  "c  C  c| |c  |C  c/  C/"
+  best   "₱"  "peso  p=  P=  php  PHP"
+  found  "₱"  "p  P  p-  P-  =p  =P"
+  best   "₴"  "hryvnia  s=  S=  г=  uah  UAH"
+  found  "₴"  "s  S  г  s--  г-  hrn"
+  best   "₮"  "togrog  tögrög  tugrik  T//  mnt  MNT"
+  found  "₮"  "t  T  t/  T/  t//"
+  best   "₺"  "lira  t=  t//  L=  L//  trl  TRL"
+  found  "₺"  "t  l  L  t/  L/  t-  L-"
+  best   "₫"  "dong  d-_  vnd  VND"
+  found  "₫"  "d  d-  d_  -d  _d  -d_  _d-"
+  best   "₭"  "kip  lak  LAK"
+  found  "₭"  "k  K  K-  k-  -k  -K"
+  best   "₩"  "won  w=  W=  krw  KRW  kpw  KPW"
+  found  "₩"  "w  W  w--  W--  w-  W-  w__  W__  __w  __W  w_  W_"
+  best   "₨"  "rupee  Rs  rs"
+  best   "₹"  "inr  INR"
+  found  "₹"  "rupee"
+  best   "₳"  "austral  A=  ara  ARA"
+  found  "₳"  "a  A  a=  a--  A--  A-"
+  best   "฿"  "baht  B|  thb  THB"
+  found  "฿"  "b  B  |B  b/  B/"
+  best   "₲"  "guarani  guaraní  G|  pyg  PYG"
+  found  "₲"  "g  G  |G  g/  G/"
+  best   "ƒ"  "florin  gulden  guilder  fl"
+  found  "ƒ"  "f"
+  -- not currencies
+  best   "¤"  "currency  ox  OX  Ox  oX"
+  best   "¢"  "cent  penny  c|"
+  top 2  "¢"  "C|  c/  C/  |c  1/100  0.01  .01"
+  found  "¢"  "c"
+  best   "₥"  "mill  mille  mil  m/"
+  top 2  "₥"  "/m  1/1000  0.001  .001"
+  found  "₥"  "m"
 
 -- | Tests for @diacritics.rules@.
 diacriticsTests :: [Rule] -> TestTree
@@ -211,48 +236,46 @@ diacriticsTests rules = testGroup "diacritics"
       testRows
         "AaEeHhIiOotUuWwXxYy"
         "ÄäËëḦḧÏïÖöẗÜüẄẅẌẍŸÿ"
-        $ \x y -> do y <++ [x <> ":", ":" <> x,
-                            x <> "\"", "\"" <> x,
-                            x <> "..", ".." <> x]
-                     y <-- [x]
+        $ \x y -> do best  y [x <> ":", ":" <> x,
+                              x <> "\"", "\"" <> x,
+                              x <> "..", ".." <> x]
+                     found y [x]
   -- We want people to be able to find e.g. “ḛ” quickly if they want to, so
   -- it's a rule of sorts that “e~” means “ẽ” and “~e” means “ḛ”.
   , testGroup "tilde" $ tests rules $ do
       testRows
         "ANOanoIiUuEeYyVv"
         "ÃÑÕãñõĨĩŨũẼẽỸỹṼṽ"
-        $ \x y -> do y <++ [x <> "~"]
-                     y <-- [x, "~" <> x]
+        $ \x y -> do best  y [x <> "~"]
+                     found y [x, "~" <> x]
   , testGroup "tilde below" $ tests rules $ do
       testRows
         "EeIiUu"
         "ḚḛḬḭṴṵ"
-        $ \x y -> do y <++ ["~" <> x]
-                     y <-- [x, x <> "~"]
+        $ \x y -> do best  y ["~" <> x]
+                     found y [x, x <> "~"]
   , testGroup "grave accent" $ tests rules $ do
       testRows
         "AaEeIiNnOoUuWwYy"
         "ÀàÈèÌìǸǹÒòÙùẀẁỲỳ"
-        $ \x y -> do y <++ ["`" <> x, x <> "`",
-                            "\\" <> x, x <> "\\"]
-                     y <-- [x]
+        $ \x y -> do best  y ["`" <> x, x <> "`",
+                              "\\" <> x, x <> "\\"]
+                     found y [x]
+  , testGroup "stroke" $ tests rules $ do
+      testRows
+        "AaCcEeLlOo"
+        "ȺⱥȻȼɆɇŁłØø"
+        $ \x y -> do best  y ["/" <> x, x <> "/"]
+                     found y [x, "-" <> x, x <> "-"]
+      testRows
+        "BbDdGgHhIiJjKkPpRrTtYyZz"
+        "ɃƀĐđǤǥĦħƗɨɈɉꝀꝁⱣᵽɌɍŦŧɎɏƵƶ"
+        $ \x y -> do best  y ["-" <> x, x <> "-"]
+                     found y [x, "/" <> x, x <> "/"]
   ]
   where testRows a b f = zipWithM f (T.chunksOf 1 a) (T.chunksOf 1 b)
 
 {-
-
-grave accent
-zip AaEeIiNnOoUuWwYy
-    ÀàÈèÌìǸǹÒòÙùẀẁỲỳ
-    0: '`' \ ''
-
-stroke
-zip AaCcEeLlOo
-    ȺⱥȻȼɆɇŁłØø
-    0: / - ''
-zip BbDdGgHhIiJjKkPpRrTtYyZz
-    ɃƀĐđǤǥĦħƗɨɈɉꝀꝁⱣᵽɌɍŦŧɎɏƵƶ
-    0: - / ''
 
 acute accent
 zip AaCcEeGgIiKkLlMmNnOoPpRrSsUuWwYyZz
@@ -309,25 +332,25 @@ zip AaUuwy
 -- | Tests for @weird.rules@.
 weirdTests :: [Rule] -> TestTree
 weirdTests rules = testGroup "weird rules" $ tests rules $ do
-  "↯" <++ T.words "hp  HP  harry  Harry  potter  Potter"
+  best  "↯"  "hp  HP  harry  Harry  potter  Potter"
 
 {- |
 Test that a pattern finds an entity (e.g. “vv” finds “↡”, but doesn't find “ø”).
 -}
 findsIn :: [Rule] -> Pattern -> Entity -> TestTree
-findsIn rules pattern entity = testCase name $ found @? ""
+findsIn rules pattern entity = testCase name $ isFound @? ""
   where
-    name  = printf "‘%s’ finds ‘%s’" pattern entity
-    found = entity `elem` map snd (matchAndSortRules pattern rules)
+    name    = printf "‘%s’ finds ‘%s’" pattern entity
+    isFound = entity `elem` map snd (matchAndSortRules pattern rules)
 
 {- |
 Test that a pattern doesn't find an entity (see 'findsIn').
 -}
 doesNotFindIn :: [Rule] -> Pattern -> Entity -> TestTree
-doesNotFindIn rules pattern entity = testCase name $ not found @? ""
+doesNotFindIn rules pattern entity = testCase name $ not isFound @? ""
   where
-    name = printf "‘%s’ doesn't find ‘%s’" pattern entity
-    found = entity `elem` map snd (matchAndSortRules pattern rules)
+    name    = printf "‘%s’ doesn't find ‘%s’" pattern entity
+    isFound = entity `elem` map snd (matchAndSortRules pattern rules)
 
 {- |
 A version of 'findsIn' that does the test for many patterns at once (e.g. test that both “vv” and “↓↓” find “↡”).
@@ -345,8 +368,8 @@ bestMatchIn :: [Rule] -> Pattern -> Entity -> TestTree
 bestMatchIn rules pattern entity = testCase name $ do
   let matches = map snd (matchAndSortRules pattern rules)
       surpassed = takeWhile (/= entity) matches
-      found = entity `elem` matches
-  found @? printf "it doesn't even find ‘%s’" entity
+      isFound = entity `elem` matches
+  isFound @? printf "it doesn't even find ‘%s’" entity
   null surpassed @? if length surpassed == 1
     then printf "%s comes before ‘%s’" (listTexts surpassed) entity
     else printf "%s come before ‘%s’"  (listTexts surpassed) entity
@@ -364,6 +387,33 @@ bestMatchedByIn rules entity patterns
     name = printf "all of %s are best matches for ‘%s’"
                   (listTexts patterns) entity
     cases = [bestMatchIn rules pattern entity | pattern <- patterns]
+
+{- |
+A version of 'bestMatchIn' that checks that the match is in top N matches, as opposed to necessarily being the best match.
+-}
+goodMatchIn :: [Rule] -> Int -> Pattern -> Entity -> TestTree
+goodMatchIn rules pos pattern entity = testCase name $ do
+  let matches = map snd (matchAndSortRules pattern rules)
+      surpassed = takeWhile (/= entity) matches
+      isFound = entity `elem` matches
+  isFound @? printf "it doesn't even find ‘%s’" entity
+  length surpassed < pos @?
+    printf "there are %d matches before ‘%s’: %s"
+           (length surpassed) entity (listTexts surpassed)
+  where
+    name = printf "‘%s’ finds ‘%s’ in top %d matches" pattern entity pos
+
+{- |
+A version of 'goodMatchIn' that does the test for many patterns at once.
+-}
+wellMatchedByIn :: [Rule] -> Entity -> Int -> [Pattern] -> TestTree
+wellMatchedByIn rules entity pos patterns
+  | [pattern] <- patterns = goodMatchIn rules pos pattern entity
+  | otherwise             = testGroup name cases
+  where
+    name = printf "all of %s are good matches for ‘%s’"
+                  (listTexts patterns) entity
+    cases = [goodMatchIn rules pos pattern entity | pattern <- patterns]
 
 {- |
 Test that a pattern has some order of preference for entities it finds (it might find other entities as well, but given ones have to come in the order they are specified).
