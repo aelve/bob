@@ -1,40 +1,46 @@
 currency sign
 ¤ = 9: currency
-    9: {(o O) (x X)}
+    8: {(o O) (x X)}
 
 cent
 ¢ = 9: cent penny 1/100 0.01 .01
-    9: {c (| / '')}
+    8: {c |}
+    5: {c (/ '')}
     5: {C (| / '')}
 
 mill
 ₥ = 9: mill mille mil 1/1000 0.001 .001
-    9: {m /} m
+    8: {m /} m
 
 dollar
 $ = 9: dollar
-    9: {(s S) (|| | / '')}
+    8: {(s S) |}
+    5: {(s S) (|| / '')}
     9: usd USD
 
 pound
 £ = 9: pound lb
-    9: {(l L) (- '')} lf Lf #
+    8: {(l L) -} lf Lf #
+    5: l L
     9: gbp GBP
 
 euro
 € = 9: euro
-    9: {(e E) (= -- - '')}
-    9: {(c C) (= --)}
+    8: {(e E) (= -- '')}
+    5: {(e E) -}
+    8: {(c C) (= --)}
     9: eur EUR
 
 colón
 ₡ = 9: colon colón
-    9: {(c C) (// / '')}
+    8: {(c C) //}
+    5: {(c C) (/ '')}
     9: crc CRC svc SVC
 
 naira
 ₦ = 9: naira
-    9: {(n N) (= -- - '')}
+    8: {(n N) (= --)}
+    5: {(n N) (- '')}
     9: ngn NGN
 
 peseta
@@ -44,48 +50,55 @@ peseta
 
 cedi
 ₵ = 9: cedi
-    9: {(c C) (| / '')}
+    8: {(c C) |}
+    5: {(c C) (/ '')}
     9: ghs GHS
 
 peso
 ₱ = 9: peso
-    9: {(p P) (= -- - '')}
+    8: {(p P) (= --)}
+    5: {(p P) (- '')}
     9: php PHP
 
 hryvnia
 ₴ = 9: hryvnia hrn
-    9: {(s S г) (= -- - '')}
+    8: {(s S г) (= --)}
+    5: {(s S г) (- '')}
     9: uah UAH
 
 tögrög (tugrik)
 ₮ = 9: togrog tögrög tugrik
-    9: {T (// / '')}
+    8: {T (// / '')}
     5: {t (// / '')}
     9: mnt MNT
 
 ruble
 ₽ = 9: ruble
-    9: {(r R р Р p P) (= - '')}
+    8: {(r R р Р p P) (= - '')}
     9: rub RUB
 
 Turkish lira
 ₺ = 9: lira
-    9: {(t l L) (= -- - // / '')}
+    8: {(t l L) (= -- //)}
+    5: {(t l L) (- / '')}
     9: trl TRL
 
 dong
 ₫ = 9: dong
-    9: {d - _} {d (- _ '')}
+    8: {d - _}
+    5: {d (- _ '')}
     9: vnd VND
 
 kip
 ₭ = 9: kip
-    9: {(k K) (- '')}
+    8: {(k K) -}
+    5: k K
     9: lak LAK
 
 won
 ₩ = 9: won
-    9: {(w W) (= -- - __ _ '')}
+    8: {(w W) (= -- __)}
+    5: {(w W) (- _ '')}
     9: krw KRW kpw KPW
 
 shekel
@@ -101,22 +114,26 @@ Indian rupee
 
 austral
 ₳ = 9: austral
-    9: {(a A) (= -- - '')}
+    8: {(a A) (= --)}
+    5: {(a A) (- '')}
     9: ara ARA
 
 yuan / yen
 ¥ = 9: yuan yen
-    9: {(y Y) (= -- - '')}
+    8: {(y Y) (= --)}
+    5: {(y Y) (- '')}
     9: cny CNY jpy JPY
 
 baht
 ฿ = 9: baht
-    9: {(b B) (| / '')}
+    8: {(b B) |}
+    5: {(b B) (/ '')}
     9: thb THB
 
 guaraní
 ₲ = 9: guarani guaraní
-    9: {(g G) (| / '')}
+    8: {(g G) |}
+    5: {(g G) (/ '')}
     9: pyg PYG
 
 florin
