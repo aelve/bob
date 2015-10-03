@@ -168,20 +168,27 @@ evalGenerators psm var gens = do
   -- the list to a Map and back, because that's how Map's fromList works.
   return $ M.toList (M.fromList pats)
 
+{-
+Note that a matcher can generate several entities for the same pattern, and sometimes it's even desirable – e.g. here “uU” can mean both “Ŭ” and “ŭ”:
+
+@
+zip AaEeIiOoUu
+    ĂăĔĕĬĭŎŏŬŭ
+    7: {(U u) ()}
+@
+-}
 evalMatcher
-  :: PatternsMap  -- ^ Already generated patterns
-  -> Matcher      -- ^ Matcher to evaluate
-  -- | Generated entities (not in 'EntitiesMap' because for a matcher it's
-  -- guaranteed that each pattern would correspond to a unique entity).
-  -> Warn (Map Pattern (Entity, Fitness))
+  :: PatternsMap        -- ^ Already generated patterns
+  -> Matcher            -- ^ Matcher to evaluate
+  -> Warn EntitiesMap
 evalMatcher psm (Zip pairs gens) = do
   results <- for pairs $ \(a, b) -> do
     patterns <- evalGenerators psm (Just a) gens
     return [(pattern, (b, fitness)) | (pattern, fitness) <- patterns]
-  return $ M.fromList (concat results)
+  return $ fromListAccum (concat results)
 evalMatcher psm (ManyToOne gens entity) = do
   patterns <- evalGenerators psm Nothing gens
-  return $ M.fromList $ do
+  return $ fromListAccum $ do
     (pattern, fitness) <- (entity, 10) : patterns
     return (pattern, (entity, fitness))
 
@@ -229,8 +236,7 @@ ruleP scope = do
            -> Warn EntitiesMap
         go _psm entitiesMap [] = return entitiesMap
         go  psm entitiesMap (matcher:rest) = do
-          entities <- evalMatcher psm matcher
-          let entityMap = fmap (:[]) entities
+          entityMap <- evalMatcher psm matcher
           go (M.unionWith union psm (toPatternsMap entityMap))
              (M.unionWith union entityMap entitiesMap)
              rest
@@ -314,3 +320,6 @@ backticks    = between (char '`')  (char '`')
 
 someSpaces :: WarnParser ()
 someSpaces = void (some (char ' '))
+
+fromListAccum :: Ord a => [(a, b)] -> Map a [b]
+fromListAccum = M.fromListWith (++) . over (each._2) (:[])
