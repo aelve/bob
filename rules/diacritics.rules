@@ -1,37 +1,44 @@
 diaeresis / umlaut
 zip AaEeHhIiOotUuWwXxYy
     ÄäËëḦḧÏïÖöẗÜüẄẅẌẍŸÿ
-    9: {(: '"' .. '') ()}
+    9: {(: '"' ..) ()}
+    5: ()
 
 tilde
 zip ANOanoIiUuEeYyVv
     ÃÑÕãñõĨĩŨũẼẽỸỹṼṽ
-    9: ()~ ()
-    5: ~()
+    9: ()~
+    5: ~() ()
 
 tilde below
 zip EeIiUu
     ḚḛḬḭṴṵ
-    9: ~() ()
-    5: ()~
+    9: ~()
+    5: ()~ ()
 
 grave accent
 zip AaEeIiNnOoUuWwYy
     ÀàÈèÌìǸǹÒòÙùẀẁỲỳ
-    9: {('`' \ '') ()}
+    9: {('`' \) ()}
+    5: ()
 
 stroke
 zip AaCcEeLlOo
     ȺⱥȻȼɆɇŁłØø
-    9: {(/ - '') ()}
+    9: {/ ()}
+    8: {- ()}
+    5: ()
 zip BbDdGgHhIiJjKkPpRrTtYyZz
     ɃƀĐđǤǥĦħƗɨɈɉꝀꝁⱣᵽɌɍŦŧɎɏƵƶ
-    9: {(- / '') ()}
+    9: {- ()}
+    8: {/ ()}
+    5: ()
 
 acute accent
 zip AaCcEeGgIiKkLlMmNnOoPpRrSsUuWwYyZz
     ÁáĆćÉéǴǵÍíḰḱĹĺḾḿŃńÓóṔṕŔŕŚśÚúẂẃÝýŹź
-    9: {('''' / , '') ()}
+    9: {('''' ,) ()}
+    5: {(/ '') ()}
 
 breve
 zip AaEeIiOoUu
@@ -69,7 +76,8 @@ zip OoUu
 double grave accent
 zip AaEeIiOoRrUu
     ȀȁȄȅȈȉȌȍȐȑȔȕ
-    9: {('``' \\ '"' = : '') ()}
+    9: {('``' \\ '"' :) ()}
+    5: {(= '') ()}
 
 ring
 zip AaUuwy
