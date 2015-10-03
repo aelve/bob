@@ -282,15 +282,19 @@ diacriticsTests rules = testGroup "diacritics"
                               "," <> x, x <> ","]
                      top 3 y ["/" <> x, x <> "/"]
                      found y [x]
+  , testGroup "breve" $ tests rules $ do
+      testRows
+        "AaEeIiOoUu"
+        "ĂăĔĕĬĭŎŏŬŭ"
+        $ \x y -> do best  y ["(" <> x, x <> "(",
+                              ")" <> x, x <> ")"]
+                     top 2 y ["u" <> x, x <> "u",
+                              "U" <> x, x <> "U"]
+                     found y [x]
   ]
   where testRows a b f = zipWithM f (T.chunksOf 1 a) (T.chunksOf 1 b)
 
 {-
-
-breve
-zip AaEeIiOoUu
-    ĂăĔĕĬĭŎŏŬŭ
-    0: U u '(' ')' ''
 
 circumflex
 zip AaCcEeGgHhIiJjOoSsUuWwYyZz
