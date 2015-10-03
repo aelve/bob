@@ -295,8 +295,9 @@ diacriticsTests rules = testGroup "diacritics"
         "AaEeIiOoUu"
         "ĂăĔĕĬĭŎŏŬŭ"
         $ \x y -> do best  y ["(" <> x, x <> "(",
-                              ")" <> x, x <> ")"]
-                     top 2 y ["u" <> x, x <> "u",
+                              ")" <> x, x <> ")",
+                              x <> "u"]
+                     top 2 y ["u" <> x,
                               "U" <> x, x <> "U"]
                      found y [x]
 
@@ -334,6 +335,17 @@ diacriticsTests rules = testGroup "diacritics"
                      top 2 y [x <> "-"]
                      found y [x]
 
+  , testGroup "ring" $ tests rules $ do
+      testRows
+        "AaUuwy"
+        "ÅåŮůẘẙ"
+        $ \x y -> do best  y [x <> "o",
+                              "()" <> x, x <> "()"]
+                     top 2 y ["o" <> x,
+                              "0" <> x, x <> "0",
+                              "O" <> x, x <> "O"]
+                     found y [x]
+
   ]
   where testRows a b f = zipWithM f (T.chunksOf 1 a) (T.chunksOf 1 b)
 
@@ -353,11 +365,6 @@ double grave accent
 zip AaEeIiOoRrUu
     ȀȁȄȅȈȉȌȍȐȑȔȕ
     0: '``' \\ '"' = : ''
-
-ring
-zip AaUuwy
-    ÅåŮůẘẙ
-    0: o O 0 '()' ''
 
 -}
 
