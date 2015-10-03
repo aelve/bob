@@ -138,8 +138,8 @@ arrowsTests rules = testGroup "arrows"
       best   "↦"  "|→  →|  |->  |>"
       best   "↤"  "←|  |←  <-|  <|"
       best   "↥"  "↑_  _^  |^_"
-      best   "↧"  "↓_  _v  |v_  vT"
-      top 2  "↧"  "vt  TV"
+      best   "↧"  "↓_  _v  |v_  TV"
+      top 2  "↧"  "vt  vT  Vt  VT  tv  tV  Tv"
 
   , testGroup "paired arrows" $ tests rules $ do
       best   "⇄"  "→←  -><-"
@@ -306,21 +306,28 @@ diacriticsTests rules = testGroup "diacritics"
         "ÂâĈĉÊêĜĝĤĥÎîĴĵÔôŜŝÛûŴŵŶŷẐẑ"
         $ \x y -> do best  y ["^" <> x, x <> "^",
                               "/\\" <> x, x <> "/\\",
-                              "<" <> x, x <> "<",
-                              ">" <> x, x <> ">"]
+                              "<" <> x, x <> ">"]
+                     top 2 y [">" <> x, x <> "<"]
                      found y [x]
+
+  , testGroup "caron" $ tests rules $ do
+      testRows
+        "AaIiCcDdEeGgHhjKkLlNnOoRrSsTtUuZz"
+        "ǍǎǏǐČčĎďĚěǦǧȞȟǰǨǩĽľŇňǑǒŘřŠšŤťǓǔŽž"
+        $ \x y -> do best  y ["v" <> x, x <> "v",
+                              "\\/" <> x, x <> "\\/",
+                              ">" <> x, x <> "<"]
+                     top 2 y ["<" <> x, x <> ">",
+                              "V" <> x, x <> "V"]
+                     found y [x]
+      testRows
+        "dtLl"
+        "ďťĽľ"
+        $ \x y -> do top 2 y ["'" <> x, x <> "'"]
   ]
   where testRows a b f = zipWithM f (T.chunksOf 1 a) (T.chunksOf 1 b)
 
 {-
-
-caron
-zip AaIiCcDdEeGgHhjKkLlNnOoRrSsTtUuZz
-    ǍǎǏǐČčĎďĚěǦǧȞȟǰǨǩĽľŇňǑǒŘřŠšŤťǓǔŽž
-    0: V v \/ < > ''
-zip dtLl
-    ďťĽľ
-    0: ''''
 
 bar
 zip Ll

@@ -49,12 +49,16 @@ zip AaEeIiOoUu
 circumflex
 zip AaCcEeGgHhIiJjOoSsUuWwYyZz
     ÂâĈĉÊêĜĝĤĥÎîĴĵÔôŜŝÛûŴŵŶŷẐẑ
-    7: {(^ /\ < > '') ()}
+    7: {(^ /\ '') ()}
+    7: <() ()>
+    6: >() ()<
 
 caron
 zip AaIiCcDdEeGgHhjKkLlNnOoRrSsTtUuZz
     ǍǎǏǐČčĎďĚěǦǧȞȟǰǨǩĽľŇňǑǒŘřŠšŤťǓǔŽž
-    7: {(V v \/ < > '') ()}
+    7: {(V v \/ '') ()}
+    7: >() ()<
+    6: <() ()>
 zip dtLl
     ďťĽľ
     7: {('''') ()}
