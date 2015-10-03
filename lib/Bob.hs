@@ -90,14 +90,14 @@ data Generator
   deriving (Show)
 
 literalP :: WarnParser Pattern
-literalP = T.pack <$> asum [
+literalP = T.pack <$> choice [
   some literalChar,
   singleQuotes (many quotedChar) ]
   where
     literalChar = satisfy $ \x ->
       or [isSymbol x, isPunctuation x, isAlphaNum x] &&
       x `notElem` ("\"'`()[]{}" :: String)
-    quotedChar = asum [
+    quotedChar = choice [
       try (string "''") >> pure '\'',
       satisfy $ \x -> not $ or [isSpace x, x == '\''] ]
 
@@ -106,7 +106,7 @@ fitnessP = integer
 
 generatorP :: WarnParser Generator
 generatorP = do
-  let singleGenerator = asum [
+  let singleGenerator = choice [
         Literal <$> literalP,
         Variable <$ try (string "()"),
         AnyOf <$> parens (generatorP `sepBy1` someSpaces),
@@ -200,7 +200,7 @@ generatorLineP = do
   return (AnyOf gens, fitness)
 
 matcherP :: WarnParser Matcher
-matcherP = asum [zipP, manyToOneP]
+matcherP = choice [zipP, manyToOneP]
   where
     nextLine = try (newline >> someSpaces)
     zipP = do
@@ -252,7 +252,7 @@ ruleFileP = do
   rule1 <- ruleP mempty
   (rule1:) <$> go (toPatternsMap (ruleEntities rule1))
   where
-    go psm = asum [
+    go psm = choice [
       -- Either there is a new rule...
       do some newline
          rule <- ruleP psm
@@ -290,7 +290,7 @@ readRules = do
   return (rules, map unlines errors)
 
 currentLine :: WarnParser Text
-currentLine = asum [
+currentLine = choice [
   eol >> pure "",
   do x  <- anyChar
      xs <- anyChar `manyTill` try (eof <|> void eol)
