@@ -43,7 +43,9 @@ crossed arrow
 
 arrow with tail
 ↢ = 9: {`←` <}
+    5: <<-
 ↣ = 9: {> `→`}
+    5: ->>
 
 arrow with bar
 ↤ = 9: {`←` |}
