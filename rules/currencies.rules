@@ -5,9 +5,8 @@ currency sign
 cent
 ¢ = 7: cent penny 1/100 0.01 .01
     7: {c |}
-    3: {c (/ '')}
-    3: {C (| / '')}
-    8: c/ C/
+    3: {C (| / '')} {c /}
+    8: c/ C/ c
 
 mill
 ₥ = 7: mill mille mil 1/1000 0.001 .001
@@ -16,23 +15,23 @@ mill
 dollar
 $ = 7: dollar
     6: {(s S) |}
-    3: {(s S) (|| / '')}
+    3: {(s S) (|| /)}
     7: usd USD
-    8: s/ S/
+    8: s/ S/ s S
 
 pound
 £ = 7: pound lb
     6: {(l L) -} lf Lf #
-    3: l L
     7: gbp GBP
-    8: l- L-
+    8: l- L- l L
 
 euro
 € = 7: euro
-    6: {(e E) (= -- '')}
+    6: {(e E) (= --)}
     3: {(e E) -}
     6: {(c C) (= --)}
     7: eur EUR
+    8: e E
 
 colón
 ₡ = 7: colon colón
@@ -124,8 +123,9 @@ austral
 yuan / yen
 ¥ = 7: yuan yen
     6: {(y Y) (= --)}
-    3: {(y Y) (- '')}
+    3: {(y Y) -}
     7: cny CNY jpy JPY
+    8: y Y y- Y-
 
 baht
 ฿ = 7: baht

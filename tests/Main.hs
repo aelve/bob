@@ -169,16 +169,13 @@ arrowsTests rules = testGroup "arrows"
 currenciesTests :: [Rule] -> TestTree
 currenciesTests rules = testGroup "currencies" $ tests rules $ do
   -- commonly used ones
-  best   "$"  "dollar  s|  S|  s||  S||  s/  S/  usd  USD"
-  top 4  "$"  "s  S"
-  best   "£"  "pound  lb  lf  Lf  gbp  GBP  l-  L-"
+  best   "$"  "s  S  dollar  s|  S|  s||  S||  s/  S/  usd  USD"
+  best   "£"  "l  L  pound  lb  lf  Lf  gbp  GBP  l-  L-"
   top 2  "£"  "#"
-  top 4  "£"  "l  L"
-  best   "€"  "euro  e=  E=  c=  C=  eur  EUR"
+  best   "€"  "e  E  euro  e=  E=  c=  C=  eur  EUR"
   top 2  "€"  "e-  E-  =e  =E  c--  C--"
-  top 4  "€"  "e  E"
-  best   "¥"  "yuan  yen  Y=  cny  CNY  jpy  JPY"
-  top 4  "¥"  "y  Y  y--  Y--  y-  Y-  =y  =Y"
+  best   "¥"  "y  Y  yuan  yen  Y=  y=  Y-  y-  cny  CNY  jpy  JPY"
+  top 2  "¥"  "y--  Y--  =y  =Y"
   best   "₪"  "shekel  sheqel  nis  ils  ILS"
   -- ruble
   best   "₽"  "ruble  rub  RUB"
@@ -222,9 +219,8 @@ currenciesTests rules = testGroup "currencies" $ tests rules $ do
   found  "ƒ"  "f"
   -- not currencies
   best   "¤"  "currency  ox  OX  Ox  oX"
-  best   "¢"  "cent  penny  c|"
-  top 2  "¢"  "C|  c/  C/  |c  1/100  0.01  .01"
-  found  "¢"  "c"
+  best   "¢"  "cent  penny  c/  c|  c"
+  top 2  "¢"  "C|  C/  |c  1/100  0.01  .01"
   best   "₥"  "mill  mille  mil  m/"
   top 2  "₥"  "/m  1/1000  0.001  .001"
   found  "₥"  "m"
@@ -274,7 +270,8 @@ diacriticsTests rules = testGroup "diacritics"
       testRows
         "BbDdGgHhIiJjKkPpRrTtYyZz"
         "ɃƀĐđǤǥĦħƗɨɈɉꝀꝁⱣᵽɌɍŦŧɎɏƵƶ"
-        $ \x y -> do best  y ["-" <> x, x <> "-"]
+        $ \x y -> do best  y ["-" <> x]
+                     top 2 y [x <> "-"]
                      top 3 y ["/" <> x, x <> "/"]
                      found y [x]
   , testGroup "acute accent" $ tests rules $ do
