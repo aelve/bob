@@ -169,16 +169,16 @@ arrowsTests rules = testGroup "arrows"
 currenciesTests :: [Rule] -> TestTree
 currenciesTests rules = testGroup "currencies" $ tests rules $ do
   -- commonly used ones
-  best   "$"  "dollar  s|  S|  s||  S||  usd  USD"
-  found  "$"  "s  S  s/  S/"
-  best   "£"  "pound  lb  lf  Lf  gbp  GBP"
-  top 2  "£"  "l-  L-  #"
-  found  "£"  "l  L"
+  best   "$"  "dollar  s|  S|  s||  S||  s/  S/  usd  USD"
+  top 4  "$"  "s  S"
+  best   "£"  "pound  lb  lf  Lf  gbp  GBP  l-  L-"
+  top 2  "£"  "#"
+  top 4  "£"  "l  L"
   best   "€"  "euro  e=  E=  c=  C=  eur  EUR"
   top 2  "€"  "e-  E-  =e  =E  c--  C--"
-  found  "€"  "e  E"
+  top 4  "€"  "e  E"
   best   "¥"  "yuan  yen  Y=  cny  CNY  jpy  JPY"
-  found  "¥"  "y  Y  y--  Y--  y-  Y-  =y  =Y"
+  top 4  "¥"  "y  Y  y--  Y--  y-  Y-  =y  =Y"
   best   "₪"  "shekel  sheqel  nis  ils  ILS"
   -- ruble
   best   "₽"  "ruble  rub  RUB"
@@ -247,13 +247,15 @@ diacriticsTests rules = testGroup "diacritics"
         "ANOanoIiUuEeYyVv"
         "ÃÑÕãñõĨĩŨũẼẽỸỹṼṽ"
         $ \x y -> do best  y [x <> "~"]
-                     found y [x, "~" <> x]
+                     top 2 y ["~" <> x]
+                     found y [x]
   , testGroup "tilde below" $ tests rules $ do
       testRows
         "EeIiUu"
         "ḚḛḬḭṴṵ"
         $ \x y -> do best  y ["~" <> x]
-                     found y [x, x <> "~"]
+                     top 2 y [x <> "~"]
+                     found y [x]
   , testGroup "grave accent" $ tests rules $ do
       testRows
         "AaEeIiNnOoUuWwYy"
@@ -265,22 +267,28 @@ diacriticsTests rules = testGroup "diacritics"
       testRows
         "AaCcEeLlOo"
         "ȺⱥȻȼɆɇŁłØø"
-        $ \x y -> do best  y ["/" <> x, x <> "/"]
-                     found y [x, "-" <> x, x <> "-"]
+        $ \x y -> do best  y ["/" <> x]
+                     top 2 y [x <> "/"]
+                     top 3 y ["-" <> x, x <> "-"]
+                     found y [x]
       testRows
         "BbDdGgHhIiJjKkPpRrTtYyZz"
         "ɃƀĐđǤǥĦħƗɨɈɉꝀꝁⱣᵽɌɍŦŧɎɏƵƶ"
         $ \x y -> do best  y ["-" <> x, x <> "-"]
-                     found y [x, "/" <> x, x <> "/"]
+                     top 3 y ["/" <> x, x <> "/"]
+                     found y [x]
+  , testGroup "acute accent" $ tests rules $ do
+      testRows
+        "AaCcEeGgIiKkLlMmNnOoPpRrSsUuWwYyZz"
+        "ÁáĆćÉéǴǵÍíḰḱĹĺḾḿŃńÓóṔṕŔŕŚśÚúẂẃÝýŹź"
+        $ \x y -> do best  y ["'" <> x, x <> "'",
+                              "," <> x, x <> ","]
+                     top 3 y ["/" <> x, x <> "/"]
+                     found y [x]
   ]
   where testRows a b f = zipWithM f (T.chunksOf 1 a) (T.chunksOf 1 b)
 
 {-
-
-acute accent
-zip AaCcEeGgIiKkLlMmNnOoPpRrSsUuWwYyZz
-    ÁáĆćÉéǴǵÍíḰḱĹĺḾḿŃńÓóṔṕŔŕŚśÚúẂẃÝýŹź
-    0: '''' / , ''
 
 breve
 zip AaEeIiOoUu

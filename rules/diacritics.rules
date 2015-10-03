@@ -1,85 +1,86 @@
 diaeresis / umlaut
 zip AaEeHhIiOotUuWwXxYy
     ÄäËëḦḧÏïÖöẗÜüẄẅẌẍŸÿ
-    9: {(: '"' ..) ()}
-    5: ()
+    7: {(: '"' ..) ()}
+    3: ()
 
 tilde
 zip ANOanoIiUuEeYyVv
     ÃÑÕãñõĨĩŨũẼẽỸỹṼṽ
-    9: ()~
-    5: ~() ()
+    7: ()~
+    3: ~() ()
 
 tilde below
 zip EeIiUu
     ḚḛḬḭṴṵ
-    9: ~()
-    5: ()~ ()
+    7: ~()
+    3: ()~ ()
 
 grave accent
 zip AaEeIiNnOoUuWwYy
     ÀàÈèÌìǸǹÒòÙùẀẁỲỳ
-    9: {('`' \) ()}
-    5: ()
+    7: {('`' \) ()}
+    3: ()
 
 stroke
 zip AaCcEeLlOo
     ȺⱥȻȼɆɇŁłØø
-    9: {/ ()}
-    8: {- ()}
-    5: ()
+    7: {/ ()}
+    7: {- ()}
+    3: ()
 zip BbDdGgHhIiJjKkPpRrTtYyZz
     ɃƀĐđǤǥĦħƗɨɈɉꝀꝁⱣᵽɌɍŦŧɎɏƵƶ
-    9: {- ()}
-    8: {/ ()}
-    5: ()
+    7: {- ()}
+    7: {/ ()}
+    3: ()
 
 acute accent
 zip AaCcEeGgIiKkLlMmNnOoPpRrSsUuWwYyZz
     ÁáĆćÉéǴǵÍíḰḱĹĺḾḿŃńÓóṔṕŔŕŚśÚúẂẃÝýŹź
-    9: {('''' ,) ()}
-    5: {(/ '') ()}
+    7: {('''' ,) ()}
+    6: {/ ()}
+    3: ()
 
 breve
 zip AaEeIiOoUu
     ĂăĔĕĬĭŎŏŬŭ
-    9: {(U u '(' ')' '') ()}
+    7: {(U u '(' ')' '') ()}
 
 circumflex
 zip AaCcEeGgHhIiJjOoSsUuWwYyZz
     ÂâĈĉÊêĜĝĤĥÎîĴĵÔôŜŝÛûŴŵŶŷẐẑ
-    9: {(^ /\ < > '') ()}
+    7: {(^ /\ < > '') ()}
 
 caron
 zip AaIiCcDdEeGgHhjKkLlNnOoRrSsTtUuZz
     ǍǎǏǐČčĎďĚěǦǧȞȟǰǨǩĽľŇňǑǒŘřŠšŤťǓǔŽž
-    9: {(V v \/ < > '') ()}
+    7: {(V v \/ < > '') ()}
 zip dtLl
     ďťĽľ
-    9: {('''') ()}
+    7: {('''') ()}
 
 bar
 zip Ll
     Ƚƚ
-    9: {(- '') ()}
+    7: {(- '') ()}
 
 diagonal stroke
 zip TtKkQqVv
     ȾⱦꝂꝃꝘꝙꝞꝟ
-    9: {(/ '') ()}
+    7: {(/ '') ()}
 
 double acute accent
 zip OoUu
     ŐőŰű
-    9: {('"' // ,, = : '') ()}
+    7: {('"' // ,, = : '') ()}
 
 double grave accent
 zip AaEeIiOoRrUu
     ȀȁȄȅȈȉȌȍȐȑȔȕ
-    9: {('``' \\ '"' :) ()}
-    5: {(= '') ()}
+    7: {('``' \\ '"' :) ()}
+    3: {(= '') ()}
 
 ring
 zip AaUuwy
     ÅåŮůẘẙ
-    9: {(o O 0 '()' '') ()}
+    7: {(o O 0 '()' '') ()}
