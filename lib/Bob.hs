@@ -23,17 +23,20 @@ where
 import Data.Foldable
 import Data.Traversable
 import Data.Monoid
+import Data.Maybe
 import Control.Applicative
 import Control.Monad
+import Control.Arrow
 import Numeric.Natural
 -- Monads
 import Control.Monad.Writer
 -- Lenses
 import Lens.Micro.GHC
 -- Lists
-import Data.List (permutations, union)
+import Data.List (permutations, union, inits)
 -- Sorting
 import Data.List (sortOn)
+import GHC.Exts (groupWith)
 -- Text
 import Text.Printf
 import qualified Data.Text as T
@@ -274,6 +277,50 @@ ruleFileP = do
       -- ...or there isn't.
       pure [] ]
 
+{- |
+This code checks whether all priorities are satisfied – that is, for each pattern and entity it checks whether the pattern finds the entity in top N matches (where N is entity's priority). It does so by enumerating all patterns, then taking all entities that some specific pattern finds, then ordering them in layers like this
+
+  * “x”, “y” have priority <= 1
+  * “x”, “y”, “m” have priority <= 4
+  * “x”, “y”, “m”, “3”, “a” have priority <= 7
+
+and finally outputting a warning for each layer that has more entities than its priority allows.
+-}
+checkPriorities :: [Rule] -> [String]
+checkPriorities = concatMap checkPattern . allPatterns
+  where
+    -- Find all patterns and associated entities.
+    allPatterns :: [Rule] -> [(Pattern, [(Entity, Priority)])]
+    allPatterns = M.toList . M.unionsWith (++) . map ruleEntities
+    -- Sort and group entities by priority.
+    sortEntities :: [(Entity, Priority)] -> [([Entity], Priority)]
+    sortEntities = map (map fst &&& snd.head) . groupWith snd
+    -- Discard a group if its priority isn't 'Top'.
+    isTopPriority :: ([Entity], Priority) -> Maybe ([Entity], Int)
+    isTopPriority (x, Top n) = Just (x, fromIntegral n)
+    isTopPriority _          = Nothing
+    -- Include earlier groups into later groups:
+    -- if 1st group has priority 2 (i.e. “should be in first 2 matches”)
+    -- and 2nd group has priority 3 (“should be in first 3 matches”)
+    -- then members of the 1st group should be added to the 2nd group as well
+    layers :: [([Entity], Int)] -> [([Entity], Int)]
+    layers = map (concatMap fst &&& snd.last) . drop 1 . inits
+    -- Find out whether a group is a good on (i.e. if it has priority N, it
+    -- should have not more than N members).
+    isGood :: ([Entity], Int) -> Bool
+    isGood (entities, priority) = length entities <= priority
+    -- Generate a warning for a bad group.
+    generateWarning :: Pattern -> ([Entity], Int) -> String
+    generateWarning pattern (entities, priority) =
+      printf "‘%s’ finds %d entities with priority %d or less: %s"
+             (T.unpack pattern) (length entities) priority
+             (unwords (map prettyChar entities))
+    -- Put it all together.
+    checkPattern :: (Pattern, [(Entity, Priority)]) -> [String]
+    checkPattern (pattern, pairs) =
+      map (generateWarning pattern) . filter (not . isGood) .
+      layers . mapMaybe isTopPriority . sortEntities $ pairs
+
 matchRule :: Pattern -> Rule -> [((RuleName, Entity), Priority)]
 matchRule query Rule{..} = do
   (entity, priority) <- M.findWithDefault [] query ruleEntities
@@ -300,7 +347,9 @@ readRules = do
       Right (rules, warnings) -> (rules, warnings)
   let rules  = concat (map fst results)
       errors = filter (not . null) (map snd results)
-  return (rules, map unlines errors)
+  -- TODO: why is there an 'unlines'? Maybe it should just return String
+  -- instead of [String]?
+  return (rules, checkPriorities rules ++ map unlines errors)
 
 currentLine :: WarnParser Text
 currentLine = choice [
@@ -336,3 +385,9 @@ someSpaces = void (some (char ' '))
 
 fromListAccum :: Ord a => [(a, b)] -> Map a [b]
 fromListAccum = M.fromListWith (++) . over (each._2) (:[])
+
+prettyChar :: Entity -> String
+prettyChar x
+  | T.all good x = T.unpack x
+  | otherwise    = "‘" ++ T.unpack x ++ "’"
+  where good c = isAlphaNum c || isSymbol c
