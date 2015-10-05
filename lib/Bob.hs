@@ -248,15 +248,18 @@ ruleP scope = do
     -- passing them to each evaluator (so that references could be resolved).
     let go :: PatternsMap    -- ^ all entities in scope
            -> EntitiesMap    -- ^ all generated entities so far
+           -> Int            -- ^ matcher number
            -> [Matcher]      -- ^ matchers left to process
            -> Warn EntitiesMap
-        go _psm entitiesMap [] = return entitiesMap
-        go  psm entitiesMap (matcher:rest) = do
+        go _psm entitiesMap _ [] = return entitiesMap
+        go  psm entitiesMap i (matcher:rest) = do
           entityMap <- evalMatcher psm matcher
+          when ("" `M.member` entityMap) $
+            warn $ printf "matcher #%d contains an empty pattern" i
           go (M.unionWith union psm (toPatternsMap entityMap))
              (M.unionWith union entityMap entitiesMap)
-             rest
-    entitiesMap <- go scope mempty matchers
+             (i+1) rest
+    entitiesMap <- go scope mempty 1 matchers
     -- Return the rule.
     let rule = Rule {
           ruleName     = name,
