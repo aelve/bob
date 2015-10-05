@@ -13,5 +13,5 @@ main = do
   (_, mbErrors) <- readRules
   defaultMain $ testGroup "tests"
     [ testCase "No warnings when loading rules" $
-        mbErrors @?= []
+        null mbErrors @? unlines mbErrors
     ]
