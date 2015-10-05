@@ -18,6 +18,7 @@ import Control.Monad.IO.Class (liftIO)
 -- Text
 import qualified Data.Text as T
 import Data.Text (Text)
+import qualified Data.Text.ICU.Char as T
 -- GUI
 import Graphics.UI.Gtk
 -- Bob-specific
@@ -49,20 +50,33 @@ runGUI rules = do
   -- add a couple columns
   colChar <- treeViewColumnNew
   colRule <- treeViewColumnNew
+  colCharName <- treeViewColumnNew
 
   treeViewColumnSetTitle colChar ("Character" :: Text)
   treeViewColumnSetTitle colRule ("Rule" :: Text)
+  treeViewColumnSetTitle colCharName ("Character name" :: Text)
 
   rendererChar <- cellRendererTextNew
   rendererRule <- cellRendererTextNew
+  rendererCharName <- cellRendererTextNew
 
   cellLayoutPackStart colChar rendererChar True
   cellLayoutPackStart colRule rendererRule True
+  cellLayoutPackStart colCharName rendererCharName True
 
   cellLayoutSetAttributes colChar rendererChar model $ \row ->
     [ cellText := snd row ]
   cellLayoutSetAttributes colRule rendererRule model $ \row ->
     [ cellText := fst row ]
+  cellLayoutSetAttributes colCharName rendererCharName model $ \row ->
+    let name | T.length (snd row) == 1 = T.charName (T.head (snd row))
+             | otherwise = ""
+    in [ cellText := name ]
+
+  treeViewAppendColumn view colChar
+  treeViewAppendColumn view colRule
+  treeViewAppendColumn view colCharName
+
   layout <- tableNew 2 1 False  -- 2 rows, 1 column, autostretching = off
   tableAttachDefaults layout searchEntry 0 1 0 1
   tableAttachDefaults layout view 0 1 1 2
@@ -70,9 +84,6 @@ runGUI rules = do
 
   set layout [
     tableChildYOptions searchEntry := [Fill] ]
-
-  treeViewAppendColumn view colChar
-  treeViewAppendColumn view colRule
 
   searchEntry `on` editableChanged $ do
     query <- get searchEntry entryText
