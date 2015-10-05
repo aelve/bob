@@ -1,145 +1,152 @@
-currency sign
-¤ = 7: currency
-    6: {(o O) (x X)}
-
-cent
-¢ = 7: cent penny 1/100 0.01 .01
-    7: {c |}
-    3: {C (| / '')} {c /}
-    8: c/ C/ c
-
-mill
-₥ = 7: mill mille mil 1/1000 0.001 .001
-    6: {m /} m
-
-dollar
-$ = 7: dollar
-    6: {(s S) |}
-    3: {(s S) (|| /)}
-    7: usd USD
-    8: s/ S/ s S
-
-pound
-£ = 7: pound lb
-    6: {(l L) -} lf Lf #
-    7: gbp GBP
-    8: l- L- l L
-
 euro
-€ = 7: euro
-    6: {(e E) (= --)}
-    3: {(e E) -}
-    6: {(c C) (= --)}
-    7: eur EUR
-    8: e E e- E-
-
-colón
-₡ = 7: colon colón
-    6: {(c C) //}
-    3: {(c C) (/ '')}
-    7: crc CRC svc SVC
-
-naira
-₦ = 7: naira
-    6: {(n N) (= --)}
-    3: {(n N) (- '')}
-    7: ngn NGN
-
-peseta
-₧ = 7: peseta
-    7: Pts pts Pt pt
-    7: esp ESP
-
-cedi
-₵ = 7: cedi
-    6: {(c C) |}
-    3: {(c C) (/ '')}
-    7: ghs GHS
-
-peso
-₱ = 7: peso
-    6: {(p P) (= --)}
-    3: {(p P) (- '')}
-    7: php PHP
-
-hryvnia
-₴ = 7: hryvnia hrn
-    6: {(s S г) (= --)}
-    3: {(s S г) (- '')}
-    7: uah UAH
-
-tögrög (tugrik)
-₮ = 7: togrog tögrög tugrik
-    6: {T (// / '')}
-    3: {t (// / '')}
-    7: mnt MNT
-
-ruble
-₽ = 7: ruble
-    6: {(r R р Р p P) (= - '')}
-    7: rub RUB
-    8: r R р Р
-
-Turkish lira
-₺ = 7: lira
-    6: {(t l L) (= -- //)}
-    3: {(t l L) (- / '')}
-    7: trl TRL
-
-dong
-₫ = 7: dong
-    6: {d - _}
-    3: {d (- _ '')}
-    7: vnd VND
-
-kip
-₭ = 7: kip
-    6: {(k K) -}
-    3: k K
-    7: lak LAK
-
-won
-₩ = 7: won
-    6: {(w W) (= -- __)}
-    3: {(w W) (- _ '')}
-    7: krw KRW kpw KPW
-
-shekel
-₪ = 7: shekel sheqel nis
-    7: ils ILS
-
-rupee
-₨ = 7: rupee Rs rs
-
-Indian rupee
-₹ = 7: rupee
-    7: inr INR
-
-austral
-₳ = 7: austral
-    6: {(a A) (= --)}
-    3: {(a A) (- '')}
-    7: ara ARA
+€ = 1: euro eur EUR
+    2: (- = --)(e E)
+    1: (e E)(- = --)
+    1: e E
+    2: (= --)(c C)
+    1: (c C)(= --)
 
 yuan / yen
-¥ = 7: yuan yen
-    6: {(y Y) (= --)}
-    3: {(y Y) -}
-    7: cny CNY jpy JPY
-    8: y Y y- Y-
+¥ = 1: yuan yen cny CNY jpy JPY
+    2: {(y Y) -}
+    2: (= --)(y Y)
+    1: (y Y)(= --)
+    1: y Y
+
+naira
+₦ = 1: naira ngn NGN
+    3: {(n N) -}
+    2: (= --)(n N)
+    1: (n N)(= --)
+    1: n N
+
+peso
+₱ = 1: peso php PHP
+    3: {(p P) -}
+    2: (= --)(p P)
+    1: (p P)(= --)
+    1: p P
+
+hryvnia
+₴ = 1: hryvnia hrn uah UAH
+    3: {(s S г) -}
+    2: (= --)(s S г)
+    1: (s S г)(= --)
+    2: s S
+    1: г
+
+colón
+₡ = 1: colon colón crc CRC svc SVC
+    2: {(c C) /}
+    1: {(c C) //}
+    2: c
+    1: C
+
+tögrög (tugrik)
+₮ = 1: togrog tögrög tugrik mnt MNT
+    3: {t /}
+    2: {T /}
+    2: {t //}
+    1: {T //}
+    2: t
+    1: T
+
+Turkish lira
+₺ = 1: lira trl TRL
+    2: {(t l L) (/ -)}
+    1: {(t l L) (// -- =)}
+    1: t l L
+
+Indian rupee
+₹ = 1: inr INR
+    2: r R rupee
+
+peseta
+₧ = 1: peseta esp ESP
+    1: Pts pts Pt pt
+
+rupee
+₨ = 1: rupee Rs rs
+
+dong
+₫ = 1: dong vnd VND
+    3: {d (- _)}
+    1: d {d - _}
+
+pound
+£ = 1: pound lb gbp GBP
+    2: lf Lf #
+    1: {(l L) -}
+    1: l L
+
+kip
+₭ = 1: kip lak LAK
+    1: {(k K) -}
+    1: k K
+
+ruble
+₽ = 1: ruble rub RUB
+    3: {(p P) (- =)}
+    1: {(р Р r R) (- =)}
+    1: р Р r R
+    2: p P
+
+austral
+₳ = 1: austral ara ARA
+    3: {(a A) -}
+    2: (= --)(a A)
+    1: (a A)(= --)
+    1: a A
+
+won
+₩ = 1: won krw KRW kpw KPW
+    3: {(w W) (- _)}
+    2: (= -- __)(w W)
+    1: (w W)(= -- __)
+    1: w W
+
+dollar
+$ = 1: dollar usd USD
+    1: {(s S) (| ||)}
+    2: /(s S)
+    1: (s S)/
+    1: s S
 
 baht
-฿ = 7: baht
-    6: {(b B) |}
-    3: {(b B) (/ '')}
-    7: thb THB
+฿ = 1: baht thb THB
+    2: {(b B) (/ |)}
+    1: (b B)|
+    1: b B
 
 guaraní
-₲ = 7: guarani guaraní
-    6: {(g G) |}
-    3: {(g G) (/ '')}
-    7: pyg PYG
+₲ = 1: guarani guaraní pyg PYG
+    2: {(g G) (/ |)}
+    1: (g G)|
+    1: g G
+
+cedi
+₵ = 1: cedi ghs GHS
+    2: {(c C) (/ |)}
+    2: c
+    1: C C|
 
 florin
-ƒ = 7: florin gulden guilder
-    7: f fl
+ƒ = 1: florin gulden guilder
+    1: f fl
+
+shekel
+₪ = 1: shekel sheqel nis ils ILS
+
+currency sign
+¤ = 1: currency
+    1: {(o O) (x X)}
+
+cent
+¢ = 1: cent penny 1/100 0.01 .01
+    3: {(c C) (| / '')}
+    1: c {c |} c/
+
+mill
+₥ = 1: mill mille mil 1/1000 0.001 .001
+    2: /m
+    1: m/ m

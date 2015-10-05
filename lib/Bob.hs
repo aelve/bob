@@ -25,6 +25,7 @@ import Data.Traversable
 import Data.Monoid
 import Control.Applicative
 import Control.Monad
+import Numeric.Natural
 -- Monads
 import Control.Monad.Writer
 -- Lenses
@@ -33,7 +34,6 @@ import Lens.Micro.GHC
 import Data.List (permutations, union)
 -- Sorting
 import Data.List (sortOn)
-import Data.Ord (Down(..))
 -- Text
 import Text.Printf
 import qualified Data.Text as T
@@ -60,25 +60,32 @@ type Pattern = Text
 -- | A thing that we search for (like “→”).
 type Entity = Text
 
--- | How well a pattern corresponds to an entity; for instance, “\>=” would
--- have bad fitness for “⇒”, but “=\>” would have good fitness for “⇒”. The
--- higher the number is, the better.
-type Fitness = Integer
+{- |
+How high should the entity be in the list of results when it's searched by some pattern? @Top 1@ means “best match”, @Top 2@ means “best match or second best match”, etc. 'Whatever' means that you don't care.
+-}
+data Priority = Top Natural | Whatever
+  deriving (Show, Eq)
+
+instance Ord Priority where
+  compare Whatever Whatever = EQ
+  compare Whatever (Top _)  = GT
+  compare (Top _) Whatever  = LT
+  compare (Top a) (Top b)   = compare a b
 
 type RuleName = Text
 
 -- | Entities corresponding to a pattern (like “->” leads to “→”). There can
 -- be several entities corresponding to a pattern even inside a single rule.
-type EntitiesMap = Map Pattern [(Entity, Fitness)]
+type EntitiesMap = Map Pattern [(Entity, Priority)]
 
 -- | All patterns that an entity corresponds to (like “→” leads to “->”, “>”).
-type PatternsMap = Map Entity [(Pattern, Fitness)]
+type PatternsMap = Map Entity [(Pattern, Priority)]
 
 toPatternsMap :: EntitiesMap -> PatternsMap
 toPatternsMap m = M.fromListWith (++) $ do
   (pattern, entities) <- M.toList m
-  (entity, fitness) <- entities
-  return (entity, [(pattern, fitness)])
+  (entity, priority) <- entities
+  return (entity, [(pattern, priority)])
 
 data Generator
   = Literal Pattern
@@ -88,6 +95,14 @@ data Generator
   | Reference Entity
   | Variable
   deriving (Show)
+
+priorityP :: WarnParser Priority
+priorityP = asum [
+  Whatever <$ char 'X',
+  do x <- integer
+     when (x == 0) $
+       fail "priority can't be 0"
+     return (Top (fromInteger x))]
 
 literalP :: WarnParser Pattern
 literalP = T.pack <$> choice [
@@ -100,9 +115,6 @@ literalP = T.pack <$> choice [
     quotedChar = choice [
       try (string "''") >> pure '\'',
       satisfy $ \x -> not $ or [isSpace x, x == '\''] ]
-
-fitnessP :: WarnParser Fitness
-fitnessP = integer
 
 generatorP :: WarnParser Generator
 generatorP = do
@@ -117,7 +129,7 @@ generatorP = do
     [gen] -> gen
     _     -> Sequence gens
 
-type Generators = [(Generator, Fitness)]
+type Generators = [(Generator, Priority)]
 
 data Matcher
   = Zip [(Text, Text)] Generators
@@ -146,7 +158,8 @@ evalGenerator psm _ (Reference x) = case M.lookup x psm of
   Nothing -> do
     warn (printf "‘%s’ was referenced but wasn't defined yet" (T.unpack x))
     return []
-  Just pats -> return (map fst pats)
+  -- The entity should be included as its own pattern, hence “x :”.
+  Just pats -> return (x : map fst pats)
 evalGenerator _ var Variable = case var of
   Nothing -> do
     warn "there's a variable in the rule but no value provided for it"
@@ -156,13 +169,13 @@ evalGenerator _ var Variable = case var of
 evalGenerators
   :: PatternsMap                 -- ^ Already generated patterns
   -> Maybe Text                  -- ^ Variable value
-  -> Generators                  -- ^ Pairs of (generator, fitness)
-  -> Warn [(Pattern, Fitness)]
+  -> Generators                  -- ^ Pairs of (generator, priority)
+  -> Warn [(Pattern, Priority)]
 evalGenerators psm var gens = do
-  groups :: [([Pattern], Fitness)] <- (each._1) (evalGenerator psm var) gens
+  groups :: [([Pattern], Priority)] <- (each._1) (evalGenerator psm var) gens
   -- Now groups have to be expanded, and patterns from later groups should
   -- replace earlier patterns. See https://github.com/aelve/bob/issues/47.
-  let pats :: [(Pattern, Fitness)]
+  let pats :: [(Pattern, Priority)]
       pats = [(p, f) | (ps, f) <- groups, p <- ps]
   -- To leave only the last occurrence of each pattern it's enough to convert
   -- the list to a Map and back, because that's how Map's fromList works.
@@ -184,20 +197,20 @@ evalMatcher
 evalMatcher psm (Zip pairs gens) = do
   results <- for pairs $ \(a, b) -> do
     patterns <- evalGenerators psm (Just a) gens
-    return [(pattern, (b, fitness)) | (pattern, fitness) <- patterns]
+    return [(pattern, (b, priority)) | (pattern, priority) <- patterns]
   return $ fromListAccum (concat results)
 evalMatcher psm (ManyToOne gens entity) = do
   patterns <- evalGenerators psm Nothing gens
   return $ fromListAccum $ do
-    (pattern, fitness) <- (entity, 10) : patterns
-    return (pattern, (entity, fitness))
+    (pattern, priority) <- patterns
+    return (pattern, (entity, priority))
 
-generatorLineP :: WarnParser (Generator, Fitness)
+generatorLineP :: WarnParser (Generator, Priority)
 generatorLineP = do
-  fitness <- fitnessP <* char ':'
+  priority <- priorityP <* char ':'
   someSpaces
   gens <- generatorP `sepBy1` someSpaces
-  return (AnyOf gens, fitness)
+  return (AnyOf gens, priority)
 
 matcherP :: WarnParser Matcher
 matcherP = choice [zipP, manyToOneP]
@@ -261,17 +274,17 @@ ruleFileP = do
       -- ...or there isn't.
       pure [] ]
 
-matchRule :: Pattern -> Rule -> [((RuleName, Entity), Fitness)]
+matchRule :: Pattern -> Rule -> [((RuleName, Entity), Priority)]
 matchRule query Rule{..} = do
-  (entity, fitness) <- M.findWithDefault [] query ruleEntities
-  return ((ruleName, entity), fitness)
+  (entity, priority) <- M.findWithDefault [] query ruleEntities
+  return ((ruleName, entity), priority)
 
-matchRules :: Pattern -> [Rule] -> [((RuleName, Entity), Fitness)]
+matchRules :: Pattern -> [Rule] -> [((RuleName, Entity), Priority)]
 matchRules query = concatMap (matchRule query)
 
 matchAndSortRules :: Pattern -> [Rule] -> [(RuleName, Entity)]
 matchAndSortRules query =
-  map fst . sortOn (Down . snd) . concatMap (matchRule query)
+  map fst . sortOn snd . concatMap (matchRule query)
 
 -- | Returns rules and warnings\/parsing errors (if there were any).
 readRules :: IO ([Rule], [String])
