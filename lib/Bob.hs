@@ -287,7 +287,7 @@ This code checks whether all priorities are satisfied – that is, for each patt
 and finally outputting a warning for each layer that has more entities than its priority allows.
 -}
 checkPriorities :: [Rule] -> [String]
-checkPriorities = concatMap checkPattern . allPatterns
+checkPriorities = mapMaybe checkPattern . allPatterns
   where
     -- Find all patterns and associated entities.
     allPatterns :: [Rule] -> [(Pattern, [(Entity, Priority)])]
@@ -309,17 +309,21 @@ checkPriorities = concatMap checkPattern . allPatterns
     -- should have not more than N members).
     isGood :: ([Entity], Int) -> Bool
     isGood (entities, priority) = length entities <= priority
-    -- Generate a warning for a bad group.
-    generateWarning :: Pattern -> ([Entity], Int) -> String
-    generateWarning pattern (entities, priority) =
-      printf "‘%s’ finds %d entities with priority %d or less: %s"
-             (T.unpack pattern) (length entities) priority
-             (unwords (map prettyChar entities))
-    -- Put it all together.
-    checkPattern :: (Pattern, [(Entity, Priority)]) -> [String]
-    checkPattern (pattern, pairs) =
-      map (generateWarning pattern) . filter (not . isGood) .
-      layers . mapMaybe isTopPriority . sortEntities $ pairs
+    -- Put it all together (and print warnings).
+    checkPattern :: (Pattern, [(Entity, Priority)]) -> Maybe String
+    checkPattern (pattern, pairs)
+      | null warnings = Nothing
+      | otherwise     = Just (unlines (header : warnings))
+      where
+        warnings = map generateWarning .
+                   filter (not . isGood) .
+                   layers . mapMaybe isTopPriority . sortEntities
+                     $ pairs
+        header = printf "‘%s’ finds:" (T.unpack pattern)
+        generateWarning (entities, priority) =
+          printf "  %d entities with priority %d or less: %s"
+                 (length entities) priority
+                 (unwords (map prettyChar entities))
 
 matchRule :: Pattern -> Rule -> [((RuleName, Entity), Priority)]
 matchRule query Rule{..} = do
@@ -347,8 +351,7 @@ readRules = do
       Right (rules, warnings) -> (rules, warnings)
   let rules  = concat (map fst results)
       errors = filter (not . null) (map snd results)
-  -- TODO: why is there an 'unlines'? Maybe it should just return String
-  -- instead of [String]?
+  -- The 'unlines' is here to group lines in -warning groups- together.
   return (rules, checkPriorities rules ++ map unlines errors)
 
 currentLine :: WarnParser Text
