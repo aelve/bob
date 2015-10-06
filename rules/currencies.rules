@@ -55,7 +55,8 @@ Turkish lira
 ₺ = 1: lira trl TRL
     2: {(t l L) (/ -)}
     1: {(t l L) (// -- =)}
-    1: t l L
+    2: l L
+    1: t
 
 Indian rupee
 ₹ = 1: inr INR

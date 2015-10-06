@@ -1,7 +1,8 @@
 diaeresis / umlaut
 zip AaEeHhIiOotUuWwXxYy
     ÄäËëḦḧÏïÖöẗÜüẄẅẌẍŸÿ
-    1: {(: '"' ..) ()}
+    1: {(: ..) ()}
+    3: {'"' ()}
     X: ()
 
 tilde
@@ -86,14 +87,16 @@ zip TtKkQqVv
 double acute accent
 zip OoUu
     ŐőŰű
-    1: {('"' // ,, = :) ()}
+    3: {(: =) ()}
+    1: {(” ’’ // ,,) ()}
+    2: {'"' ()}
     X: ()
 
 double grave accent
 zip AaEeIiOoRrUu
     ȀȁȄȅȈȉȌȍȐȑȔȕ
-    1: {('``' \\ '"' :) ()}
-    2: {= ()}
+    1: {('``' “ ‘‘ \\ '"') ()}
+    2: {(: =) ()}
     X: ()
 
 ring
