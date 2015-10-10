@@ -275,7 +275,7 @@ ruleFileP = do
       -- Either there is a new rule...
       do some newline
          rule <- ruleP psm
-         let psm' = psm <> toPatternsMap (ruleEntities rule)
+         let psm' = M.unionWith (++) psm (toPatternsMap (ruleEntities rule))
          (rule:) <$> go psm',
       -- ...or there isn't.
       pure [] ]
