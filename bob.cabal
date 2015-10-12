@@ -11,7 +11,7 @@ maintainer:          yom@artyom.me
 category:            Application
 build-type:          Simple
 extra-source-files:  README.md
-data-files:          rules/*.rules
+data-files:          data/*.rules
 cabal-version:       >=1.10
 
 source-repository head

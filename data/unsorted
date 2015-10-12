@@ -1,0 +1,208 @@
+arrow: → ← ⇒ ⇐ ↠ ↣ ↞ ↢ ↔ ⇔
+
+left arrow: ← ⇐ ↞ ↢
+
+left right arrow: ↔ ⇔
+
+left →: ← or ← ⇐ ↞ ↢?
+
+left ->: ← or ← ⇐ ↞ ↢?
+
+
+
+
+arrows
+--------------------
+
+⇕⇖⇗⇘⇙
+↜↝↨↩↪↫↬↭↮↯
+↰↱↲↳↴↵
+↶↷↸↹↺↻↼↽↾↿
+⇀⇁⇂⇃⇋⇌⇎
+⇠⇡⇢⇣⇤⇥⇦⇧⇨⇩⇪⇫⇬⇭⇮⇯
+⇰⇱⇲⇳⇴⇶⇷⇸⇹⇺⇻⇼⇽⇾⇿
+⟰⟱
+⟲⟳
+⟴
+⟵⟶⟷⟸⟹⟺
+⟻⟼⟽⟾
+⟿
+⤀⤁⤂⤃⤄⤅⤆⤇⤈⤉⤊⤋⤌⤍⤎⤏
+⤐⤑⤒⤓⤔⤕⤖⤗⤘⤙⤚⤛⤜⤝⤞⤟
+⤠⤡⤢⤣⤤⤥⤦⤧⤨⤩⤪⤫⤬⤭⤮⤯
+⤰⤱⤲⤳⤴⤵⤶⤷⤸⤹⤺⤻⤼⤽⤾⤿
+⥀⥁⥂⥃⥄⥅⥆⥇⥈⥉⥊⥋⥌⥍⥎⥏
+⥐⥑⥒⥓⥔⥕⥖⥗⥘⥙⥚⥛⥜⥝⥞⥟
+⥠⥡⥢⥣⥤⥥⥦⥧⥨⥩⥪⥫⥬⥭⥮⥯
+⥰⥱⥲⥳⥴⥵⥶⥷⥸⥹⥺⥻⥼⥽⥾⥿
+⬀⬁⬂⬃⬄⬅⬆⬇⬈⬉⬊⬋⬌⬍⬎⬏⬐⬑
+
+currencies
+--------------------
+
+drachma
+₯ = drachma
+    Δρχ Δρ Dp dp
+    grd
+
+₨ = lkr npr mur pkr scr
+﷼ = yer omr qar irr sar
+₠ = xeu
+₢ = brz
+
+cruzeiro
+
+₤   = trl (old)
+
+https://en.wikipedia.org/wiki/Turkish_lira_sign
+https://en.wikipedia.org/wiki/Mark_%28currency%29
+https://en.wikipedia.org/wiki/Azerbaijani_manat
+https://en.wikipedia.org/wiki/Russian_ruble
+https://en.wikipedia.org/wiki/Georgian_lari
+https://en.wikipedia.org/wiki/Kazakhstani_tenge
+https://en.wikipedia.org/wiki/Spesmilo
+https://en.wikipedia.org/wiki/Livre_tournois
+https://en.wikipedia.org/wiki/Cambodian_riel
+https://en.wikipedia.org/wiki/Deutsche_Mark
+https://en.wikipedia.org/wiki/German_gold_mark
+https://en.wikipedia.org/wiki/Reichsmark
+https://en.wikipedia.org/wiki/Pfennig
+https://en.wikipedia.org/wiki/Bangladeshi_taka
+https://en.wikipedia.org/wiki/Afghan_afghani
+https://en.wikipedia.org/wiki/Iranian_rial
+
+there's also some sign for https://en.wikipedia.org/wiki/French_franc but I can't find it (₣ perhaps?)
+
+
+math
+--------------------
+
+https://en.wikipedia.org/wiki/List_of_mathematical_symbols#Symbols_based_on_equality_sign
+
+
+    ≔ (U+2254 ≔ colon equals)
+    ≕ (U+2255 ≕ equals colon)
+    ≖ (U+2256 ≖ ring in equal to)
+    ≗ (U+2257 ≗ ring equal to)
+    ≙ (U+2259 ≙ estimates)
+    ≚ (U+225A ≚ equiangular to)
+    ≛ (U+225B ≛ star equals)
+    ≜ (U+225C ≜ delta equal to)
+
+∝  =  prop, propto, Proportional, vprop, varpropto, proportional to
+∣  =  divides
+∤  =  does not divide
+≃  =  asymptotically equal to
+≄  =  not asymptotically equal to
+≆  =  approximately but not actually equal to
+≇  =  neither approximately nor actually equal to
+
+√  =  radic, Sqrt, radical, square root
+∛  =  cube root
+∜  =  fourth root
+′  =  prime, derivative
+″  =  Prime, double prime
+‴  =  tprime, triple prime
+∏  =  N-ary product
+∑  =  N-ary summation
+
+×  =  multiplication sign
+⋅  =  sdot
+÷  =  division sign, obelus
+
+Calculus, Vector Calculus, Differential Equations
+
+    ∞ 221E infinity
+    ∂ 2202 partial differential
+    ∱ 2231 clockwise integral
+    ∲ 2232 clockwise contour integral
+    ∳ 2233 anticlockwise contour integral
+    ∇ 2207 nabla, Del, backward difference, gradient
+
+Sets
+
+    ⊂ 2282 subset, included in, proper subset
+    ⊃ 2283 superset, includes, proper superset
+    ⊆ 2286 subset of or equal to
+    ⊇ 2287 superset or equal to
+    ⊄ 2284 notin set
+    ∩ 2229 intersection
+    ∪ 222A union
+    ∈ 2208 isin, isinv, Element, in, element of (large symbol)
+    ∊ 220A element of (small symbol)
+    ∉ 2209 notin, NotElement, notinva, not element of
+    ∋ 220B niv, ReverseElement, ni, SuchThat, contains as member (large symbol)
+    ∍ 220D contains as member (small symbol)
+    ∌ 220C notni, notniva, NotReverseElement, does not contain as member
+    ∅ 2205 empty, emptyset, emptyv, varnothing, empty set
+
+Mathematical typography
+
+    ⋮ 22EE vellip, vertical ellipsis
+    ⋯ 22EF hellip, horizontal ellipsis
+    ⋰ 22F0 utdot, rising dots, up right diagonal ellipsis
+    ⋱ 22F1 dtdot, falling dots, down right diagonal ellipsis
+    〈 27E8 lang , left angle bracket
+    〉 27E9 rang, right angle bracket
+
+Logic
+
+    ¬ 00AC not sign
+    ∧ 2227 Logical AND
+    ∨ 2228 Logical OR
+    ∎ 220E, END OF PROOF
+    ∴ 2234, THEREFORE , there4, therefore, Therefore
+    ∵ 2235, BECAUSE , becaus, because, Because
+    ∀ 2200, FOR ALL , forall, ForAll
+    ∃ 2203, THERE EXISTS , exist, Exists
+    ∄ 2204, THERE DOES NOT EXIST , nexist, NotExists, nexists
+
+Geometry
+
+    ∠ 2220 ang, angle
+    ∡ 2221 angmsd, measured angle
+    ∢ 2222 spherical angle
+    ⟂ 27C2 perpendicular to
+    ∟ 221F right angle
+
+Other
+
+    ° 00B0 degree
+    µ 00B5 micro
+    π 03C0 Greek small letter pi
+    ℓ 2113 Small script letter L, litre. 
+
+
+typography
+--------------------
+
+brackets 	⟨ ⟩
+comma 	،  、
+solidus   ⁄
+
+interpunct 	·
+
+bullet 	•
+dagger 	† ‡
+degree 	°
+ditto mark 	″
+inverted exclamation mark 	¡
+inverted question mark 	¿
+numero sign 	№
+ordinal indicator 	º ª
+per mil   ‰
+basis point 	‱
+pilcrow 	¶
+prime 	′  ″  ‴
+section sign 	§
+pipe, broken bar    ‖  ¦
+
+hedera 	❧
+index, fist 	☞
+irony punctuation 	⸮
+lozenge 	◊
+reference mark 	※
+tie 	⁀
+
+
+https://en.wikipedia.org/wiki/Quotation_mark#Unicode_code_point_table

@@ -345,9 +345,9 @@ readRules :: IO ([Rule], [String])
 readRules = do
   dataDir <- getDataDir
   ruleFiles <- filter ((== ".rules") . takeExtensions) <$>
-               getDirectoryContents (dataDir </> "rules")
+               getDirectoryContents (dataDir </> "data")
   results <- for ruleFiles $ \ruleFile -> do
-    let path = dataDir </> "rules" </> ruleFile
+    let path = dataDir </> "data" </> ruleFile
     res <- warnParse ruleFileP ruleFile <$> T.readFile path
     return $ case res of
       Left err -> ([], [show err])
