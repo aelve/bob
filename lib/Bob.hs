@@ -85,10 +85,10 @@ type EntitiesMap = Map Pattern [(Entity, Priority)]
 type PatternsMap = Map Entity [(Pattern, Priority)]
 
 toPatternsMap :: EntitiesMap -> PatternsMap
-toPatternsMap m = M.fromListWith (++) $ do
+toPatternsMap m = fromListMulti $ do
   (pattern, entities) <- M.toList m
   (entity, priority) <- entities
-  return (entity, [(pattern, priority)])
+  return (entity, (pattern, priority))
 
 data Generator
   = Literal Pattern
@@ -201,10 +201,10 @@ evalMatcher psm (Zip pairs gens) = do
   results <- for pairs $ \(a, b) -> do
     patterns <- evalGenerators psm (Just a) gens
     return [(pattern, (b, priority)) | (pattern, priority) <- patterns]
-  return $ fromListAccum (concat results)
+  return $ fromListMulti (concat results)
 evalMatcher psm (ManyToOne gens entity) = do
   patterns <- evalGenerators psm Nothing gens
-  return $ fromListAccum $ do
+  return $ fromListMulti $ do
     (pattern, priority) <- patterns
     return (pattern, (entity, priority))
 
@@ -397,8 +397,23 @@ spaceSeparated p = p `sepBy1` someSpaces
 someSpaces :: WarnParser ()
 someSpaces = skipSome (char ' ')
 
-fromListAccum :: Ord a => [(a, b)] -> Map a [b]
-fromListAccum = M.fromListWith (++) . over (each._2) (:[])
+{- |
+Create a map from a list of pairs. When several values correspond to the same key, they are concatenated.
+
+>>> fromListConcat [(1, "foo"), (2, "bar"), (1, "baz")]
+{1: "foobaz", 2: "bar"}
+-}
+fromListConcat :: (Ord a, Monoid b) => [(a, b)] -> Map a b
+fromListConcat = M.fromListWith (<>)
+
+{- |
+Create a map from a list of pairs. When several values correspond to the same key, they are all put into a list.
+
+>>> fromListConcat [(1, "foo"), (2, "bar"), (1, "baz")]
+{1: ["foo", "baz"], 2: ["bar"]}
+-}
+fromListMulti :: Ord a => [(a, b)] -> Map a [b]
+fromListMulti = fromListConcat . over (each._2) (:[])
 
 prettyChar :: Entity -> String
 prettyChar x
