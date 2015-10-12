@@ -218,7 +218,7 @@ generatorLineP = do
 matcherP :: WarnParser Matcher
 matcherP = choice [zipP, manyToOneP]
   where
-    nextLine = try (newline >> someSpaces)
+    nextLine = try (eol >> someSpaces)
     zipP = do
       symbol "zip"
       lineA <- (T.chunksOf 1 <$> literalP) <* nextLine
@@ -243,7 +243,7 @@ ruleP scope = do
   name <- currentLine
   let header = printf "warnings in rule ‘%s’:" (T.unpack name)
   groupWarnings header $ do
-    matchers <- matcherP `endBy1` newline
+    matchers <- matcherP `endBy1` eol
     -- Evaluate all matchers, combining generated patterns as we go along and
     -- passing them to each evaluator (so that references could be resolved).
     let go :: PatternsMap    -- ^ all entities in scope
@@ -253,7 +253,10 @@ ruleP scope = do
            -> Warn EntitiesMap
         go _psm entitiesMap _ [] = return entitiesMap
         go  psm entitiesMap i (matcher:rest) = do
+          -- TODO: what is entityMap? what is entitiesMap? it's unclear and
+          -- should be explained
           entityMap <- evalMatcher psm matcher
+          -- TODO: rename i to matcherIndex
           when ("" `M.member` entityMap) $
             warn $ printf "matcher #%d contains an empty pattern" i
           go (M.unionWith union psm (toPatternsMap entityMap))
@@ -266,6 +269,7 @@ ruleP scope = do
           ruleEntities = entitiesMap }
     return rule
 
+-- TODO: explain the format of ruleFileP, ruleP, etc
 ruleFileP :: WarnParser [Rule]
 ruleFileP = do
   rule1 <- ruleP mempty
@@ -273,7 +277,8 @@ ruleFileP = do
   where
     go psm = choice [
       -- Either there is a new rule...
-      do some newline
+      do some eol
+         -- TODO: maybe require exactly one blank line?
          rule <- ruleP psm
          let psm' = M.unionWith (++) psm (toPatternsMap (ruleEntities rule))
          (rule:) <$> go psm',
