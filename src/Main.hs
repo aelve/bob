@@ -13,8 +13,13 @@ module Main (main) where
 import Data.Maybe
 import Data.Foldable
 import Control.Monad
+-- Lists
+import Data.List (intercalate, dropWhileEnd)
 -- Monads
 import Control.Monad.IO.Class (liftIO)
+-- Containers
+import Data.Map (Map)
+import qualified Data.Map as M
 -- Text
 import qualified Data.Text as T
 import Data.Text (Text)
@@ -26,8 +31,8 @@ import Bob
 
 
 
-runGUI :: [Rule] -> IO ()
-runGUI rules = do
+runGUI :: [Rule] -> Map Entity [Text] -> IO ()
+runGUI rules names = do
   initGUI
 
   window <- windowNew
@@ -47,35 +52,32 @@ runGUI rules = do
 
   treeViewSetHeadersVisible view True
 
-  -- add a couple columns
-  colChar <- treeViewColumnNew
-  colRule <- treeViewColumnNew
-  colCharName <- treeViewColumnNew
+  -- add some columns
+  let addColumn (title :: Text) = do
+        column <- treeViewColumnNew
+        treeViewColumnSetTitle column title
+        renderer <- cellRendererTextNew
+        cellLayoutPackStart column renderer True
+        treeViewAppendColumn view column
+        return (column, renderer)
 
-  treeViewColumnSetTitle colChar ("Character" :: Text)
-  treeViewColumnSetTitle colRule ("Rule" :: Text)
-  treeViewColumnSetTitle colCharName ("Character name" :: Text)
+  (columnChar,        columnRendererChar)        <- addColumn "Character"
+  (columnRule,        columnRendererRule)        <- addColumn "Rule"
+  (columnName,        columnRendererName)        <- addColumn "Name"
+  (columnUnicodeName, columnRendererUnicodeName) <- addColumn "Unicode name"
 
-  rendererChar <- cellRendererTextNew
-  rendererRule <- cellRendererTextNew
-  rendererCharName <- cellRendererTextNew
-
-  cellLayoutPackStart colChar rendererChar True
-  cellLayoutPackStart colRule rendererRule True
-  cellLayoutPackStart colCharName rendererCharName True
-
-  cellLayoutSetAttributes colChar rendererChar model $ \row ->
-    [ cellText := snd row ]
-  cellLayoutSetAttributes colRule rendererRule model $ \row ->
-    [ cellText := fst row ]
-  cellLayoutSetAttributes colCharName rendererCharName model $ \row ->
-    let name | T.length (snd row) == 1 = T.charName (T.head (snd row))
-             | otherwise = ""
-    in [ cellText := name ]
-
-  treeViewAppendColumn view colChar
-  treeViewAppendColumn view colRule
-  treeViewAppendColumn view colCharName
+  cellLayoutSetAttributes columnChar columnRendererChar model $
+    \(rule, entity) -> [ cellText := entity ]
+  cellLayoutSetAttributes columnRule columnRendererRule model $
+    \(rule, entity) -> [ cellText := rule ]
+  cellLayoutSetAttributes columnName columnRendererName model $
+    \(rule, entity) -> [
+      cellText := T.intercalate " / " (M.findWithDefault [] entity names) ]
+  cellLayoutSetAttributes columnUnicodeName columnRendererUnicodeName model $
+    \(rule, entity) -> [
+      cellText := if T.length entity == 1
+                    then T.charName (T.head entity)
+                    else "" ]
 
   layout <- tableNew 2 1 False  -- 2 rows, 1 column, autostretching = off
   tableAttachDefaults layout searchEntry 0 1 0 1
@@ -132,6 +134,12 @@ runGUI rules = do
 
 main :: IO ()
 main = do
-  (rules, errors) <- readRules
-  mapM_ putStrLn errors
-  runGUI rules
+  (rules, names, errors) <- readData
+  putStr (unparagraphs errors)
+  runGUI rules names
+
+-- | Separate paragraphs with blank lines.
+unparagraphs :: [String] -> String
+unparagraphs =
+  intercalate "\n" . map (++ "\n") .
+  map (dropWhile (== '\n')) . map (dropWhileEnd (== '\n'))

@@ -1,4 +1,5 @@
 {-# LANGUAGE
+TupleSections,
 RecordWildCards,
 ScopedTypeVariables,
 OverloadedStrings,
@@ -6,13 +7,14 @@ RankNTypes,
 FlexibleContexts
   #-}
 
+
 module Bob
 (
   Pattern,
   Entity,
   RuleName,
   Rule(..),
-  readRules,
+  readData,
   matchRules,
   matchAndSortRules,
 )
@@ -286,6 +288,31 @@ ruleFileP = do
       pure [] ]
 
 {- |
+A parser for files with character names. The format is as follows:
+
+> some name
+> things having that name
+>
+> another name
+> things having that name
+>
+> ...
+
+“Things having that name” are specified as literals (see 'literalP') separated by spaces.
+
+It's possible for an entity to have several names.
+-}
+namesFileP :: WarnParser (Map Entity [Text])
+namesFileP = do
+  let oneGroup :: WarnParser [(Entity, Text)]
+      oneGroup = do
+        name <- currentLine
+        entities <- spaceSeparated literalP
+        eol
+        return (map (,name) entities)
+  fromListMulti . concat <$> (oneGroup `sepBy1` eol)
+
+{- |
 This code checks whether all priorities are satisfied – that is, for each pattern and entity it checks whether the pattern finds the entity in top N matches (where N is entity's priority). It does so by enumerating all patterns, then taking all entities that some specific pattern finds, then ordering them in layers like this
 
   * “x”, “y” have priority <= 1
@@ -345,22 +372,36 @@ matchAndSortRules :: Pattern -> [Rule] -> [(RuleName, Entity)]
 matchAndSortRules query =
   map fst . sortOn snd . concatMap (matchRule query)
 
--- | Returns rules and warnings\/parsing errors (if there were any).
-readRules :: IO ([Rule], [String])
-readRules = do
-  dataDir <- getDataDir
+-- | Returns rules, names, and warnings\/parsing errors (if there were any).
+readData :: IO ([Rule], Map Entity [Text], [String])
+readData = do
+  dataDir <- (</> "data") <$> getDataDir
+
+  -- Read rule files.
   ruleFiles <- filter ((== ".rules") . takeExtensions) <$>
-               getDirectoryContents (dataDir </> "data")
-  results <- for ruleFiles $ \ruleFile -> do
-    let path = dataDir </> "data" </> ruleFile
+               getDirectoryContents dataDir
+  -- TODO: rule files should be in their own folder and have extension “.txt”
+  ruleResults <- for ruleFiles $ \ruleFile -> do
+    let path = dataDir </> ruleFile
     res <- warnParse ruleFileP ruleFile <$> T.readFile path
     return $ case res of
-      Left err -> ([], [show err])
-      Right (rules, warnings) -> (rules, warnings)
-  let rules  = concat (map fst results)
-      errors = filter (not . null) (map snd results)
-  -- The 'unlines' is here to group lines in -warning groups- together.
-  return (rules, checkPriorities rules ++ map unlines errors)
+      Left err -> ([], Just (show err))
+      Right (rules, warning) -> (rules, warning)
+  let rules = concat (map fst ruleResults)
+      ruleErrors = checkPriorities rules ++ catMaybes (map snd ruleResults)
+
+  -- Read entities' names.
+  (names, nameErrors) <- do
+    let path = dataDir </> "names.txt"
+    res <- warnParse namesFileP "names.txt" <$> T.readFile path
+    return $ case res of
+      Left err -> (mempty, [show err])
+      Right (names, warning) -> (names, maybeToList warning)
+
+  -- TODO: warn when an entity doesn't have a name
+
+  -- Return everything.
+  return (rules, names, nameErrors ++ ruleErrors)
 
 currentLine :: WarnParser Text
 currentLine = choice [
@@ -381,8 +422,11 @@ groupWarnings title = censor $ \s ->
   if null s then [] else title : map ("  " ++) s
 
 warnParse :: WarnParser a -> FilePath -> Text ->
-             Either ParseError (a, [String])
-warnParse = parse . runWriterT
+             Either ParseError (a, Maybe String)
+warnParse p src s = case parse (runWriterT p) src s of
+  Left err -> Left err
+  Right (x, []) -> Right (x, Nothing)
+  Right (x, ws) -> Right (x, Just (unlines ws))
 
 parens, braces, singleQuotes, backticks :: WarnParser a -> WarnParser a
 parens       = between (string "(") (string ")")

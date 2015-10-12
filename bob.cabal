@@ -11,7 +11,9 @@ maintainer:          yom@artyom.me
 category:            Application
 build-type:          Simple
 extra-source-files:  README.md
-data-files:          data/*.rules
+data-files:
+  data/*.rules
+  data/names.txt
 cabal-version:       >=1.10
 
 source-repository head
@@ -38,6 +40,7 @@ executable bob
   main-is:             Main.hs
   build-depends:       base == 4.8.*
                      , bob
+                     , containers == 0.5.*
                      , gtk3 == 0.13.*
                      , text == 1.2.*
                      , text-icu == 0.7.*
