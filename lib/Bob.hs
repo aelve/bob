@@ -22,7 +22,6 @@ where
 -- General
 import Data.Foldable
 import Data.Traversable
-import Data.Monoid
 import Data.Maybe
 import Control.Applicative
 import Control.Monad
@@ -46,7 +45,8 @@ import Data.Char
 -- Parsing
 import Text.Megaparsec
 import Text.Megaparsec.Text
-import Text.Megaparsec.Lexer
+import qualified Text.Megaparsec.Lexer as Lexer
+import Text.Megaparsec.Lexer (integer)
 -- Containers
 import qualified Data.Map as M
 import Data.Map (Map)
@@ -124,8 +124,8 @@ generatorP = do
   let singleGenerator = choice [
         Literal <$> literalP,
         Variable <$ try (string "()"),
-        AnyOf <$> parens (generatorP `sepBy1` someSpaces),
-        Permutation <$> braces (generatorP `sepBy1` someSpaces),
+        AnyOf <$> parens (spaceSeparated generatorP),
+        Permutation <$> braces (spaceSeparated generatorP),
         Reference <$> backticks literalP ]
   gens <- some singleGenerator
   return $ case gens of
@@ -210,9 +210,9 @@ evalMatcher psm (ManyToOne gens entity) = do
 
 generatorLineP :: WarnParser (Generator, Priority)
 generatorLineP = do
-  priority <- priorityP <* char ':'
-  someSpaces
-  gens <- generatorP `sepBy1` someSpaces
+  priority <- priorityP
+  symbol ":"
+  gens <- spaceSeparated generatorP
   return (AnyOf gens, priority)
 
 matcherP :: WarnParser Matcher
@@ -220,7 +220,7 @@ matcherP = choice [zipP, manyToOneP]
   where
     nextLine = try (newline >> someSpaces)
     zipP = do
-      string "zip" <* someSpaces
+      symbol "zip"
       lineA <- (T.chunksOf 1 <$> literalP) <* nextLine
       lineB <- (T.chunksOf 1 <$> literalP) <* nextLine
       when (length lineA /= length lineB) $
@@ -228,8 +228,8 @@ matcherP = choice [zipP, manyToOneP]
       gens <- generatorLineP `sepBy1` nextLine
       return (Zip (zip lineA lineB) gens)
     manyToOneP = do
-      x <- literalP <* someSpaces
-      char '=' <* someSpaces
+      x <- lexeme literalP
+      symbol "="
       gens <- generatorLineP `sepBy1` nextLine
       return (ManyToOne gens x)
 
@@ -379,15 +379,23 @@ warnParse :: WarnParser a -> FilePath -> Text ->
              Either ParseError (a, [String])
 warnParse = parse . runWriterT
 
-parens, braces, singleQuotes, backticks
-  :: WarnParser a -> WarnParser a
-parens       = between (char '(')  (char ')')
-braces       = between (char '{')  (char '}')
-singleQuotes = between (char '\'') (char '\'')
-backticks    = between (char '`')  (char '`')
+parens, braces, singleQuotes, backticks :: WarnParser a -> WarnParser a
+parens       = between (string "(") (string ")")
+braces       = between (string "{") (string "}")
+singleQuotes = between (string "'") (string "'")
+backticks    = between (string "`") (string "`")
+
+lexeme :: WarnParser a -> WarnParser a
+lexeme = Lexer.lexeme someSpaces
+
+symbol :: String -> WarnParser String
+symbol = Lexer.symbol someSpaces
+
+spaceSeparated :: WarnParser a -> WarnParser [a]
+spaceSeparated p = p `sepBy1` someSpaces
 
 someSpaces :: WarnParser ()
-someSpaces = void (some (char ' '))
+someSpaces = skipSome (char ' ')
 
 fromListAccum :: Ord a => [(a, b)] -> Map a [b]
 fromListAccum = M.fromListWith (++) . over (each._2) (:[])
