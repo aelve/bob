@@ -224,7 +224,7 @@ evalMatcher psm (Order gen entities) = do
 
 generatorLineP :: WarnParser (Generator, Priority)
 generatorLineP = do
-  priority <- lexeme priorityP
+  priority <- priorityP
   symbol ":"
   gens <- some generatorP
   return (AnyOf gens, priority)
@@ -232,22 +232,24 @@ generatorLineP = do
 matcherP :: WarnParser Matcher
 matcherP = choice [zipP, manyToOneP, orderP]
   where
-    nextLine = try (eol >> some (char ' '))
     zipP = do
       symbol "zip"
       lineA <- (T.chunksOf 1 <$> literalP) <* nextLine
-      lineB <- (T.chunksOf 1 <$> literalP) <* nextLine
+      lineB <- indentation *> (T.chunksOf 1 <$> literalP) <* nextLine
       when (length lineA /= length lineB) $
         warn "lengths of zipped rows don't match"
-      gens <- generatorLineP `sepBy1` nextLine
+      gens <- some (indentation *> generatorLineP <* nextLine)
       return (Zip (zip lineA lineB) gens)
     manyToOneP = do
       x <- try (lexeme literalP <* symbol "=")
-      gens <- generatorLineP `sepBy1` nextLine
-      return (ManyToOne gens x)
+      -- The 1st generator doesn't have any indentation, because it's on the
+      -- same line as “=”.
+      gen1 <- generatorLineP <* nextLine
+      gens <- many (indentation *> generatorLineP <* nextLine)
+      return (ManyToOne (gen1:gens) x)
     orderP = do
       gen <- try (generatorP <* symbol ":")
-      entities <- some (lexeme literalP)
+      entities <- some (lexeme literalP) <* nextLine
       return (Order gen entities)
 
 data Rule = Rule {
@@ -258,9 +260,10 @@ data Rule = Rule {
 ruleP :: PatternsMap -> WarnParser Rule
 ruleP scope = do
   name <- currentLine
+  many comment
   let header = printf "warnings in rule ‘%s’:" (T.unpack name)
   groupWarnings header $ do
-    matchers <- matcherP `endBy1` eol
+    matchers <- some matcherP
     -- Evaluate all matchers, combining generated patterns as we go along and
     -- passing them to each evaluator (so that references could be resolved).
     let go :: PatternsMap    -- ^ all entities in scope
@@ -289,6 +292,7 @@ ruleP scope = do
 -- TODO: explain the format of ruleFileP, ruleP, etc
 ruleFileP :: WarnParser [Rule]
 ruleFileP = do
+  many (blankline <|> comment)
   rule1 <- ruleP mempty
   (rule1:) <$> go (toPatternsMap (ruleEntities rule1))
   where
@@ -481,8 +485,21 @@ prettyChar x
 
 comment :: WarnParser ()
 comment = void $ do
-  string "#"
+  try $ do
+    skipMany (char ' ')
+    string "#"
   anyChar `manyTill` try eol
+
+-- | Call this when you've parsed everything you needed from the current line
+-- and now have to skip to the next line.
+nextLine :: WarnParser ()
+nextLine = do
+  skipMany (char ' ')
+  void eol <|> comment
+  skipMany comment
+
+indentation :: WarnParser ()
+indentation = skipSome (char ' ')
 
 blankline :: WarnParser ()
 blankline = void eol
