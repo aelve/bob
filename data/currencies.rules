@@ -76,7 +76,7 @@ dong
 
 pound
 £ = 1: pound lb gbp GBP
-    2: lf Lf #
+    2: lf Lf '#'
     1: {(l L) -}
     1: l L
 

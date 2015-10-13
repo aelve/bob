@@ -22,7 +22,7 @@ where
 
 
 -- General
-import Data.Foldable
+import Data.Functor
 import Data.Traversable
 import Data.Maybe
 import Control.Applicative
@@ -102,32 +102,37 @@ data Generator
   deriving (Show)
 
 priorityP :: WarnParser Priority
-priorityP = choice [
-  Whatever <$ char 'X',
-  do x <- integer
-     when (x == 0) $
-       fail "priority can't be 0"
-     return (Top (fromInteger x))]
+priorityP = lexeme (whatever <|> top)
+  where
+    whatever = char 'X' $> Whatever
+    top = do
+      x <- integer
+      when (x == 0) $
+        fail "priority can't be 0"
+      return (Top (fromInteger x))
 
 literalP :: WarnParser Pattern
-literalP = T.pack <$> choice [
-  some literalChar,
-  singleQuotes (many quotedChar) ]
+literalP = T.pack <$> (literalString <|> quotedString)
   where
+    -- A literal string is just some chars, like «abc».
+    literalString = some literalChar
     literalChar = satisfy $ \x ->
       or [isSymbol x, isPunctuation x, isAlphaNum x] &&
-      x `notElem` ("\"'`()[]{}" :: String)
+      x `notElem` ("\"'`()[]{}#" :: String)
+    -- A quoted string looks like «'abc'» and can contain characters like
+    -- «()» that can't be in an ordinary literal string.
+    quotedString = singleQuotes (many quotedChar)
     quotedChar = choice [
       try (string "''") >> pure '\'',
       satisfy $ \x -> not $ or [isSpace x, x == '\''] ]
 
 generatorP :: WarnParser Generator
-generatorP = do
+generatorP = lexeme $ do
   let singleGenerator = choice [
         Literal <$> literalP,
         Variable <$ try (string "()"),
-        AnyOf <$> parens (spaceSeparated generatorP),
-        Permutation <$> braces (spaceSeparated generatorP),
+        AnyOf <$> parens (some generatorP),
+        Permutation <$> braces (some generatorP),
         Reference <$> backticks literalP ]
   gens <- some singleGenerator
   return $ case gens of
@@ -219,15 +224,15 @@ evalMatcher psm (Order gen entities) = do
 
 generatorLineP :: WarnParser (Generator, Priority)
 generatorLineP = do
-  priority <- priorityP
+  priority <- lexeme priorityP
   symbol ":"
-  gens <- spaceSeparated generatorP
+  gens <- some generatorP
   return (AnyOf gens, priority)
 
 matcherP :: WarnParser Matcher
 matcherP = choice [zipP, manyToOneP, orderP]
   where
-    nextLine = try (eol >> someSpaces)
+    nextLine = try (eol >> some (char ' '))
     zipP = do
       symbol "zip"
       lineA <- (T.chunksOf 1 <$> literalP) <* nextLine
@@ -241,8 +246,8 @@ matcherP = choice [zipP, manyToOneP, orderP]
       gens <- generatorLineP `sepBy1` nextLine
       return (ManyToOne gens x)
     orderP = do
-      gen <- try (lexeme generatorP <* symbol ":")
-      entities <- spaceSeparated literalP
+      gen <- try (generatorP <* symbol ":")
+      entities <- some (lexeme literalP)
       return (Order gen entities)
 
 data Rule = Rule {
@@ -287,15 +292,11 @@ ruleFileP = do
   rule1 <- ruleP mempty
   (rule1:) <$> go (toPatternsMap (ruleEntities rule1))
   where
-    go psm = choice [
-      -- Either there is a new rule...
-      do some eol
-         -- TODO: maybe require exactly one blank line?
-         rule <- ruleP psm
-         let psm' = M.unionWith (++) psm (toPatternsMap (ruleEntities rule))
-         (rule:) <$> go psm',
-      -- ...or there isn't.
-      pure [] ]
+    go psm = option [] $ do
+      paragraphSeparator
+      rule <- ruleP psm
+      let psm' = M.unionWith (++) psm (toPatternsMap (ruleEntities rule))
+      (rule:) <$> go psm'
 
 {- |
 A parser for files with character names. The format is as follows:
@@ -317,7 +318,7 @@ namesFileP = do
   let oneGroup :: WarnParser [(Entity, Text)]
       oneGroup = do
         name <- currentLine
-        entities <- spaceSeparated literalP
+        entities <- some (lexeme literalP)
         eol
         return (map (,name) entities)
   fromListMulti . concat <$> (oneGroup `sepBy1` eol)
@@ -438,23 +439,21 @@ warnParse p src s = case parse (runWriterT p) src s of
   Right (x, []) -> Right (x, Nothing)
   Right (x, ws) -> Right (x, Just (unlines ws))
 
+-- Closing parens/braces aren't allowed to skip trailing space, because
+-- otherwise “(...) (...)” and “(...)(...)” would mean the same thing, and
+-- they definitely don't mean the same thing. However, opening parens/braces
+-- can skip trailing space.
 parens, braces, singleQuotes, backticks :: WarnParser a -> WarnParser a
-parens       = between (string "(") (string ")")
-braces       = between (string "{") (string "}")
+parens       = between (symbol "(") (string ")")
+braces       = between (symbol "{") (string "}")
 singleQuotes = between (string "'") (string "'")
 backticks    = between (string "`") (string "`")
 
 lexeme :: WarnParser a -> WarnParser a
-lexeme = Lexer.lexeme someSpaces
+lexeme = Lexer.lexeme (skipMany (char ' '))
 
 symbol :: String -> WarnParser String
-symbol = Lexer.symbol someSpaces
-
-spaceSeparated :: WarnParser a -> WarnParser [a]
-spaceSeparated p = p `sepBy1` someSpaces
-
-someSpaces :: WarnParser ()
-someSpaces = skipSome (char ' ')
+symbol = Lexer.symbol (skipMany (char ' '))
 
 {- |
 Create a map from a list of pairs. When several values correspond to the same key, they are concatenated.
@@ -479,3 +478,20 @@ prettyChar x
   | T.all good x = T.unpack x
   | otherwise    = "‘" ++ T.unpack x ++ "’"
   where good c = isAlphaNum c || isSymbol c
+
+comment :: WarnParser ()
+comment = void $ do
+  string "#"
+  anyChar `manyTill` try eol
+
+blankline :: WarnParser ()
+blankline = void eol
+
+paragraphSeparator :: WarnParser ()
+paragraphSeparator = void $ do
+  -- There has to be a blank line between 2 paragraphs, and there can also be
+  -- comments. Comments right after the paragraph are allowed, but there
+  -- still has to be a blank line somewhere.
+  many comment
+  blankline
+  many (blankline <|> comment)
