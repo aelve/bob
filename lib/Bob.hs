@@ -102,7 +102,7 @@ data Generator
   deriving (Show)
 
 priorityP :: WarnParser Priority
-priorityP = asum [
+priorityP = choice [
   Whatever <$ char 'X',
   do x <- integer
      when (x == 0) $
