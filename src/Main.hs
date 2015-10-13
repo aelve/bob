@@ -24,6 +24,7 @@ import qualified Data.Map as M
 import qualified Data.Text as T
 import Data.Text (Text)
 import qualified Data.Text.ICU.Char as T
+import Text.Printf
 -- GUI
 import Graphics.UI.Gtk
 -- Bob-specific
@@ -135,7 +136,9 @@ runGUI rules names = do
 main :: IO ()
 main = do
   (rules, names, errors) <- readData
-  putStr (unparagraphs errors)
+  unless (null errors) $ do
+    putStrLn (unparagraphs errors)
+    printf "Overall warnings: %d\n" (length errors)
   runGUI rules names
 
 -- | Separate paragraphs with blank lines.
