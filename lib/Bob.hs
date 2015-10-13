@@ -147,7 +147,7 @@ evalGenerator
   -> Maybe Text      -- ^ Variable value (needed for 'Variable')
   -> Generator       -- ^ Generator to evaluate
   -> Warn [Pattern]
-evalGenerator _   _ (Literal x) = return [x]
+evalGenerator _   _   (Literal x) = return [x]
 evalGenerator psm var (AnyOf gs) = concat <$> mapM (evalGenerator psm var) gs
 evalGenerator psm var (Sequence gs) = do
   ps :: [[Pattern]] <- mapM (evalGenerator psm var) gs

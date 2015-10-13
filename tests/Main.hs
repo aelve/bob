@@ -10,7 +10,7 @@ import Bob
 
 main :: IO ()
 main = do
-  (_, mbErrors) <- readRules
+  (_, _, mbErrors) <- readData
   defaultMain $ testGroup "tests"
     [ testCase "No warnings when loading rules" $
         null mbErrors @? unlines mbErrors
