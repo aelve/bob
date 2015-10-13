@@ -137,8 +137,9 @@ generatorP = do
 type Generators = [(Generator, Priority)]
 
 data Matcher
-  = Zip [(Text, Text)] Generators
+  = Zip [(Pattern, Entity)] Generators
   | ManyToOne Generators Entity
+  | Order Generator [Entity]
   deriving (Show)
 
 evalGenerator
@@ -209,6 +210,12 @@ evalMatcher psm (ManyToOne gens entity) = do
   return $ fromListMulti $ do
     (pattern, priority) <- patterns
     return (pattern, (entity, priority))
+evalMatcher psm (Order gen entities) = do
+  patterns <- evalGenerator psm Nothing gen
+  return $ fromListMulti $ do
+    pattern <- patterns
+    (entity, priority) <- zip entities [1..]
+    return (pattern, (entity, Top priority))
 
 generatorLineP :: WarnParser (Generator, Priority)
 generatorLineP = do
@@ -218,7 +225,7 @@ generatorLineP = do
   return (AnyOf gens, priority)
 
 matcherP :: WarnParser Matcher
-matcherP = choice [zipP, manyToOneP]
+matcherP = choice [zipP, manyToOneP, orderP]
   where
     nextLine = try (eol >> someSpaces)
     zipP = do
@@ -230,10 +237,13 @@ matcherP = choice [zipP, manyToOneP]
       gens <- generatorLineP `sepBy1` nextLine
       return (Zip (zip lineA lineB) gens)
     manyToOneP = do
-      x <- lexeme literalP
-      symbol "="
+      x <- try (lexeme literalP <* symbol "=")
       gens <- generatorLineP `sepBy1` nextLine
       return (ManyToOne gens x)
+    orderP = do
+      gen <- try (lexeme generatorP <* symbol ":")
+      entities <- spaceSeparated literalP
+      return (Order gen entities)
 
 data Rule = Rule {
   ruleName     :: RuleName,
