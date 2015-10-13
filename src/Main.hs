@@ -68,14 +68,14 @@ runGUI rules names = do
   (columnUnicodeName, columnRendererUnicodeName) <- addColumn "Unicode name"
 
   cellLayoutSetAttributes columnChar columnRendererChar model $
-    \(rule, entity) -> [ cellText := entity ]
+    \(_rule, entity) -> [ cellText := entity ]
   cellLayoutSetAttributes columnRule columnRendererRule model $
-    \(rule, entity) -> [ cellText := rule ]
+    \(rule, _entity) -> [ cellText := rule ]
   cellLayoutSetAttributes columnName columnRendererName model $
-    \(rule, entity) -> [
+    \(_rule, entity) -> [
       cellText := T.intercalate " / " (M.findWithDefault [] entity names) ]
   cellLayoutSetAttributes columnUnicodeName columnRendererUnicodeName model $
-    \(rule, entity) -> [
+    \(_rule, entity) -> [
       cellText := if T.length entity == 1
                     then T.charName (T.head entity)
                     else "" ]
