@@ -1,4 +1,5 @@
 {-# LANGUAGE
+NoImplicitPrelude,
 TupleSections,
 RecordWildCards,
 ScopedTypeVariables,
@@ -22,28 +23,17 @@ where
 
 
 -- General
-import Data.Functor
-import Data.Traversable
-import Data.Maybe
-import Control.Applicative
-import Control.Monad
-import Control.Arrow
+import BasePrelude hiding (try)
 import Numeric.Natural
 -- Monads
 import Control.Monad.Writer
 -- Lenses
 import Lens.Micro.GHC
--- Lists
-import Data.List (permutations, union, inits)
--- Sorting
-import Data.List (sortOn)
-import GHC.Exts (groupWith)
 -- Text
 import Text.Printf
 import qualified Data.Text as T
 import qualified Data.Text.IO as T
 import Data.Text (Text)
-import Data.Char
 -- Parsing
 import Text.Megaparsec
 import Text.Megaparsec.Text

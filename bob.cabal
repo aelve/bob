@@ -24,6 +24,7 @@ library
   exposed-modules:     Bob
   other-modules:       Paths_bob
   build-depends:       base == 4.8.*
+                     , base-prelude == 0.1.*
                      , containers == 0.5.*
                      , directory == 1.2.*
                      , filepath == 1.4.*
@@ -39,6 +40,7 @@ library
 executable bob
   main-is:             Main.hs
   build-depends:       base == 4.8.*
+                     , base-prelude == 0.1.*
                      , bob
                      , containers == 0.5.*
                      , gtk3 == 0.13.*

@@ -1,4 +1,5 @@
 {-# LANGUAGE
+NoImplicitPrelude,
 RecordWildCards,
 OverloadedStrings,
 ScopedTypeVariables,
@@ -10,11 +11,7 @@ module Main (main) where
 
 
 -- General
-import Data.Maybe
-import Data.Foldable
-import Control.Monad
--- Lists
-import Data.List (intercalate, dropWhileEnd)
+import BasePrelude hiding (on)
 -- Monads
 import Control.Monad.IO.Class (liftIO)
 -- Containers
@@ -29,7 +26,6 @@ import Text.Printf
 import Graphics.UI.Gtk
 -- Bob-specific
 import Bob
-
 
 
 runGUI :: [Rule] -> Map Entity [Text] -> IO ()
