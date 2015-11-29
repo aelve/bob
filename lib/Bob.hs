@@ -83,12 +83,12 @@ toPatternsMap m = fromListMulti $ do
   return (entity, (pattern, priority))
 
 data Generator
-  = Literal Pattern
-  | AnyOf [Generator]
-  | Sequence [Generator]
-  | Permutation [Generator]
-  | Reference Entity
-  | Variable
+  = Literal Pattern           -- abc or 'abc'
+  | AnyOf [Generator]         -- (a b c)
+  | Sequence [Generator]      -- a b c
+  | Permutation [Generator]   -- {a b c}
+  | Reference Entity          -- `name`
+  | Variable                  -- ()
   deriving (Show)
 
 priorityP :: WarnParser Priority
