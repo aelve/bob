@@ -295,27 +295,21 @@ ruleFileP = do
 {- |
 A parser for files with character names. The format is as follows:
 
-> some name
-> things having that name
+> entity1 = name1
+> entity2 = name2
 >
-> another name
-> things having that name
+> entity3 = name3
 >
 > ...
-
-“Things having that name” are specified as literals (see 'literalP') separated by spaces.
-
-It's possible for an entity to have several names.
 -}
-namesFileP :: WarnParser (Map Entity [Text])
-namesFileP = do
-  let oneGroup :: WarnParser [(Entity, Text)]
-      oneGroup = do
-        name <- currentLine
-        entities <- some (lexeme literalP)
-        eol
-        return (map (,name) entities)
-  fromListMulti . concat <$> (oneGroup `sepBy1` eol)
+namesFileP :: WarnParser (Map Entity Text)
+namesFileP = M.fromList . concat <$> some line `sepBy1` blankline
+  where
+    line = do
+      entity <- lexeme literalP
+      symbol "="
+      name <- currentLine
+      return (entity, name)
 
 {- |
 This code checks whether all priorities are satisfied – that is, for each pattern and entity it checks whether the pattern finds the entity in top N matches (where N is entity's priority). It does so by enumerating all patterns, then taking all entities that some specific pattern finds, then ordering them in layers like this
@@ -378,7 +372,7 @@ matchAndSortRules query =
   map fst . sortOn snd . concatMap (matchRule query)
 
 -- | Returns rules, names, and warnings\/parsing errors (if there were any).
-readData :: IO ([Rule], Map Entity [Text], [String])
+readData :: IO ([Rule], Map Entity Text, [String])
 readData = do
   dataDir <- (</> "data") <$> getDataDir
 
@@ -403,7 +397,7 @@ readData = do
       Left err -> (mempty, [show err])
       Right (names, warning) -> (names, maybeToList warning)
 
-  -- TODO: warn when an entity doesn't have a name
+  -- TODO: warn when an entity doesn't have a name or has several names
 
   -- Return everything.
   return (rules, names, nameErrors ++ ruleErrors)

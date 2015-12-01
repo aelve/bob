@@ -1,5 +1,23 @@
-arrow
-→ ←
+→ = right arrow
+← = left arrow
 
-integral
-∫ ∬ ∭
+∫ = integral
+∬ = double integral
+∭ = triple integral
+
+Ã = A with tilde
+Ñ = N with tilde
+Õ = O with tilde
+ã = a with tilde
+ñ = n with tilde
+õ = o with tilde
+Ĩ = I with tilde
+ĩ = i with tilde
+Ũ = U with tilde
+ũ = u with tilde
+Ẽ = E with tilde
+ẽ = e with tilde
+Ỹ = Y with tilde
+ỹ = y with tilde
+Ṽ = V with tilde
+ṽ = v with tilde

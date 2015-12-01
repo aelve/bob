@@ -28,7 +28,7 @@ import Graphics.UI.Gtk
 import Bob
 
 
-runGUI :: [Rule] -> Map Entity [Text] -> IO ()
+runGUI :: [Rule] -> Map Entity Text -> IO ()
 runGUI rules names = do
   initGUI
 
@@ -69,7 +69,7 @@ runGUI rules names = do
     \(rule, _entity) -> [ cellText := rule ]
   cellLayoutSetAttributes columnName columnRendererName model $
     \(_rule, entity) -> [
-      cellText := T.intercalate " / " (M.findWithDefault [] entity names) ]
+      cellText := M.findWithDefault "" entity names ]
   cellLayoutSetAttributes columnUnicodeName columnRendererUnicodeName model $
     \(_rule, entity) -> [
       cellText := if T.length entity == 1
