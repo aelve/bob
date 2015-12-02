@@ -1,0 +1,15 @@
+# we decide this based on approximate frequency of diacritics,
+# plus people probably look for ‘€’ pretty often
+a : á ä å
+A : Á Ä Å
+e : é è ê
+E : € É È Ê
+l : ł ľ ĺ
+L : Ł Ľ Ĺ
+n : ñ
+N : Ñ
+o : ö ø ó
+O : Ö Ø Ó
+t : ť
+u : ü
+U : Ü
