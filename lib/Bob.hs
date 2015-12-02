@@ -17,7 +17,6 @@ module Bob
   Rule(..),
   readData,
   matchRules,
-  matchAndSortRules,
 )
 where
 
@@ -28,7 +27,7 @@ import Numeric.Natural
 -- Monads
 import Control.Monad.Writer
 -- Lenses
-import Lens.Micro.GHC
+import Lens.Micro.GHC hiding ((&))
 -- Text
 import Text.Printf
 import qualified Data.Text as T
@@ -330,9 +329,15 @@ checkPriorities = mapMaybe checkPattern . allPatterns
     -- Find all patterns and associated entities.
     allPatterns :: [Rule] -> [(Pattern, [(Entity, Priority)])]
     allPatterns = M.toList . M.unionsWith (++) . map ruleEntities
-    -- Sort and group entities by priority.
+    -- Sort and group entities by priority. When an entity has several
+    -- priorities, pick lowest.
     sortEntities :: [(Entity, Priority)] -> [([Entity], Priority)]
-    sortEntities = map (map fst &&& snd.head) . groupWith snd
+    sortEntities =
+      map (map entity &&& priority . head) . groupWith priority .
+      map (entity . head &&& minimum . map priority) . groupWith entity
+      where
+        entity = fst
+        priority = snd
     -- Discard a group if its priority isn't 'Top'.
     isTopPriority :: ([Entity], Priority) -> Maybe ([Entity], Int)
     isTopPriority (x, Top n) = Just (x, fromIntegral n)
@@ -368,12 +373,25 @@ matchRule query Rule{..} = do
   (entity, priority) <- M.findWithDefault [] query ruleEntities
   return ((ruleNote, entity), priority)
 
-matchRules :: Pattern -> [Rule] -> [((Maybe RuleNote, Entity), Priority)]
-matchRules query = concatMap (matchRule query)
+{- |
+Find all matches for a pattern, sort results by priority. (When the same entity is matched by several rules, pick smallest priority.)
 
-matchAndSortRules :: Pattern -> [Rule] -> [(Maybe RuleNote, Entity)]
-matchAndSortRules query =
-  map fst . sortOn snd . concatMap (matchRule query)
+TODO: warn about the same pattern–entity pair having more than one rule note.
+-}
+matchRules :: Pattern -> [Rule] -> [((Maybe RuleNote, Entity), Priority)]
+matchRules query rules =
+  rules
+    -- Do the matching.
+    & concatMap (matchRule query)
+    -- Group results by entity.
+    & groupWith (snd . fst)
+    -- For each entity, pick lowest priority and any non-empty rule note.
+    & map (\xs -> let entity     = snd (fst (head xs))
+                      priorities = map snd xs
+                      notes      = map (fst . fst) xs
+                  in  ((asum notes, entity), minimum priorities))
+    -- Sort entities by priority.
+    & sortOn snd
 
 -- | Returns rules, names, and warnings\/parsing errors (if there were any).
 readData :: IO ([Rule], Map Entity Text, [String])

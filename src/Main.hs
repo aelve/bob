@@ -90,8 +90,8 @@ runGUI rules names = do
   searchEntry `on` editableChanged $ do
     query <- get searchEntry entryText
     listStoreClear model
-    let matches = matchAndSortRules query rules
-    for_ matches $ \(name, result) ->
+    let matches = matchRules query rules
+    for_ matches $ \((name, result), _priority) ->
       listStoreAppend model (name, result)
     unless (null matches) $
       treeViewSetCursor view [0] Nothing
