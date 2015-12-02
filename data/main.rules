@@ -1,11 +1,11 @@
-superscript
+# superscript
 zip '0123456789+=()ni'
     '⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁼⁽⁾ⁿⁱ'
     X: ()
     2: ()^
     1: ^()
 
-subscript
+# subscript
 zip '0123456789+=()aeoxhklmnpst'
     '₀₁₂₃₄₅₆₇₈₉₊₌₍₎ₐₑₒₓₕₖₗₘₙₚₛₜ'
     X: ()

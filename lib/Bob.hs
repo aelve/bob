@@ -13,7 +13,7 @@ module Bob
 (
   Pattern,
   Entity,
-  RuleName,
+  RuleNote,
   Rule(..),
   readData,
   matchRules,
@@ -67,7 +67,7 @@ instance Ord Priority where
   compare (Top _) Whatever  = LT
   compare (Top a) (Top b)   = compare a b
 
-type RuleName = Text
+type RuleNote = Text
 
 -- | Entities corresponding to a pattern (like “->” leads to “→”). There can
 -- be several entities corresponding to a pattern even inside a single rule.
@@ -243,15 +243,19 @@ matcherP = choice [zipP, manyToOneP, orderP]
       return (Order gen entities)
 
 data Rule = Rule {
-  ruleName     :: RuleName,
+  ruleNote     :: Maybe RuleNote,
   ruleEntities :: EntitiesMap }
   deriving (Show)
 
 ruleP :: PatternsMap -> WarnParser Rule
 ruleP scope = do
-  name <- currentLine
+  pos <- getPosition
+  mbNote <- optional $ do
+    -- TODO: think up something better about rule names (also see ‘comment’)
+    try (symbol "####")
+    currentLine
   many comment
-  let header = printf "warnings in rule ‘%s’:" (T.unpack name)
+  let header = printf "warnings in rule at %s:" (show pos)
   groupWarnings header $ do
     matchers <- some matcherP
     -- Evaluate all matchers, combining generated patterns as we go along and
@@ -275,7 +279,7 @@ ruleP scope = do
     entitiesMap <- go scope mempty 1 matchers
     -- Return the rule.
     let rule = Rule {
-          ruleName     = name,
+          ruleNote     = mbNote,
           ruleEntities = entitiesMap }
     return rule
 
@@ -359,15 +363,15 @@ checkPriorities = mapMaybe checkPattern . allPatterns
                  (length entities) priority
                  (unwords (map prettyChar entities))
 
-matchRule :: Pattern -> Rule -> [((RuleName, Entity), Priority)]
+matchRule :: Pattern -> Rule -> [((Maybe RuleNote, Entity), Priority)]
 matchRule query Rule{..} = do
   (entity, priority) <- M.findWithDefault [] query ruleEntities
-  return ((ruleName, entity), priority)
+  return ((ruleNote, entity), priority)
 
-matchRules :: Pattern -> [Rule] -> [((RuleName, Entity), Priority)]
+matchRules :: Pattern -> [Rule] -> [((Maybe RuleNote, Entity), Priority)]
 matchRules query = concatMap (matchRule query)
 
-matchAndSortRules :: Pattern -> [Rule] -> [(RuleName, Entity)]
+matchAndSortRules :: Pattern -> [Rule] -> [(Maybe RuleNote, Entity)]
 matchAndSortRules query =
   map fst . sortOn snd . concatMap (matchRule query)
 
@@ -472,6 +476,12 @@ comment = void $ do
   try $ do
     skipMany (char ' ')
     string "#"
+    -- We don't want to treat “####” as a comment because lets you add notes
+    -- to rules (in the beginning of the rule – look at ruleP). This is a
+    -- hack kinda.
+    --
+    -- TODO: think up something better about rule notes
+    notFollowedBy (string "###")
   anyChar `manyTill` try eol
 
 -- | Call this when you've parsed everything you needed from the current line

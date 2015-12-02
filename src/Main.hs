@@ -59,19 +59,22 @@ runGUI rules names = do
         return (column, renderer)
 
   (columnChar,        columnRendererChar)        <- addColumn "Character"
-  (columnRule,        columnRendererRule)        <- addColumn "Rule"
-  (columnName,        columnRendererName)        <- addColumn "Name"
+  (columnDescription, columnRendererDescription) <- addColumn "Description"
   (columnUnicodeName, columnRendererUnicodeName) <- addColumn "Unicode name"
 
   cellLayoutSetAttributes columnChar columnRendererChar model $
-    \(_rule, entity) -> [ cellText := entity ]
-  cellLayoutSetAttributes columnRule columnRendererRule model $
-    \(rule, _entity) -> [ cellText := rule ]
-  cellLayoutSetAttributes columnName columnRendererName model $
-    \(_rule, entity) -> [
-      cellText := M.findWithDefault "" entity names ]
+    \(_mbNote, entity) -> [ cellText := entity ]
+  cellLayoutSetAttributes columnDescription columnRendererDescription model $
+    \(mbNote, entity) -> [
+      cellText := let name = case M.lookup entity names of
+                        Nothing -> []
+                        Just x  -> [x]
+                      note = case mbNote of
+                        Nothing -> []
+                        Just x  -> ["[" <> x <> "]"]
+                  in  T.unwords (name ++ note) ]
   cellLayoutSetAttributes columnUnicodeName columnRendererUnicodeName model $
-    \(_rule, entity) -> [
+    \(_mbNote, entity) -> [
       cellText := if T.length entity == 1
                     then T.charName (T.head entity)
                     else "" ]

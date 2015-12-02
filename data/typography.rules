@@ -1,77 +1,77 @@
-ellipsis
+# ellipsis
 … = 1: ...
 
-asterism
+# asterism
 ⁂ = 1: ***
 
-interrobang
+# interrobang
 ‽ = 1: {? !}
 
-en dash
+# en dash
 – = 1: - --
 
-em dash
+# em dash
 — = 2: -
     1: ---
 
-figure dash
+# figure dash
 ‒ = 5: -
 
-horizontal bar
+# horizontal bar
 ― = 5: -
     3: ---
     1: ----
 
-swung dash
+# swung dash
 ⁓ = 1: {`—` ~}
     2: ~~
 
-apostrophe
+# apostrophe
 ’ = 1: ''''
 
-left single quotation mark
+# left single quotation mark
 ‘ = 1: '`'
     3: ''''
 
-right single quotation mark
+# right single quotation mark
 ’ = 3: ''''
 
-left double quotation mark
+# left double quotation mark
 “ = 2: '"' '``'
     3: ''''''
 
-right double quotation mark
+# right double quotation mark
 ” = 2: '"'
     3: ''''''
 
-left guillemet
+# left guillemet
 « = 1: <<
     4: '"'
 
-right quillemet
+# right quillemet
 » = 1: >>
     4: '"'
 
-single quotation marks
+# single quotation marks
 ‘’ = 1: ''''''
 
-double quotation marks
+# double quotation marks
 “” = 1: '""'
 
-guillemets
+# guillemets
 «» = 2: '""'
 
-service mark
+# service mark
 ℠ = 1: sm SM
 
-trademark
+# trademark
 ™ = 1: tm TM
 
-copyright
+# copyright
 © = 1: '(c)' '(C)' {(o O) (c C)} c C
 
-sound-recording copyright
+# sound-recording copyright
 ℗ = 1: '(p)' '(P)' {(o O) (p P)} p P
 
-registered trademark
+# registered trademark
 ® = 1: '(r)' '(R)' {(o O) (r R)} r R

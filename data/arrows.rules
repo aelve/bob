@@ -1,4 +1,4 @@
-horisontal arrow
+# horisontal arrow
 ← = 1: <- <
     X: -<
 → = 1: -> >
@@ -7,14 +7,14 @@ horisontal arrow
     2: {← →} <>
     1: <-> <-->
 
-vertical arrow
+# vertical arrow
 ↑ = 1: ^ {| ^}
 ↓ = 1: v V {| (v V)}
 ↕ = X: {`↑` `↓`}
     2: {(↑ ^| |^) (↓ v| |v)}
     1: {^ v} v|^ ^|v
 
-diagonal arrow
+# diagonal arrow
 ↖ = X: {\ `←`}
     2: (^ ← <- <)\
     1: \(^ ← <- <)
@@ -32,7 +32,7 @@ diagonal arrow
     1: \(v V → -> >)
     1: -v -V
 
-double arrow
+# double arrow
 ⇐ = X: {`←` =}
     2: =<
     1: <= ←=
@@ -48,7 +48,7 @@ double arrow
     1: {(= ⇐ <=) (v V)}
     1: {| | (v V)}
 
-crossed arrow
+# crossed arrow
 ↚ = X: {`←` /}
     2: /(<- ← <)
     1: (<- ← <)/
@@ -66,7 +66,7 @@ crossed arrow
     1: /(=> ⇒)
     1: =/>
 
-2-headed arrow
+# 2-headed arrow
 ↠ = X: `→`>
     3: →→
     4: >>
@@ -88,7 +88,7 @@ crossed arrow
     2: ↓↓ {(|v |V) (v| V|)}
     1: {v | v} {V | V} vv VV
 
-arrow with tail
+# arrow with tail
 ↢ = X: {`←` <}
     5: <<
     3: <← <<-
@@ -98,7 +98,7 @@ arrow with tail
     3: →> ->>
     1: >→ >->
 
-arrow with bar
+# arrow with bar
 ↤ = X: {`←` |}
     2: |<- |<
     1: <-| <|
@@ -114,7 +114,7 @@ arrow with bar
     2: {(t T) (v V)}
     1: TV
 
-paired arrows
+# paired arrows
 ⇄ = X: {`→` `←`}
     3: ←→ <> <-->
     2: ><
