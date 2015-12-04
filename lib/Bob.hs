@@ -321,6 +321,13 @@ extractPatterns :: [Rule] -> [(Pattern, [(Entity, Priority)])]
 extractPatterns = M.toList . M.unionsWith (++) . map ruleEntities
 
 {- |
+Find all entities and associated patterns.
+-}
+extractEntities :: [Rule] -> [(Entity, [(Pattern, Priority)])]
+extractEntities = M.toList . M.unionsWith (++) .
+                  map (toPatternsMap . ruleEntities)
+
+{- |
 Sort and group entities by priority. When an entity has several priorities, pick lowest.
 -}
 groupEntities :: [(Entity, Priority)] -> [([Entity], Priority)]
@@ -373,6 +380,24 @@ checkPriorities = mapMaybe checkPattern . extractPatterns
                  (length entities) priority
                  (unwords (map prettyChar entities))
 
+{- |
+This code finds entities that can't be entered using just the symbols on a standard keyboard.
+-}
+checkAscii :: [Rule] -> [String]
+checkAscii rules =
+  rules
+    -- Get a list of entities and corresponding patterns.
+    & extractEntities
+    & map (\(e, xs) -> (e, map fst xs))
+    -- Find entities that don't have at least 1 ASCII pattern.
+    & filter (\(_, ps) -> all (not . isGoodPattern) ps)
+    -- Generate warnings.
+    & map (\(e, ps) -> printf "‘%s’ can't be found using only ASCII; \
+                              \patterns that find it are: %s"
+                              (prettyChar e) (T.unpack (T.unwords ps)))
+  where
+    isGoodPattern = T.all (\c -> isAscii c && isPrint c)
+
 matchRule :: Pattern -> Rule -> [((Maybe RuleNote, Entity), Priority)]
 matchRule query Rule{..} = do
   (entity, priority) <- M.findWithDefault [] query ruleEntities
@@ -414,7 +439,8 @@ readData = do
       Left err -> ([], Just (show err))
       Right (rules, warning) -> (rules, warning)
   let rules = concat (map fst ruleResults)
-      ruleErrors = checkPriorities rules ++ catMaybes (map snd ruleResults)
+      ruleErrors = checkPriorities rules ++ checkAscii rules ++
+                   catMaybes (map snd ruleResults)
 
   -- Read entities' names.
   (names, nameErrors) <- do
