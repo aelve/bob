@@ -68,10 +68,13 @@
 ™ = 1: tm TM
 
 # copyright
-© = 1: '(c)' '(C)' {(o O) (c C)} c C
+© = 1: '(c)' '(C)' {(o O) (c C)}
+    3: c C
 
 # sound-recording copyright
-℗ = 1: '(p)' '(P)' {(o O) (p P)} p P
+℗ = 1: '(p)' '(P)' {(o O) (p P)}
+    3: p P
 
 # registered trademark
-® = 1: '(r)' '(R)' {(o O) (r R)} r R
+® = 1: '(r)' '(R)' {(o O) (r R)}
+    3: r R

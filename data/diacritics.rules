@@ -22,7 +22,8 @@ zip EeIiUu
 # grave accent
 zip AaEeIiNnOoUuWwYy
     ÀàÈèÌìǸǹÒòÙùẀẁỲỳ
-    1: {('`' \) ()}
+    2: {\ ()}
+    1: {'`' ()}
     X: ()
 
 # stroke
@@ -41,8 +42,8 @@ zip BbDdGgHhIiJjKkPpRrTtYyZz
 zip AaCcEeGgIiKkLlMmNnOoPpRrSsUuWwYyZz
     ÁáĆćÉéǴǵÍíḰḱĹĺḾḿŃńÓóṔṕŔŕŚśÚúẂẃÝýŹź
     1: ()'''' (),
-    2: ''''() ,() {/ ()}
-    X: ()
+    2: ''''() ,()
+    X: {/ ()} ()
 
 # breve
 zip AaEeIiOoUu
@@ -63,26 +64,14 @@ zip AaCcEeGgHhIiJjOoSsUuWwYyZz
 # caron
 zip AaIiCcDdEeGgHhjKkLlNnOoRrSsTtUuZz
     ǍǎǏǐČčĎďĚěǦǧȞȟǰǨǩĽľŇňǑǒŘřŠšŤťǓǔŽž
-    1: {(V v \/) ()}
+    3: {V ()}
+    1: {(v \/) ()}
     1: >() ()<
     2: <() ()>
     X: ()
 zip dtLl
     ďťĽľ
     2: {'''' ()}
-
-# bar
-zip Ll
-    Ƚƚ
-    1: -() {_ ()}
-    2: ()-
-    X: ()
-
-# diagonal stroke
-zip TtKkQqVv
-    ȾⱦꝂꝃꝘꝙꝞꝟ
-    1: {/ ()}
-    X: ()
 
 # double acute accent
 zip OoUu
@@ -104,4 +93,18 @@ zip AaUuwy
     ÅåŮůẘẙ
     1: ()o {'()' ()}
     2: o() {(O 0) ()}
+    X: ()
+
+# these aren't very common, so they don't get high priorities
+
+# diagonal stroke
+zip TtKkQqVv
+    ȾⱦꝂꝃꝘꝙꝞꝟ
+    3: {/ ()}
+    X: ()
+
+# bar
+zip Ll
+    Ƚƚ
+    3: {(_ -) ()}
     X: ()

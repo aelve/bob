@@ -1,153 +1,123 @@
-# euro
-€ = 1: euro eur EUR
-    2: (- = --)(e E)
-    1: (e E)(- = --)
-    1: e E
-    2: (= --)(c C)
-    1: (c C)(= --)
+# letter-like, important
+zip seylрp
+    $€¥£₽₽
+    5: ()
+zip SEYLРPc
+    $€¥£₽₽¢
+    3: ()
 
-# yuan / yen
-¥ = 1: yuan yen cny CNY jpy JPY
-    2: {(y Y) -}
-    2: (= --)(y Y)
-    1: (y Y)(= --)
-    1: y Y
+# letter-like, unimportant
+#
+# note that these are lower bounds – there are additional rules in vague.rules
+# that make most of these turn up earlier than 5th position (this applies to
+# important ones as well)
+zip nNpPcCcCtTaArRwWbBgGkKsSгlLtdmf
+    ₦₦₱₱₡₡₵₵₮₮₳₳₹₹₩₩฿฿₲₲₭₭₴₴₴₺₺₺₫₥ƒ
+    5: ()
 
-# naira
+# crossed letters (vertically)
+zip sbgc
+    $฿₲₵
+    3: {() (/ |)}
+    2: ()|
+zip SBGCc
+    $฿₲₵¢
+    2: {() (/ |)}
+    1: ()|
+
+# crossed letters (horizontally)
+zip lk
+    £₭
+    X: -()
+    3: ()-
+zip LK
+    £₭
+    X: -()
+    2: ()-
+£ = 1: L-          # pound is an exception because it's used often
+
+# doubly crossed letters (horizontally)
+zip npawyecs
+    ₦₱₳₩¥€€₴
+    X: (- = --)()
+    4: ()-
+    2: ()(= --)
+zip NPAWYECSг
+    ₦₱₳₩¥€€₴₴
+    X: (- = --)()
+    3: ()-
+    1: ()(= --)
+
+# doubly crossed letters (across)
+zip ctL
+    ₡₮₺
+    4: {() /}
+    2: {() //}
+zip CTtL
+    ₡₮₺₺
+    3: {() /}
+    1: {() //}
+
+# combinations of letters
+₨ = 1: Rs rs
+₧ = 1: Pts pts Pt pt
+
+# names and codes for currencies
 ₦ = 1: naira ngn NGN
-    3: {(n N) -}
-    2: (= --)(n N)
-    1: (n N)(= --)
-    1: n N
-
-# peso
 ₱ = 1: peso php PHP
-    3: {(p P) -}
-    2: (= --)(p P)
-    1: (p P)(= --)
-    1: p P
-
-# hryvnia
+₳ = 1: austral ara ARA
+₩ = 1: won krw KRW kpw KPW
+€ = 1: euro eur EUR
+¥ = 1: yuan yen cny CNY jpy JPY
 ₴ = 1: hryvnia hrn uah UAH
-    3: {(s S г) -}
-    2: (= --)(s S г)
-    1: (s S г)(= --)
-    2: s S
-    1: г
-
-# colón
 ₡ = 1: colon colón crc CRC svc SVC
-    2: {(c C) /}
-    1: {(c C) //}
-    2: c
-    1: C
-
-# tögrög (tugrik)
 ₮ = 1: togrog tögrög tugrik mnt MNT
-    3: {t /}
-    2: {T /}
-    2: {t //}
-    1: {T //}
-    2: t
-    1: T
-
-# Turkish lira
-₺ = 1: lira trl TRL
-    2: {(t l L) (/ -)}
-    1: {(t l L) (// -- =)}
-    2: l L
-    1: t
-
-# Indian rupee
+₪ = 1: shekel sheqel ils ILS
+฿ = 1: baht thb THB
+₲ = 1: guarani guaraní pyg PYG
+₵ = 1: cedi ghs GHS
+₭ = 1: kip lak LAK
 ₹ = 1: inr INR
-    2: r R rupee
-
-# peseta
 ₧ = 1: peseta esp ESP
-    1: Pts pts Pt pt
+₫ = 1: dong vnd VND
+ƒ = 1: florin gulden guilder
+₽ = 1: ruble rub RUB
+£ = 1: pound lb gbp GBP
+$ = 1: dollar usd USD
+¢ = 1: cent penny
+₥ = 1: mill mille mil
+₺ = 1: lira trl TRL
 
-# rupee
-₨ = 1: rupee Rs rs
+# “rupee” is ambiguous, so we explicitly set order for rupees
+# (generic rupee is probably more common than Indian rupee)
+rupee : ₨ ₹
+
+# --------------------------------------------------------------------
+# miscellaneous
+# --------------------------------------------------------------------
+
+# other special names, combinations, etc
+ƒ = 1: fl
+₪ = 1: nis NIS
+£ = 2: lf Lf '#'
+¢ = 1: 1/100 0.01 .01
+₥ = 1: 1/1000 0.001 .001
+
+# sometimes people write dollar signs with 2 bars
+$ = 1: {(s S) ||}
 
 # dong
-₫ = 1: dong vnd VND
-    3: {d (- _)}
-    1: d {d - _}
-
-# pound
-£ = 1: pound lb gbp GBP
-    2: lf Lf '#'
-    1: {(l L) -}
-    1: l L
-
-# kip
-₭ = 1: kip lak LAK
-    1: {(k K) -}
-    1: k K
+₫ = 3: {d (- _)}
+    1: {d - _}
 
 # ruble
-₽ = 1: ruble rub RUB
-    3: {(p P) (- =)}
-    1: {(р Р r R) (- =)}
-    1: р Р r R
-    2: p P
+₽ = 3: {(p P) (- =)}      # English “p”
+    2: {(р Р r R) (- =)}  # Russian “r”, English “r”
 
-# austral
-₳ = 1: austral ara ARA
-    3: {(a A) -}
-    2: (= --)(a A)
-    1: (a A)(= --)
-    1: a A
-
-# won
-₩ = 1: won krw KRW kpw KPW
-    3: {(w W) (- _)}
-    2: (= -- __)(w W)
-    1: (w W)(= -- __)
-    1: w W
-
-# dollar
-$ = 1: dollar usd USD
-    1: {(s S) (| ||)}
-    2: /(s S)
-    1: (s S)/
-    1: s S
-
-# baht
-฿ = 1: baht thb THB
-    2: {(b B) (/ |)}
-    1: (b B)|
-    1: b B
-
-# guaraní
-₲ = 1: guarani guaraní pyg PYG
-    2: {(g G) (/ |)}
-    1: (g G)|
-    1: g G
-
-# cedi
-₵ = 1: cedi ghs GHS
-    2: {(c C) (/ |)}
-    2: c
-    1: C C|
-
-# florin
-ƒ = 1: florin gulden guilder
-    1: f fl
-
-# shekel
-₪ = 1: shekel sheqel nis ils ILS
+# mill
+₥ = 2: /m
+    1: m/
 
 # currency sign
 ¤ = 1: currency
     1: {(o O) (x X)}
-
-# cent
-¢ = 1: cent penny 1/100 0.01 .01
-    3: {(c C) (| / '')}
-    1: c {c |} c/
-
-# mill
-₥ = 1: mill mille mil 1/1000 0.001 .001
-    2: /m
-    1: m/ m

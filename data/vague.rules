@@ -1,18 +1,50 @@
+# these are rules for letters
+#
 # we decide this based on approximate frequency of diacritics,
-# plus people probably look for ‘€’ pretty often
-a : á ä å
-A : Á Ä Å
-e : é è ê
+# plus people probably look for ‘€’ and other currency symbols pretty often
+a : á ä å ₳
+A : Á Ä Å ₳
+b : ฿
+B : ฿
+c : © ¢ č ₵ ₡
+C : © ₵ Č ₡
+d : ₫
+e : é è ê €
 E : € É È Ê
-l : ł ľ ĺ
-L : Ł Ľ Ĺ
-n : ñ
-N : Ñ
+f : ƒ
+g : ₲
+G : ₲
+k : ₭
+K : ₭
+l : ł ľ ĺ £ ₺
+L : £ Ł Ľ Ĺ ₺
+n : ñ ₦
+N : Ñ ₦
 o : ö ø ó
 O : Ö Ø Ó
-t : ť
+p : ₱ ℗
+P : ₱ ℗
+r : ® ₹
+R : ® ₹
+s : $ ∫
+S : $ ∫
+t : ť ₺ ₮
+T : Ť ₮
 u : ü
 U : Ü
+v : ↓
+V : ↓
+w : ₩
+W : ₩
+y : ¥
+Y : ¥
+
+# non-latin letters
+г : ₴
+р : ₽
+Р : ₽
 
 # en dash, em dash, minus sign, figure dash, horizontal bar
 - : – — − ‒ ―
+
+<> : ≶ ↔ ⇆ ≠
