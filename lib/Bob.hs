@@ -106,14 +106,14 @@ literalP = T.pack <$> (literalString <|> quotedString)
     -- A literal string is just some chars, like «abc».
     literalString = some literalChar
     literalChar = satisfy $ \x ->
-      or [isSymbol x, isPunctuation x, isAlphaNum x] &&
+      (isSymbol x || isPunctuation x || isAlphaNum x) &&
       x `notElem` ("\"'`()[]{}#" :: String)
     -- A quoted string looks like «'abc'» and can contain characters like
     -- «()» that can't be in an ordinary literal string.
     quotedString = singleQuotes (many quotedChar)
     quotedChar = choice [
       try (string "''") >> pure '\'',
-      satisfy $ \x -> not $ or [isSpace x, x == '\''] ]
+      satisfy $ \x -> not (isSpace x) && x /= '\'' ]
 
 generatorP :: WarnParser Generator
 generatorP = lexeme $ do
@@ -315,6 +315,23 @@ namesFileP = M.fromList . concat <$> some line `sepBy1` blankline
       return (entity, name)
 
 {- |
+Find all patterns and associated entities.
+-}
+extractPatterns :: [Rule] -> [(Pattern, [(Entity, Priority)])]
+extractPatterns = M.toList . M.unionsWith (++) . map ruleEntities
+
+{- |
+Sort and group entities by priority. When an entity has several priorities, pick lowest.
+-}
+groupEntities :: [(Entity, Priority)] -> [([Entity], Priority)]
+groupEntities =
+  map (map entity &&& priority . head) . groupWith priority .
+  map (entity . head &&& minimum . map priority) . groupWith entity
+  where
+    entity = fst
+    priority = snd
+
+{- |
 This code checks whether all priorities are satisfied – that is, for each pattern and entity it checks whether the pattern finds the entity in top N matches (where N is entity's priority). It does so by enumerating all patterns, then taking all entities that some specific pattern finds, then ordering them in layers like this
 
   * “x”, “y” have priority <= 1
@@ -324,20 +341,8 @@ This code checks whether all priorities are satisfied – that is, for each patt
 and finally outputting a warning for each layer that has more entities than its priority allows.
 -}
 checkPriorities :: [Rule] -> [String]
-checkPriorities = mapMaybe checkPattern . allPatterns
+checkPriorities = mapMaybe checkPattern . extractPatterns
   where
-    -- Find all patterns and associated entities.
-    allPatterns :: [Rule] -> [(Pattern, [(Entity, Priority)])]
-    allPatterns = M.toList . M.unionsWith (++) . map ruleEntities
-    -- Sort and group entities by priority. When an entity has several
-    -- priorities, pick lowest.
-    sortEntities :: [(Entity, Priority)] -> [([Entity], Priority)]
-    sortEntities =
-      map (map entity &&& priority . head) . groupWith priority .
-      map (entity . head &&& minimum . map priority) . groupWith entity
-      where
-        entity = fst
-        priority = snd
     -- Discard a group if its priority isn't 'Top'.
     isTopPriority :: ([Entity], Priority) -> Maybe ([Entity], Int)
     isTopPriority (x, Top n) = Just (x, fromIntegral n)
@@ -360,7 +365,7 @@ checkPriorities = mapMaybe checkPattern . allPatterns
       where
         warnings = map generateWarning .
                    filter (not . isGood) .
-                   layers . mapMaybe isTopPriority . sortEntities
+                   layers . mapMaybe isTopPriority . groupEntities
                      $ pairs
         header = printf "‘%s’ finds:" (T.unpack pattern)
         generateWarning (entities, priority) =
