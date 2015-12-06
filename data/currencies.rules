@@ -37,13 +37,15 @@ zip LK
 £ = 1: L-          # pound is an exception because it's used often
 
 # doubly crossed letters (horizontally)
-zip npawyecs
-    ₦₱₳₩¥€€₴
+#
+# ‘₮’ and ‘₺’ are sufficiently horizontal, I guess
+zip npawyecst
+    ₦₱₳₩¥€€₴₮
     X: (- = --)()
     4: ()-
     2: ()(= --)
-zip NPAWYECSг
-    ₦₱₳₩¥€€₴₴
+zip NPAWYECSTtг
+    ₦₱₳₩¥€€₴₮₺₴
     X: (- = --)()
     3: ()-
     1: ()(= --)
