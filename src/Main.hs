@@ -12,6 +12,8 @@ module Main (main) where
 
 -- General
 import BasePrelude hiding (on)
+-- Lenses
+import Lens.Micro.GHC hiding (set)
 -- Monads
 import Control.Monad.IO.Class (liftIO)
 -- Containers
@@ -22,8 +24,11 @@ import qualified Data.Text as T
 import Data.Text (Text)
 import qualified Data.Text.ICU.Char as T
 import Text.Printf
+import Numeric (showHex)
 -- GUI
 import Graphics.UI.Gtk
+-- Browser
+import Web.Browser
 -- Bob-specific
 import Bob
 
@@ -96,11 +101,11 @@ runGUI rules names = do
     unless (null matches) $
       treeViewSetCursor view [0] Nothing
 
-  let getVariantsNumber = length <$> listStoreToList model
+  let getVariantsCount = length <$> listStoreToList model
 
   let choose mbIndex = do
-        variantsNumber <- getVariantsNumber
-        unless (variantsNumber == 0) $ do
+        variantsCount <- getVariantsCount
+        unless (variantsCount == 0) $ do
           row <- listStoreGetValue model (fromMaybe 0 mbIndex)
           clipboard <- clipboardGet selectionClipboard
           clipboardSetText clipboard (snd row)
@@ -109,16 +114,55 @@ runGUI rules names = do
 
   view `on` rowActivated $ \path _ -> choose (listToMaybe path)
 
+  -- TODO: rename “view” to something better
+
   let getSelectedRow = listToMaybe . fst <$> treeViewGetCursor view
+
+  viewMenu <- do
+    menu <- menuNew
+    infoItem <- menuItemNewWithLabel ("See information" :: Text)
+    infoItem `on` menuItemActivated $ do
+      mbI <- getSelectedRow
+      let i = case mbI of
+                Nothing -> error "tried to show menu but nothing is selected"
+                Just x  -> x
+      (_note, entity) <- listStoreGetValue model i
+      if T.length entity == 1
+        then let code = showHex (fromEnum (T.head entity)) ""
+             in  void $ openBrowser ("http://unicode-table.com/en/" ++ code)
+        else putStrLn "can't look up entities that aren't single characters"
+    menuShellAppend menu infoItem
+    widgetShowAll menu
+    return menu
+
+  view `on` buttonPressEvent $ tryEvent $ do
+    time <- eventTime
+    SingleClick <- eventClick
+    RightButton <- eventButton
+    coords <- over each round <$> eventCoordinates
+    liftIO $ do
+      mbPath <- treeViewGetPathAtPos view coords
+      case mbPath of
+        Nothing -> return ()
+        Just (path, _, _) -> do
+          treeViewSetCursor view path Nothing
+          menuPopup viewMenu (Just (RightButton, time))
+
+  view `on` popupMenuSignal $ do
+    -- TODO: the menu should appear at the selected thing
+    -- (also, a question: what should be done if the selected thing has
+    -- been scrolled away and isn't even visible?)
+    menuPopup viewMenu (Just (OtherButton 0, currentTime))
+    return True
 
   searchEntry `on` keyPressEvent $ do
     key <- T.unpack <$> eventKeyName
     mbIndex <- liftIO getSelectedRow
-    variantsNumber <- liftIO getVariantsNumber
-    let indexPrev Nothing  = if variantsNumber == 0 then [] else [0]
+    variantsCount <- liftIO getVariantsCount
+    let indexPrev Nothing  = if variantsCount == 0 then [] else [0]
         indexPrev (Just i) = [max 0 (i-1)]
-    let indexNext Nothing  = if variantsNumber == 0 then [] else [0]
-        indexNext (Just i) = [min (variantsNumber-1) (i+1)]
+    let indexNext Nothing  = if variantsCount == 0 then [] else [0]
+        indexNext (Just i) = [min (variantsCount-1) (i+1)]
     liftIO $ case key of
       "Up"   -> do treeViewSetCursor view (indexPrev mbIndex) Nothing
                    return True

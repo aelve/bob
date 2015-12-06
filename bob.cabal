@@ -44,6 +44,8 @@ executable bob
                      , bob
                      , containers == 0.5.*
                      , gtk3 == 0.13.*
+                     , microlens-ghc == 0.3.*
+                     , open-browser == 0.2.*
                      , text == 1.2.*
                      , text-icu == 0.7.*
                      , transformers == 0.4.*
