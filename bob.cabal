@@ -30,6 +30,7 @@ library
                      , filepath == 1.4.*
                      , megaparsec == 4.0.*
                      , microlens-ghc == 0.3.*
+                     , microlens-th == 0.2.*
                      , mtl == 2.2.*
                      , text == 1.2.*
   hs-source-dirs:      lib

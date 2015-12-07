@@ -27,6 +27,7 @@ main = do
         null mbErrors @? unlines mbErrors
     , parsingTests
     , behaviorTests
+    , matcherTests
     , warningTests
     ]
 
@@ -78,9 +79,41 @@ behaviorTests = testGroup "behavior"
         "    Xx",
         "    2: {(A a) ()}" ]
       [Rule Nothing [("AA",[("X",Top 2)]),
-                     ("Aa",[("x",Top 2),("X",Top 2)]),
-                     ("aA",[("x",Top 2),("X",Top 2)]),
+                     ("Aa",[("X",Top 2),("x",Top 2)]),
+                     ("aA",[("X",Top 2),("x",Top 2)]),
                      ("aa",[("x",Top 2)])]]
+        @=? rules
+  ]
+
+matcherTests :: TestTree
+matcherTests = testGroup "matchers"
+  [ testCase "zip" $ do
+      rules <- testReadRules $ T.unlines [
+        "zip ab",
+        "    AB",
+        "    1: ()+",
+        "    2: +()" ]
+      [Rule Nothing [("a+",[("A",Top 1)]),
+                     ("b+",[("B",Top 1)]),
+                     ("+a",[("A",Top 2)]),
+                     ("+b",[("B",Top 2)])]]
+        @=? rules
+
+  , testCase "many-to-one" $ do
+      rules <- testReadRules $ T.unlines [
+        "x = 1: a",
+        "    2: b" ]
+      [Rule Nothing [("a",[("x",Top 1)]),
+                     ("b",[("x",Top 2)])]]
+        @=? rules
+
+  , testCase "order" $ do
+      rules <- testReadRules $ T.unlines [
+        "(x y) : a b" ]
+      [Rule Nothing [("x",[("a",Top 1),
+                           ("b",Top 2)]),
+                     ("y",[("a",Top 1),
+                           ("b",Top 2)])]]
         @=? rules
   ]
 

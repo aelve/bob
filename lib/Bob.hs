@@ -5,7 +5,8 @@ RecordWildCards,
 ScopedTypeVariables,
 OverloadedStrings,
 RankNTypes,
-FlexibleContexts
+FlexibleContexts,
+TemplateHaskell
   #-}
 
 
@@ -16,6 +17,8 @@ module Bob
   Priority(..),
   RuleNote,
   Rule(..),
+  ruleNote,
+  ruleEntities,
   Warning,
   readRuleFile,
   readData,
@@ -31,6 +34,7 @@ import Numeric.Natural
 import Control.Monad.Writer
 -- Lenses
 import Lens.Micro.GHC hiding ((&))
+import Lens.Micro.TH
 -- Text
 import Text.Printf
 import qualified Data.Text as T
@@ -77,6 +81,13 @@ type EntitiesMap = Map Pattern [(Entity, Priority)]
 
 -- | All patterns that an entity corresponds to (like “→” leads to “->”, “>”).
 type PatternsMap = Map Entity [(Pattern, Priority)]
+
+data Rule = Rule {
+  _ruleNote     :: Maybe RuleNote,
+  _ruleEntities :: EntitiesMap }
+  deriving (Eq, Show)
+
+makeLenses ''Rule
 
 toPatternsMap :: EntitiesMap -> PatternsMap
 toPatternsMap m = fromListMulti $ do
@@ -244,11 +255,6 @@ matcherP = choice [zipP, manyToOneP, orderP]
       entities <- some (lexeme literalP) <* nextLine
       return (Order gen entities)
 
-data Rule = Rule {
-  ruleNote     :: Maybe RuleNote,
-  ruleEntities :: EntitiesMap }
-  deriving (Eq, Show)
-
 ruleP :: PatternsMap -> WarnParser Rule
 ruleP scope = do
   pos <- getPosition
@@ -281,19 +287,21 @@ ruleP scope = do
     entitiesMap <- go scope mempty 1 matchers
     -- Return the rule.
     let rule = Rule {
-          ruleNote     = mbNote,
-          ruleEntities = entitiesMap }
+          _ruleNote     = mbNote,
+          _ruleEntities = entitiesMap }
     return rule
 
 -- TODO: explain the format of ruleFileP, ruleP, etc
 ruleFileP :: WarnParser [Rule]
 ruleFileP = do
   many (blankline <|> comment)
-  go mempty
+  -- Let's sort the pairs so that it'd be easier to write tests (which assume
+  -- consistent order).
+  over (each . ruleEntities . traversed) sort <$> go mempty
   where
     go psm = option [] $ do
       rule <- ruleP psm
-      let psm' = M.unionWith (++) psm (toPatternsMap (ruleEntities rule))
+      let psm' = M.unionWith (++) psm (toPatternsMap (rule ^. ruleEntities))
       choice [
         paragraphSeparator *> ((rule:) <$> go psm'),
         pure [rule] ]
@@ -321,14 +329,14 @@ namesFileP = M.fromList . concat <$> some line `sepBy1` blankline
 Find all patterns and associated entities.
 -}
 extractPatterns :: [Rule] -> [(Pattern, [(Entity, Priority)])]
-extractPatterns = M.toList . M.unionsWith (++) . map ruleEntities
+extractPatterns = M.toList . M.unionsWith (++) . map (^. ruleEntities)
 
 {- |
 Find all entities and associated patterns.
 -}
 extractEntities :: [Rule] -> [(Entity, [(Pattern, Priority)])]
 extractEntities = M.toList . M.unionsWith (++) .
-                  map (toPatternsMap . ruleEntities)
+                  map (toPatternsMap . (^. ruleEntities))
 
 {- |
 Sort and group entities by priority. When an entity has several priorities, pick lowest.
@@ -403,8 +411,8 @@ checkAscii rules =
 
 matchRule :: Pattern -> Rule -> [((Maybe RuleNote, Entity), Priority)]
 matchRule query Rule{..} = do
-  (entity, priority) <- M.findWithDefault [] query ruleEntities
-  return ((ruleNote, entity), priority)
+  (entity, priority) <- M.findWithDefault [] query _ruleEntities
+  return ((_ruleNote, entity), priority)
 
 {- |
 Find all matches for a pattern, sort results by priority. (When the same entity is matched by several rules, pick smallest priority.)
