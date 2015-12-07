@@ -28,6 +28,7 @@ main = do
     , parsingTests
     , behaviorTests
     , matcherTests
+    , generatorTests
     , warningTests
     ]
 
@@ -125,6 +126,77 @@ matcherTests = testGroup "matchers"
                            ("b",Top 2)]),
                      ("y",[("a",Top 1),
                            ("b",Top 2)])]]
+        @=? rules
+  ]
+
+generatorTests :: TestTree
+generatorTests = testGroup "generators"
+  [ testCase "row of generators" $ do
+      rules <- testReadRules $ T.unlines [
+        "x = 1: a (b c)" ]
+      [Rule Nothing [("a",[("x",Top 1)]),
+                     ("b",[("x",Top 1)]),
+                     ("c",[("x",Top 1)])]]
+        @=? rules
+
+  , testCase "sequence" $ do
+      rules <- testReadRules $ T.unlines [
+        "x = 1: +(a b){c d}-" ]
+      [Rule Nothing [("+acd-",[("x",Top 1)]),
+                     ("+adc-",[("x",Top 1)]),
+                     ("+bcd-",[("x",Top 1)]),
+                     ("+bdc-",[("x",Top 1)])]]
+        @=? rules
+
+  , testCase "literal" $ do
+      rules <- testReadRules $ T.unlines [
+        "x = 1: a 'bcd' '''' '()'" ]
+      [Rule Nothing [("a"  ,[("x",Top 1)]),
+                     ("bcd",[("x",Top 1)]),
+                     ("'"  ,[("x",Top 1)]),
+                     ("()" ,[("x",Top 1)])]]
+        @=? rules
+
+  , testCase "single generator" $ do
+      rules <- testReadRules $ T.unlines [
+        "x = 1: (x y)" ]
+      [Rule Nothing [("x",[("x",Top 1)]),
+                     ("y",[("x",Top 1)])]]
+        @=? rules
+
+  , testCase "variable" $ do
+      rules <- testReadRules $ T.unlines [
+        "zip a",
+        "    A",
+        "    1: ()" ]
+      [Rule Nothing [("a",[("A",Top 1)])]]
+        @=? rules
+
+  , testCase "any-of" $ do
+      rules <- testReadRules $ T.unlines [
+        "x = 1: (a b)" ]
+      [Rule Nothing [("a",[("x",Top 1)]),
+                     ("b",[("x",Top 1)])]]
+        @=? rules
+
+  , testCase "permutation" $ do
+      rules <- testReadRules $ T.unlines [
+        "x = 1: {a b}" ]
+      [Rule Nothing [("ab",[("x",Top 1)]),
+                     ("ba",[("x",Top 1)])]]
+        @=? rules
+
+  , testCase "reference" $ do
+      rules <- testReadRules $ T.unlines [
+        "a = 1: a b",
+        "",
+        "x = 1: `a``'a'`" ]
+      [Rule Nothing [("a",[("a",Top 1)]),
+                     ("b",[("a",Top 1)])],
+       Rule Nothing [("aa",[("x",Top 1)]),
+                     ("ab",[("x",Top 1)]),
+                     ("ba",[("x",Top 1)]),
+                     ("bb",[("x",Top 1)])]]
         @=? rules
   ]
 
