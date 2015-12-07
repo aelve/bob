@@ -1,3 +1,4 @@
+# ================ A
 # à bas
 # à la
 # à la carte
@@ -5,89 +6,79 @@
 # à gogo and àgo-go
 # abacá
 # abaká
-# abbé
-# açaí
-
+abbé  = 1: abbe
+abbés = 1: abbes
+#
+açaí = 1: acai
+#
 adiós = 1: adios
-
 # agèd
-# agrément
+agrément  = 1: agrement
+agréments = 1: agrements
 # ampère
 # Ancien Régime
 # ångström
 # animé (the oleo-resin)
 # áo dài
-
 aperçu  = 1: apercu
 aperçus = 1: apercus
-
-# apéritif
-
+#
+apéritif  = 1: aperitif
+apéritifs = 1: aperitifs
+#
 appliqué    = 1: applique
 appliqués   = 1: appliques
 appliquéd   = 1: appliqued
 appliquéing = 1: appliqueing
-
+#
 après-ski    = 1: apres-ski
 après-skiing = 1: apres-skiing
-
+#
 arête  = 1: arete
 arêtes = 1: aretes
-
+#
 attaché   = 1: attache
 attachée  = 1: attachee
 attachés  = 1: attaches
 attachées = 1: attachees
-
+#
 auto-da-fé  = 1: auto-da-fe
 autos-da-fé = 1: autos-da-fe
 
+# ================ B
 barège = 1: barege
-
 # beau idéal
 # belle époque
 # béguin
 # bête noire
-
 bêtise = 1: betise
-
 # Bichon Frisé
-
 blasé = 1: blase
-
 # blessèd
 # bobèche
-
 boîte  = 1: boite
 boîtes = 1: boites
-
+#
 bombé = 1: bombe
-
 # Bön
 # Boötes
 # boutonnière
-
 bric-à-brac = 1: bric-a-brac
-
 # Brontë Beyoncé
 
+# ================ C
 café  = 1: cafe
 cafés = 1: cafes
-
 # cafetière
 # calèche
 # caïquejee
-
 canapé  = 1: canape
 canapés = 1: canapes
-
 # cañón (rare or obsolete - now canyon)
 # cap-à-pie
 # Champs-Élysées
-
 château  = 1: chateau
 châteaux = 1: chateaux
-
 # chargé d'affaires
 # cause célèbre
 # chacun à son goût
@@ -95,11 +86,9 @@ châteaux = 1: chateaux
 # chèvre
 # Chloë
 # cinéma vérité
-
 cliché  = 1: cliche
 clichés = 1: cliches
 clichéd = 1: cliched
-
 # cliché-verre
 # comme ci comme ça
 # cloisonné
@@ -122,24 +111,21 @@ clichéd = 1: cliched
 # crème de cacao
 # crème de menthe
 # crème fraîche
-
 crêpe  = 1: crepe
 crêpey = 1: crepey
 crêpy  = 1: crepy
 crêpes = 1: crepes
-
 # Creüsa
 # croûton
 # crudités
 # Curaçao
 # cursèd (rare)
 
+# ================ D
 # daïs
 # dấu hỏi
-
 débâcle  = 1: debacle
 débâcles = 1: debacles
-
 # débutante
 # déclassé
 # décolletage
@@ -149,9 +135,7 @@ débâcles = 1: debacles
 # dégagé
 # déjà vu
 # démarche
-
 démodé = 1: demode
-
 # dénouement
 # dépôt (rare)
 # dérailleur
@@ -162,146 +146,122 @@ démodé = 1: demode
 # discothèque
 # divorcé(e)
 # Doña
-
 doppelgänger  = 1: doppelganger
 doppelgängers = 1: doppelgangers
 
+# ================ E
 éclair  = 1: eclair
 éclairs = 1: eclairs
-
 # éclat
 # Éire
 # El Niño
 # élan
 # élite
 # émigré
-
 entrée  = 1: entree
 entrées = 1: entrees
-
 # entrepôt
-
 entrecôte  = 1: entrecote
 entrecôtes = 1: entrecotes
-
+#
 épée    = 1: epee
 épées   = 1: epees
 épéeist = 1: epeeist
-
 # étouffée
 # étude
-
 exposé  = 1: expose
 exposés = 1: exposes
 
+# ================ F
 façade  = 1: facade
 façades = 1: facades
-
 # fête
-
 faïence = 1: faience
-
 # filmjölk
 # fin de siècle
-
 flambé    = 1: flambe
 flambés   = 1: flambes
 flambéed  = 1: flambeed
 flambéing = 1: flambeing
-
+#
 flèche  = 1: fleche
 flèches = 1: fleches
-
 # föhn wind
 # folie à deux
-
 fouetté  = 1: fouette
 fouettés = 1: fouettes
-
+#
 frappé = 1: frappe
-
 # fräulein
 # Führer
-
 fiancé   = 1: fiance
 fiancée  = 1: fiancee
 fiancés  = 1: fiances
 fiancées = 1: fiancees
 
+# ================ G
 garçon  = 1: garcon
 garçons = 1: garcons
-
 # garçonnière
 # gâteau
 # gemütlichkeit
-
 glacé = 1: glace
-
+#
 glögg = 1: glogg
-
 # Gewürztraminer
 # Götterdämmerung
 # Gräfenberg spot
 # gruyère (cheese)
 
+# ================ H
 habitué  = 1: habitue
 habitués = 1: habitues
-
+#
 háček  = 1: hacek
 háčeks = 1: haceks
-
 # hôtel (rare)
 
+# ================ I
 ingénue  = 1: ingenue
 ingénues = 1: ingenues
 
+# ================ J
 # jäger
-
 jalapeño  = 1: jalapeno
 jalapeños = 1: jalapenos
-
 # jardinière
 
+# ================ K
 # kroužek
-
 kümmel = 1: kummel
-
 # kåldolmar
 
+# ================ L
 # Laocoön
-
 lamé = 1: lame
-
 # ländler
 # langue d'oïl
 # La Niña
 # littérateur
 # lycée
 
+# ================ M
 # macédoine
-
 macramé = 1: macrame
-
 # maître d'hôtel
 # malagueña
-
 mañana = 1: manana
-
+#
 manège  = 1: manege
 manèges = 1: maneges
-
 # manqué
 # Māori
-
 maté = 1: mate
-
 # matériel
 # matinée
 # mélange
-
 mêlée  = 1: melee
 mêlées = 1: melees
-
 # ménage à trois
 # mésalliance
 # métier
@@ -309,65 +269,57 @@ mêlées = 1: melees
 # minaudière
 # Monégasque
 # moiré
+# Montaño
 
+# ================ N
 naïf     = 1: naif
 naïve    = 1: naive
 naïvely  = 1: naively
 naïvety  = 1: naivety
 naïveté  = 1: naivete
 naïvetés = 1: naivetes
-
+#
 né  = 1: ne
 née = 1: nee
-
 # négligée
 # Neufchâtel
 # Nez Percé
 # Noël
 # noöne (rare)
 # número uno (Spanish with accent, Italian without)
-# Montaño
 
+# ================ O
 # objet trouvé
 # olé
-
 ombré = 1: ombre
-
 # omertà
 # oöcyte
 # oölogy (rare)
 # opéra bouffe
 # opéra comique
 # opïum (rare)
-
 öre = 2: ore
-
+#
 øre = 2: ore
-
+#
 outré = 1: outre
 
+# ================ P
 papier-mâché = 1: papier-mache
-
+#
 passé = 1: passe
-
+#
 pâté = 1: pate
-
 # phở
 # pièce de résistance
 # pied-à-terre
-
 plissé = 1: plisse
-
 # piña colada
-
 piñata  = 1: pinata
 piñatas = 1: pinatas
-
 # piñón
 # piraña (usually piranha)
-
 piqué = 1: pique
-
 # più
 # plié
 # précis
@@ -379,74 +331,74 @@ piqué = 1: pique
 # prêt-à-porter
 # protégé
 # protégée
-
 purée    = 1: puree
 purées   = 1: purees
 puréeing = 1: pureeing
 puréed   = 1: pureed
 
+# ================ Q
 # Québec
 # Québécois
 
+# ================ R
 # raison d'être
 # recherché
-# réclame
+réclame  = 1: reclame
+réclames = 1: reclames
 # reëlect [-ed, -ing] (rare)
 # reënter [-ed, -ing] (rare)
 # reëstablish [-ed, -ing] (rare)
 # régime
-
 résumé  = 1: resume
 résumés = 1: resumes
-
 # residuüm (rare)
-# retroussé
-# risqué
-
+retroussé = 1: retrousse
+#
+risqué = 1: risque
+#
 rôle  = 1: role
 rôles = 1: roles
-
 # rivière
 # roman à clef
 # rosé
 # roué
 
+# ================ S
 # sauté
 # séance
 # señor
 # señora
 # señorita
 # Sinn Féin
-
 smörgåsbord  = 1: smorgasbord
 smörgåsbords = 1: smorgasbords
-
 # smörgåstårta
 # soigné
 # soirée
-
 soufflé  = 1: souffle
 soufflés = 1: souffles
-
 # soupçon
 # spermatozoön
 # surströmming
 
+# ================ T
 tête-à-tête  = 1: tete-a-tete
 tête-à-têtes = 1: tete-a-tetes
-
+#
 touché = 1: touche
-
 # tourtière
 
+# ================ U
 # über, Übermensch
 
+# ================ V
 vicuña  = 1: vicuna
 vicuñas = 1: vicunas
-
+#
 vis-à-vis = 1: vis-a-vis
-
+#
 voilà = 1: voila
 
+# ================ Z
 # Zaïre
 # zoölogy
