@@ -37,6 +37,17 @@ parsingTests = testGroup "parsing"
       rules <- testReadRules "a = 1: b\n"
       [Rule Nothing [("b", [("a", Top 1)])]] @=? rules
 
+  , testCase "2 rules" $ do
+      rules <- testReadRules $ T.unlines [
+        "a = 1: b",
+        "# whatever",
+        "",
+        "# whatever",
+        "x = X: y" ]
+      [Rule Nothing [("b", [("a", Top 1)])],
+       Rule Nothing [("y", [("x", Whatever)])]]
+        @=? rules
+
   , testCase "Newline at the end of file isn't needed" $ do
       rules <- testReadRules "a = 1: b"
       [Rule Nothing [("b", [("a", Top 1)])]] @=? rules
