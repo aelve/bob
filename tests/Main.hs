@@ -3,6 +3,7 @@ OverloadedStrings,
 OverloadedLists
   #-}
 
+
 module Main where
 
 
@@ -34,15 +35,25 @@ parsingTests = testGroup "parsing"
   [ testCase "Simplest rule can be parsed" $ do
       rules <- testReadRules "a = 1: b\n"
       [Rule Nothing [("b", [("a", Top 1)])]] @=? rules
+
   , testCase "Newline at the end of file isn't needed" $ do
       rules <- testReadRules "a = 1: b"
       [Rule Nothing [("b", [("a", Top 1)])]] @=? rules
+
   , testCase "A file can be empty" $ do
       rules <- testReadRules ""
       [] @=? rules
+
   , testCase "A file can contain just a comment" $ do
       rules <- testReadRules "# comment"
       [] @=? rules
+
+  , testCase "Priority can't be 0" $ do
+      err <- testReadRulesButFail "a = 0: b"
+      unlines ["line 1, column 6:",
+               "expecting rest of integer",
+               "priority can't be 0" ]
+        @=? err
   ]
 
 behaviorTests :: TestTree
@@ -64,6 +75,7 @@ warningTests = testGroup "warnings"
       unlines ["warnings in rule at line 1, column 1:",
                "  lengths of zipped rows don't match" ]
         @=? warnings
+
   , testCase "Warn when undefined things are referenced" $ do
       (_, warnings) <- testReadRulesAndWarnings $ T.unlines [
         "a   : 1 2 3",
@@ -71,6 +83,7 @@ warningTests = testGroup "warnings"
       unlines ["warnings in rule at line 1, column 1:",
                "  ‘e’ was referenced but wasn't defined yet" ]
         @=? warnings
+
   , testCase "Warn when no value can be provided for a variable" $ do
       (_, warnings) <- testReadRulesAndWarnings $ T.unlines [
         "a  : 1 2 3",
@@ -78,6 +91,7 @@ warningTests = testGroup "warnings"
       unlines ["warnings in rule at line 1, column 1:",
                "  there's a variable in the rule but no value provided for it" ]
         @=? warnings
+
   , testCase "Warn when empty patterns are encountered" $ do
       (_, warnings) <- testReadRulesAndWarnings $ T.unlines [
         "a  : 1 2 3",
@@ -85,6 +99,7 @@ warningTests = testGroup "warnings"
       unlines ["warnings in rule at line 1, column 1:",
                "  matcher #2 contains an empty pattern" ]
         @=? warnings
+
   , testCase "Warn when priorities aren't satisfied" $ do
       (_, warnings) <- testReadRulesAndWarnings $ T.unlines [
         "e1 = 1: x",
@@ -100,6 +115,7 @@ warningTests = testGroup "warnings"
                "‘y’ finds:",
                "  3 entities with priority 2 or less: e3 e1 e2" ]
         @=? warnings
+
   , testCase "Warn when an entity can't be found using only ASCII" $ do
       (_, warnings) <- testReadRulesAndWarnings $ T.unlines [
         "bad1 = 1: x€y",     -- bad because non-ASCII
@@ -124,6 +140,18 @@ testReadRules rulesString =
       return rules
     Right (_rules, warnings) -> do
       assertFailure (unparagraphs warnings)
+      error "test failed"
+
+testReadRulesButFail :: Text -> IO String
+testReadRulesButFail rulesString =
+  case readRuleFile rulesString of
+    Left err ->
+      -- Errors don't have “\n” at the end but we often compare them
+      -- against something generated with 'unlines', and 'unlines'
+      -- always adds a newline, so let's add a newline too.
+      return (show err ++ "\n")
+    Right _ -> do
+      assertFailure "there was no error"
       error "test failed"
 
 testReadRulesAndWarnings :: Text -> IO ([Rule], String)
