@@ -547,7 +547,7 @@ comment = void $ do
 nextLine :: WarnParser ()
 nextLine = do
   skipMany (char ' ')
-  void eol <|> comment
+  eof <|> void eol <|> comment
   skipMany comment
 
 indentation :: WarnParser ()
