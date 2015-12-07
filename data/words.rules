@@ -281,7 +281,9 @@ naïvetés = 1: naivetes
 #
 né  = 1: ne
 née = 1: nee
-# négligée
+#
+négligée  = 1: negligee
+négligées = 1: negligees
 # Neufchâtel
 # Nez Percé
 # Noël
@@ -290,13 +292,15 @@ née = 1: nee
 
 # ================ O
 # objet trouvé
-# olé
+olé = 1: ole
+#
 ombré = 1: ombre
-# omertà
+#
+omertà = 1: omerta
 # oöcyte
 # oölogy (rare)
-# opéra bouffe
-# opéra comique
+opéra  = 1: opera
+opéras = 1: operas
 # opïum (rare)
 öre = 2: ore
 #
@@ -322,15 +326,24 @@ piñatas = 1: pinatas
 piqué = 1: pique
 # più
 # plié
-# précis
-# pölsa
+précis    = 1: precis
+précises  = 1: precises
+précised  = 1: precised
+précising = 1: precising
+#
+pölsa = 1: polsa
 # preëminent [-ly] (rare)
 # preëmpt [-ion, -ive] (rare)
-# première
-# première danseuse
-# prêt-à-porter
-# protégé
-# protégée
+première  = 1: premiere
+premières = 1: premieres
+#
+prêt-à-porter = 1: pret-a-porter
+#
+protégé   = 1: protege
+protégés  = 1: proteges
+protégée  = 1: protegee
+protégées = 1: protegees
+#
 purée    = 1: puree
 purées   = 1: purees
 puréeing = 1: pureeing
@@ -342,7 +355,8 @@ puréed   = 1: pureed
 
 # ================ R
 # raison d'être
-# recherché
+recherché = 1: recherche
+#
 réclame  = 1: reclame
 réclames = 1: reclames
 # reëlect [-ed, -ing] (rare)
@@ -358,26 +372,40 @@ risqué = 1: risque
 #
 rôle  = 1: role
 rôles = 1: roles
-# rivière
+#
+rivière  = 1: riviere
+rivières = 1: rivieres
 # roman à clef
-# rosé
-# roué
+rosé  = 1: rose
+rosés = 1: roses
+#
+roué  = 1: roue
+roués = 1: roues
 
 # ================ S
 # sauté
 # séance
-# señor
-# señora
-# señorita
+señor     = 1: senor
+señores   = 1: senores
+señora    = 1: senora
+señoras   = 1: senoras
+señorita  = 1: senorita
+señoritas = 1: senoritas
 # Sinn Féin
 smörgåsbord  = 1: smorgasbord
 smörgåsbords = 1: smorgasbords
 # smörgåstårta
-# soigné
-# soirée
+soigné  = 1: soigne
+soignée = 1: soignee
+#
+soirée  = 1: soiree
+soirées = 1: soirees
+#
 soufflé  = 1: souffle
 soufflés = 1: souffles
-# soupçon
+#
+soupçon  = 1: soupcon
+soupçons = 1: soupcons
 # spermatozoön
 # surströmming
 
@@ -386,7 +414,8 @@ tête-à-tête  = 1: tete-a-tete
 tête-à-têtes = 1: tete-a-tetes
 #
 touché = 1: touche
-# tourtière
+#
+tourtière = 1: tourtiere
 
 # ================ U
 # über, Übermensch
