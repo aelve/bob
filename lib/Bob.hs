@@ -426,9 +426,14 @@ matchRules query rules =
     -- Sort entities by priority.
     & sortOn snd
 
-readRuleFile :: Maybe FilePath -> Text
-             -> Either ParseError ([Rule], Maybe Warning)
-readRuleFile mbName = warnParse (ruleFileP <* eof) (fromMaybe "" mbName)
+readRuleFile :: Text -> Either ParseError ([Rule], [Warning])
+readRuleFile ruleString =
+  case warnParse (ruleFileP <* eof) "" ruleString of
+    Left err -> Left err
+    Right (rules, mbWarning) ->
+      let warnings = maybeToList mbWarning ++ checkPriorities rules ++
+                     checkAscii rules
+      in  Right (rules, warnings)
 
 -- | Returns rules, names, and warnings\/parsing errors (if there were any).
 readData :: IO ([Rule], Map Entity Text, [Warning])
@@ -441,11 +446,12 @@ readData = do
   -- TODO: rule files should be in their own folder and have extension “.txt”
   ruleResults <- for ruleFiles $ \ruleFile -> do
     let path = dataDir </> ruleFile
-    res <- readRuleFile (Just ruleFile) <$> T.readFile path
+    res <- warnParse (ruleFileP <* eof) ruleFile <$> T.readFile path
     return $ case res of
       Left err -> ([], Just (show err))
       Right (rules, warning) -> (rules, warning)
   let rules = concat (map fst ruleResults)
+      -- When adding another check here, add it to 'readRuleFile' as well!
       ruleErrors = checkPriorities rules ++ checkAscii rules ++
                    catMaybes (map snd ruleResults)
 
