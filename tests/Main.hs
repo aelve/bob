@@ -68,7 +68,20 @@ behaviorTests = testGroup "behavior"
       rules <- testReadRules $ T.unlines [
         "a = 1: one two",
         "    2: two" ]
-      [Rule Nothing [("one", [("a", Top 1)]), ("two", [("a", Top 2)])]] @=? rules
+      [Rule Nothing [("one", [("a", Top 1)]),
+                     ("two", [("a", Top 2)])]]
+        @=? rules
+
+  , testCase "A matcher can generate several entities for a pattern" $ do
+      rules <- testReadRules $ T.unlines [
+        "zip Aa",
+        "    Xx",
+        "    2: {(A a) ()}" ]
+      [Rule Nothing [("AA",[("X",Top 2)]),
+                     ("Aa",[("x",Top 2),("X",Top 2)]),
+                     ("aA",[("x",Top 2),("X",Top 2)]),
+                     ("aa",[("x",Top 2)])]]
+        @=? rules
   ]
 
 warningTests :: TestTree
