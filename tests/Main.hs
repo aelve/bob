@@ -63,6 +63,12 @@ behaviorTests = testGroup "behavior"
         "####  blah",
         "a = 1: b" ]
       [Rule (Just "blah") [("b", [("a", Top 1)])]] @=? rules
+
+  , testCase "Later priorities should count, not earlier" $ do
+      rules <- testReadRules $ T.unlines [
+        "a = 1: one two",
+        "    2: two" ]
+      [Rule Nothing [("one", [("a", Top 1)]), ("two", [("a", Top 2)])]] @=? rules
   ]
 
 warningTests :: TestTree
