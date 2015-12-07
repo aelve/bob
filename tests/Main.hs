@@ -36,6 +36,11 @@ main = do
     , testCase "A file can contain just a comment" $ do
         rules <- testReadRules "# comment"
         [] @=? rules
+    , testCase "####-notes should work" $ do
+        rules <- testReadRules $ T.unlines [
+          "####  blah",
+          "a = 1: b" ]
+        [Rule (Just "blah") [("b", [("a", Top 1)])]] @=? rules
     , testCase "Warn when arguments of 'zip' have unequal lengths" $ do
         (_, warnings) <- testReadRulesAndWarnings $ T.unlines [
           "zip abc",
@@ -73,7 +78,6 @@ main = do
           "     2: y",
           "e3 = 2: x",
           "     1: y" ]
-
         unlines ["‘x’ finds:",
                  "  2 entities with priority 1 or less: e1 e2",
                  "  3 entities with priority 2 or less: e1 e2 e3",
