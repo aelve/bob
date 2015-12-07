@@ -27,6 +27,12 @@ main = do
     , testCase "Newline at the end of file isn't needed" $ do
         rules <- testReadRules "a = 1: b"
         [Rule Nothing [("b", [("a", Top 1)])]] @=? rules
+    , testCase "A file can be empty" $ do
+        rules <- testReadRules ""
+        [] @=? rules
+    , testCase "A file can contain just a comment" $ do
+        rules <- testReadRules "# comment"
+        [] @=? rules
     ]
 
 testReadRules :: Text -> IO [Rule]

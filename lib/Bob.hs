@@ -289,14 +289,14 @@ ruleP scope = do
 ruleFileP :: WarnParser [Rule]
 ruleFileP = do
   many (blankline <|> comment)
-  rule1 <- ruleP mempty
-  (rule1:) <$> go (toPatternsMap (ruleEntities rule1))
+  go mempty
   where
     go psm = option [] $ do
-      paragraphSeparator
       rule <- ruleP psm
       let psm' = M.unionWith (++) psm (toPatternsMap (ruleEntities rule))
-      (rule:) <$> go psm'
+      choice [
+        paragraphSeparator *> ((rule:) <$> go psm'),
+        eof $> [rule] ]
 
 {- |
 A parser for files with character names. The format is as follows:
@@ -540,7 +540,7 @@ comment = void $ do
     --
     -- TODO: think up something better about rule notes
     notFollowedBy (string "###")
-  anyChar `manyTill` try eol
+  anyChar `manyTill` try (void eol <|> eof)
 
 -- | Call this when you've parsed everything you needed from the current line
 -- and now have to skip to the next line.
