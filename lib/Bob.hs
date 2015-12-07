@@ -296,7 +296,7 @@ ruleFileP = do
       let psm' = M.unionWith (++) psm (toPatternsMap (ruleEntities rule))
       choice [
         paragraphSeparator *> ((rule:) <$> go psm'),
-        eof $> [rule] ]
+        pure [rule] ]
 
 {- |
 A parser for files with character names. The format is as follows:
@@ -428,7 +428,7 @@ matchRules query rules =
 
 readRuleFile :: Maybe FilePath -> Text
              -> Either ParseError ([Rule], Maybe Warning)
-readRuleFile mbName = warnParse ruleFileP (fromMaybe "" mbName)
+readRuleFile mbName = warnParse (ruleFileP <* eof) (fromMaybe "" mbName)
 
 -- | Returns rules, names, and warnings\/parsing errors (if there were any).
 readData :: IO ([Rule], Map Entity Text, [Warning])
@@ -452,7 +452,7 @@ readData = do
   -- Read entities' names.
   (names, nameErrors) <- do
     let path = dataDir </> "names.txt"
-    res <- warnParse namesFileP "names.txt" <$> T.readFile path
+    res <- warnParse (namesFileP <* eof) "names.txt" <$> T.readFile path
     return $ case res of
       Left err -> (mempty, [show err])
       Right (names, warning) -> (names, maybeToList warning)
