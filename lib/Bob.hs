@@ -13,8 +13,11 @@ module Bob
 (
   Pattern,
   Entity,
+  Priority(..),
   RuleNote,
   Rule(..),
+  Warning,
+  readRuleFile,
   readData,
   matchRules,
 )
@@ -244,7 +247,7 @@ matcherP = choice [zipP, manyToOneP, orderP]
 data Rule = Rule {
   ruleNote     :: Maybe RuleNote,
   ruleEntities :: EntitiesMap }
-  deriving (Show)
+  deriving (Eq, Show)
 
 ruleP :: PatternsMap -> WarnParser Rule
 ruleP scope = do
@@ -347,7 +350,7 @@ This code checks whether all priorities are satisfied – that is, for each patt
 
 and finally outputting a warning for each layer that has more entities than its priority allows.
 -}
-checkPriorities :: [Rule] -> [String]
+checkPriorities :: [Rule] -> [Warning]
 checkPriorities = mapMaybe checkPattern . extractPatterns
   where
     -- Discard a group if its priority isn't 'Top'.
@@ -365,7 +368,7 @@ checkPriorities = mapMaybe checkPattern . extractPatterns
     isGood :: ([Entity], Int) -> Bool
     isGood (entities, priority) = length entities <= priority
     -- Put it all together (and print warnings).
-    checkPattern :: (Pattern, [(Entity, Priority)]) -> Maybe String
+    checkPattern :: (Pattern, [(Entity, Priority)]) -> Maybe Warning
     checkPattern (pattern, pairs)
       | null warnings = Nothing
       | otherwise     = Just (unlines (header : warnings))
@@ -383,7 +386,7 @@ checkPriorities = mapMaybe checkPattern . extractPatterns
 {- |
 This code finds entities that can't be entered using just the symbols on a standard keyboard.
 -}
-checkAscii :: [Rule] -> [String]
+checkAscii :: [Rule] -> [Warning]
 checkAscii rules =
   rules
     -- Get a list of entities and corresponding patterns.
@@ -423,8 +426,12 @@ matchRules query rules =
     -- Sort entities by priority.
     & sortOn snd
 
+readRuleFile :: Maybe FilePath -> Text
+             -> Either ParseError ([Rule], Maybe Warning)
+readRuleFile mbName = warnParse ruleFileP (fromMaybe "" mbName)
+
 -- | Returns rules, names, and warnings\/parsing errors (if there were any).
-readData :: IO ([Rule], Map Entity Text, [String])
+readData :: IO ([Rule], Map Entity Text, [Warning])
 readData = do
   dataDir <- (</> "data") <$> getDataDir
 
@@ -434,7 +441,7 @@ readData = do
   -- TODO: rule files should be in their own folder and have extension “.txt”
   ruleResults <- for ruleFiles $ \ruleFile -> do
     let path = dataDir </> ruleFile
-    res <- warnParse ruleFileP ruleFile <$> T.readFile path
+    res <- readRuleFile (Just ruleFile) <$> T.readFile path
     return $ case res of
       Left err -> ([], Just (show err))
       Right (rules, warning) -> (rules, warning)
@@ -462,19 +469,21 @@ currentLine = choice [
      xs <- anyChar `manyTill` try (eof <|> void eol)
      pure (T.pack (x:xs)) ]
 
-type Warn a = forall m. MonadWriter [String] m => m a
+type Warning = String
 
-warn :: String -> Warn ()
+type Warn a = forall m. MonadWriter [Warning] m => m a
+
+warn :: Warning -> Warn ()
 warn s = tell [s]
 
-type WarnParser a = WriterT [String] Parser a
+type WarnParser a = WriterT [Warning] Parser a
 
 groupWarnings :: String -> WarnParser a -> WarnParser a
 groupWarnings title = censor $ \s ->
   if null s then [] else title : map ("  " ++) s
 
 warnParse :: WarnParser a -> FilePath -> Text ->
-             Either ParseError (a, Maybe String)
+             Either ParseError (a, Maybe Warning)
 warnParse p src s = case parse (runWriterT p) src s of
   Left err -> Left err
   Right (x, []) -> Right (x, Nothing)
