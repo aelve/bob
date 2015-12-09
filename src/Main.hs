@@ -3,7 +3,8 @@ NoImplicitPrelude,
 RecordWildCards,
 OverloadedStrings,
 ScopedTypeVariables,
-FlexibleContexts
+FlexibleContexts,
+TemplateHaskell
   #-}
 
 
@@ -13,7 +14,7 @@ module Main (main) where
 -- General
 import BasePrelude hiding (on)
 -- Lenses
-import Lens.Micro.GHC hiding (set)
+import Lens.Micro.Platform hiding (view, set, (.=), (&))
 -- Monads
 import Control.Monad.IO.Class (liftIO)
 -- Containers
@@ -25,16 +26,43 @@ import Data.Text (Text)
 import qualified Data.Text.ICU.Char as T
 import Text.Printf
 import Numeric (showHex)
+-- ByteString
+import qualified Data.ByteString as BS
+import qualified Data.ByteString.Lazy as BSL
 -- GUI
 import Graphics.UI.Gtk
+-- Files
+import System.Directory    -- directory
+import System.FilePath     -- filepath
+-- JSON
+import Data.Aeson as Aeson                                  -- aeson
+import Data.Aeson.Encode.Pretty as Aeson hiding (Config)    -- aeson-pretty
 -- Browser
 import Web.Browser
 -- Bob-specific
 import Bob
 
 
-runGUI :: [Rule] -> Map Entity Text -> IO ()
-runGUI rules names = do
+data Config = Config {
+  _windowSize :: (Int, Int) }
+
+makeLenses ''Config
+
+defaultConfig :: Config
+defaultConfig = Config {
+  _windowSize = (300, 400) }
+
+instance FromJSON Config where
+  parseJSON = withObject "config" $ \o -> do
+    _windowSize <- o .:? "window-size" .!= (defaultConfig ^. windowSize)
+    return Config{..}
+
+instance ToJSON Config where
+  toJSON Config{..} = object [
+    "window-size" .= _windowSize ]
+
+runGUI :: Config -> [Rule] -> Map Entity Text -> IO ()
+runGUI Config{..} rules names = do
   initGUI
 
   window <- windowNew
@@ -43,8 +71,14 @@ runGUI rules names = do
     windowTitle := ("Bob" :: Text),
     windowGravity := GravityCenter,
     windowWindowPosition := WinPosCenter,
-    windowDefaultWidth := 300,
-    windowDefaultHeight := 400 ]
+    windowDefaultWidth := fst _windowSize,
+    windowDefaultHeight := snd _windowSize ]
+
+  -- On exit, save window size.
+  window `on` deleteEvent $ liftIO $ do
+    Rectangle _ _ width height <- widgetGetAllocation window
+    modifyConfig $ \config -> return (config & windowSize .~ (width, height))
+    return False
 
   searchEntry <- entryNew
 
@@ -185,11 +219,46 @@ runGUI rules names = do
 
 main :: IO ()
 main = do
+  config <- readConfig
   (rules, names, errors) <- readData
   unless (null errors) $ do
     putStrLn (unparagraphs errors)
     printf "Overall warnings: %d\n" (length errors)
-  runGUI rules names
+  runGUI config rules names
+
+-- | Get directory with application data.
+getDataDirectory :: IO FilePath
+getDataDirectory = do
+  dir <- getAppUserDataDirectory "aelve/bob"
+  ex <- doesDirectoryExist dir
+  unless ex $
+    createDirectory dir
+  return dir
+
+readConfig :: IO Config
+readConfig = do
+  dir <- getDataDirectory
+  let filename = dir </> "config.json"
+  exists <- doesFileExist filename
+  when (not exists) $
+    BSL.writeFile filename (Aeson.encodePretty defaultConfig)
+  contents <- BSL.fromStrict <$> BS.readFile filename
+  return (fromMaybe defaultConfig (Aeson.decode' contents))
+
+modifyConfig :: (Config -> IO Config) -> IO ()
+modifyConfig func = do
+  dir <- getDataDirectory
+  file <- readConfig
+  -- Just writing encoded data to the file isn't safe, because if something
+  -- happens while we're writing (such as power outage), we risk losing it.
+  -- So, instead we're going to write into a *different* file, and then
+  -- atomically (or so documentation for 'renameFile' claims) rename the
+  -- new one into the old one. Note: we can't create this file in a
+  -- temporary directory, because it might not be on the same device, which
+  -- would cause renameFile to fail.
+  let newFile = dir </> "config-new.json"
+  BSL.writeFile newFile . Aeson.encodePretty =<< func file
+  renameFile newFile (dir </> "config.json")
 
 -- | Separate paragraphs with blank lines.
 unparagraphs :: [String] -> String
