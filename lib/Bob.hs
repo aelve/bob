@@ -414,7 +414,7 @@ matchRule query Rule{..} = do
   return ((_ruleNote, entity), priority)
 
 {- |
-Find all matches for a pattern, sort results by priority. (When the same entity is matched by several rules, pick smallest priority.)
+Find all matches for a pattern, sort results by priority and alphabetically. (When the same entity is matched by several rules, pick smallest priority.)
 
 TODO: warn about the same pattern–entity pair having more than one rule note.
 -}
@@ -423,7 +423,7 @@ matchRules query rules =
   rules
     -- Do the matching.
     & concatMap (matchRule query)
-    -- Group results by entity.
+    -- Group results by entity (and sort entities in the process).
     & groupWith (snd . fst)
     -- For each entity, pick lowest priority and any non-empty rule note.
     & map (\xs -> let entity     = snd (fst (head xs))
@@ -431,6 +431,9 @@ matchRules query rules =
                       notes      = map (fst . fst) xs
                   in  ((asum notes, entity), minimum priorities))
     -- Sort entities by priority.
+    --
+    -- This will only leave entities sorted alphabetically if 'sortOn' is a
+    -- stable sort (which it is).
     & sortOn snd
 
 readRuleFile :: Text -> Either ParseError ([Rule], [Warning])

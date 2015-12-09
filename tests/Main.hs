@@ -26,6 +26,7 @@ main = do
     [ testCase "No warnings when loading rules" $
         null mbErrors @? unlines mbErrors
     , parsingTests
+    , searchTests
     , behaviorTests
     , matcherTests
     , generatorTests
@@ -67,6 +68,25 @@ parsingTests = testGroup "parsing"
                "expecting rest of integer",
                "priority can't be 0" ]
         @=? err
+  ]
+
+searchTests :: TestTree
+searchTests = testGroup "search"
+  [ testCase "Entities with equal priority are ordered alphabetically" $ do
+      rules <- testReadRules $ T.unlines [
+        "e = 5: x",
+        "b = 5: x",
+        "c = 5: x",
+        "",
+        "#### hi",
+        "d = 5: x",
+        "a = 5: x" ]
+      matchRules "x" rules @?= [
+        ((Just "hi", "a"), Top 5),
+        ((Nothing,   "b"), Top 5),
+        ((Nothing,   "c"), Top 5),
+        ((Just "hi", "d"), Top 5),
+        ((Nothing,   "e"), Top 5) ]
   ]
 
 behaviorTests :: TestTree
