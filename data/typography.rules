@@ -78,3 +78,7 @@
 # registered trademark
 ® = 1: '(r)' '(R)' {(o O) (r R)}
     3: r R
+
+# inverted marks
+¿ = 1: ?
+¡ = 1: !

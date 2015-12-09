@@ -21,3 +21,9 @@ zip '+=()aeoxhklmnpst'
     X: ()
     3: ()_
     2: _()
+
+# eszett
+ß = 1: ss
+
+# degree
+° = 1: o deg
