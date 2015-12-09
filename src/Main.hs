@@ -43,8 +43,8 @@ runGUI rules names = do
     windowTitle := ("Bob" :: Text),
     windowGravity := GravityCenter,
     windowWindowPosition := WinPosCenter,
-    windowDefaultWidth := 200,
-    windowDefaultHeight := 200 ]
+    windowDefaultWidth := 300,
+    windowDefaultHeight := 400 ]
 
   searchEntry <- entryNew
 
@@ -57,7 +57,11 @@ runGUI rules names = do
   -- add some columns
   let addColumn (title :: Text) = do
         column <- treeViewColumnNew
-        treeViewColumnSetTitle column title
+        set column [
+          treeViewColumnReorderable := True,
+          treeViewColumnResizable := True,
+          treeViewColumnExpand := True,
+          treeViewColumnTitle := title ]
         renderer <- cellRendererTextNew
         cellLayoutPackStart column renderer True
         treeViewAppendColumn view column
@@ -84,9 +88,12 @@ runGUI rules names = do
                     then T.charName (T.head entity)
                     else "" ]
 
+  viewScrolled <- scrolledWindowNew Nothing Nothing
+  viewScrolled `containerAdd` view
+
   layout <- tableNew 2 1 False  -- 2 rows, 1 column, autostretching = off
   tableAttachDefaults layout searchEntry 0 1 0 1
-  tableAttachDefaults layout view 0 1 1 2
+  tableAttachDefaults layout viewScrolled 0 1 1 2
   window `containerAdd` layout
 
   set layout [
