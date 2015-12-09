@@ -260,9 +260,9 @@ warningTests = testGroup "warnings"
         "",
         "okay2 = 1: rupee" ]
       warnings @?= unlines [
-        "‘bad1’ can't be found using only ASCII; patterns that find it are: x€y",
+        "‘bad1’ can't be found with ASCII; found by: x€y",
         "",
-        "‘bad2’ can't be found using only ASCII; patterns that find it are: ä" ]
+        "‘bad2’ can't be found with ASCII; found by: ä" ]
   ]
 
 testReadRules :: Text -> IO [Rule]

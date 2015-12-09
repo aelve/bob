@@ -403,8 +403,7 @@ checkAscii rules =
     -- Find entities that don't have at least 1 ASCII pattern.
     & filter (\(_, ps) -> all (not . isGoodPattern) ps)
     -- Generate warnings.
-    & map (\(e, ps) -> printf "‘%s’ can't be found using only ASCII; \
-                              \patterns that find it are: %s"
+    & map (\(e, ps) -> printf "‘%s’ can't be found with ASCII; found by: %s"
                               (prettyChar e) (T.unpack (T.unwords ps)))
   where
     isGoodPattern = T.all (\c -> isAscii c && isPrint c)
