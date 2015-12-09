@@ -37,7 +37,7 @@ parsingTests :: TestTree
 parsingTests = testGroup "parsing"
   [ testCase "Simplest rule can be parsed" $ do
       rules <- testReadRules "a = 1: b\n"
-      [Rule Nothing [("b", [("a", Top 1)])]] @=? rules
+      rules @?= [Rule Nothing [("b", [("a", Top 1)])]]
 
   , testCase "2 rules" $ do
       rules <- testReadRules $ T.unlines [
@@ -46,28 +46,29 @@ parsingTests = testGroup "parsing"
         "",
         "# whatever",
         "x = X: y" ]
-      [Rule Nothing [("b", [("a", Top 1)])],
-       Rule Nothing [("y", [("x", Whatever)])]]
-        @=? rules
+      rules @?= [
+        Rule Nothing [("b", [("a", Top 1)])],
+        Rule Nothing [("y", [("x", Whatever)])]]
 
   , testCase "Newline at the end of file isn't needed" $ do
       rules <- testReadRules "a = 1: b"
-      [Rule Nothing [("b", [("a", Top 1)])]] @=? rules
+      rules @?= [
+        Rule Nothing [("b", [("a", Top 1)])]]
 
   , testCase "A file can be empty" $ do
       rules <- testReadRules ""
-      [] @=? rules
+      rules @?= []
 
   , testCase "A file can contain just a comment" $ do
       rules <- testReadRules "# comment"
-      [] @=? rules
+      rules @?= []
 
   , testCase "Priority can't be 0" $ do
       err <- testReadRulesButFail "a = 0: b"
-      unlines ["line 1, column 6:",
-               "expecting rest of integer",
-               "priority can't be 0" ]
-        @=? err
+      err @?= unlines [
+        "line 1, column 6:",
+        "expecting rest of integer",
+        "priority can't be 0" ]
   ]
 
 searchTests :: TestTree
@@ -86,7 +87,7 @@ searchTests = testGroup "search"
         ((Nothing,   "b"), Top 5),
         ((Nothing,   "c"), Top 5),
         ((Just "hi", "d"), Top 5),
-        ((Nothing,   "e"), Top 5) ]
+        ((Nothing,   "e"), Top 5)]
   ]
 
 behaviorTests :: TestTree
@@ -95,26 +96,29 @@ behaviorTests = testGroup "behavior"
       rules <- testReadRules $ T.unlines [
         "####  blah",
         "a = 1: b" ]
-      [Rule (Just "blah") [("b", [("a", Top 1)])]] @=? rules
+      rules @?= [
+        Rule (Just "blah") [("b", [("a", Top 1)])]]
 
   , testCase "Later priorities should count, not earlier" $ do
       rules <- testReadRules $ T.unlines [
         "a = 1: one two",
         "    2: two" ]
-      [Rule Nothing [("one", [("a", Top 1)]),
-                     ("two", [("a", Top 2)])]]
-        @=? rules
+      rules @?= [
+        Rule Nothing [
+          ("one", [("a", Top 1)]),
+          ("two", [("a", Top 2)])]]
 
   , testCase "A matcher can generate several entities for a pattern" $ do
       rules <- testReadRules $ T.unlines [
         "zip Aa",
         "    Xx",
         "    2: {(A a) ()}" ]
-      [Rule Nothing [("AA",[("X",Top 2)]),
-                     ("Aa",[("X",Top 2),("x",Top 2)]),
-                     ("aA",[("X",Top 2),("x",Top 2)]),
-                     ("aa",[("x",Top 2)])]]
-        @=? rules
+      rules @?= [
+        Rule Nothing [
+          ("AA",[("X",Top 2)]),
+          ("Aa",[("X",Top 2),("x",Top 2)]),
+          ("aA",[("X",Top 2),("x",Top 2)]),
+          ("aa",[("x",Top 2)])]]
   ]
 
 matcherTests :: TestTree
@@ -125,28 +129,29 @@ matcherTests = testGroup "matchers"
         "    AB",
         "    1: ()+",
         "    2: +()" ]
-      [Rule Nothing [("a+",[("A",Top 1)]),
-                     ("b+",[("B",Top 1)]),
-                     ("+a",[("A",Top 2)]),
-                     ("+b",[("B",Top 2)])]]
-        @=? rules
+      rules @?= [
+        Rule Nothing [
+          ("a+",[("A",Top 1)]),
+          ("b+",[("B",Top 1)]),
+          ("+a",[("A",Top 2)]),
+          ("+b",[("B",Top 2)])]]
 
   , testCase "many-to-one" $ do
       rules <- testReadRules $ T.unlines [
         "x = 1: a",
         "    2: b" ]
-      [Rule Nothing [("a",[("x",Top 1)]),
-                     ("b",[("x",Top 2)])]]
-        @=? rules
+      rules @?= [
+        Rule Nothing [
+          ("a",[("x",Top 1)]),
+          ("b",[("x",Top 2)])]]
 
   , testCase "order" $ do
       rules <- testReadRules $ T.unlines [
         "(x y) : a b" ]
-      [Rule Nothing [("x",[("a",Top 1),
-                           ("b",Top 2)]),
-                     ("y",[("a",Top 1),
-                           ("b",Top 2)])]]
-        @=? rules
+      rules @?= [
+        Rule Nothing [
+          ("x", [("a",Top 1), ("b",Top 2)]),
+          ("y", [("a",Top 1), ("b",Top 2)])]]
   ]
 
 generatorTests :: TestTree
@@ -154,70 +159,78 @@ generatorTests = testGroup "generators"
   [ testCase "row of generators" $ do
       rules <- testReadRules $ T.unlines [
         "x = 1: a (b c)" ]
-      [Rule Nothing [("a",[("x",Top 1)]),
-                     ("b",[("x",Top 1)]),
-                     ("c",[("x",Top 1)])]]
-        @=? rules
+      rules @?= [
+        Rule Nothing [
+          ("a",[("x",Top 1)]),
+          ("b",[("x",Top 1)]),
+          ("c",[("x",Top 1)])]]
 
   , testCase "sequence" $ do
       rules <- testReadRules $ T.unlines [
         "x = 1: +(a b){c d}-" ]
-      [Rule Nothing [("+acd-",[("x",Top 1)]),
-                     ("+adc-",[("x",Top 1)]),
-                     ("+bcd-",[("x",Top 1)]),
-                     ("+bdc-",[("x",Top 1)])]]
-        @=? rules
+      rules @?= [
+        Rule Nothing [
+          ("+acd-",[("x",Top 1)]),
+          ("+adc-",[("x",Top 1)]),
+          ("+bcd-",[("x",Top 1)]),
+          ("+bdc-",[("x",Top 1)])]]
 
   , testCase "literal" $ do
       rules <- testReadRules $ T.unlines [
         "x = 1: a 'bcd' '''' '()'" ]
-      [Rule Nothing [("a"  ,[("x",Top 1)]),
-                     ("bcd",[("x",Top 1)]),
-                     ("'"  ,[("x",Top 1)]),
-                     ("()" ,[("x",Top 1)])]]
-        @=? rules
+      rules @?= [
+        Rule Nothing [
+          ("a"  ,[("x",Top 1)]),
+          ("bcd",[("x",Top 1)]),
+          ("'"  ,[("x",Top 1)]),
+          ("()" ,[("x",Top 1)])]]
 
   , testCase "single generator" $ do
       rules <- testReadRules $ T.unlines [
         "x = 1: (x y)" ]
-      [Rule Nothing [("x",[("x",Top 1)]),
-                     ("y",[("x",Top 1)])]]
-        @=? rules
+      rules @?= [
+        Rule Nothing [
+          ("x",[("x",Top 1)]),
+          ("y",[("x",Top 1)])]]
 
   , testCase "variable" $ do
       rules <- testReadRules $ T.unlines [
         "zip a",
         "    A",
         "    1: ()" ]
-      [Rule Nothing [("a",[("A",Top 1)])]]
-        @=? rules
+      rules @?= [
+        Rule Nothing [("a",[("A",Top 1)])]]
 
   , testCase "any-of" $ do
       rules <- testReadRules $ T.unlines [
         "x = 1: (a b)" ]
-      [Rule Nothing [("a",[("x",Top 1)]),
-                     ("b",[("x",Top 1)])]]
-        @=? rules
+      rules @?= [
+        Rule Nothing [
+          ("a",[("x",Top 1)]),
+          ("b",[("x",Top 1)])]]
 
   , testCase "permutation" $ do
       rules <- testReadRules $ T.unlines [
         "x = 1: {a b}" ]
-      [Rule Nothing [("ab",[("x",Top 1)]),
-                     ("ba",[("x",Top 1)])]]
-        @=? rules
+      rules @?= [
+        Rule Nothing [
+          ("ab",[("x",Top 1)]),
+          ("ba",[("x",Top 1)])]]
 
   , testCase "reference" $ do
       rules <- testReadRules $ T.unlines [
         "a = 1: a b",
         "",
         "x = 1: `a``'a'`" ]
-      [Rule Nothing [("a",[("a",Top 1)]),
-                     ("b",[("a",Top 1)])],
-       Rule Nothing [("aa",[("x",Top 1)]),
-                     ("ab",[("x",Top 1)]),
-                     ("ba",[("x",Top 1)]),
-                     ("bb",[("x",Top 1)])]]
-        @=? rules
+      rules @?= [
+        Rule Nothing [
+          ("a",[("a",Top 1)]),
+          ("b",[("a",Top 1)])],
+        Rule Nothing [
+          ("aa",[("x",Top 1)]),
+          ("ab",[("x",Top 1)]),
+          ("ba",[("x",Top 1)]),
+          ("bb",[("x",Top 1)])]]
   ]
 
 warningTests :: TestTree
