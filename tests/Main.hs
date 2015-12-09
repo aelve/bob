@@ -207,33 +207,33 @@ warningTests = testGroup "warnings"
         "zip abc",
         "    wxyz",
         "    1: ()" ]
-      unlines ["warnings in rule at line 1, column 1:",
-               "  lengths of zipped rows don't match" ]
-        @=? warnings
+      warnings @?= unlines [
+        "warnings in rule at line 1, column 1:",
+        "  lengths of zipped rows don't match" ]
 
   , testCase "Warn when undefined things are referenced" $ do
       (_, warnings) <- testReadRulesAndWarnings $ T.unlines [
         "a   : 1 2 3",
         "`e` : x y z" ]
-      unlines ["warnings in rule at line 1, column 1:",
-               "  ‘e’ was referenced but wasn't defined yet" ]
-        @=? warnings
+      warnings @?= unlines [
+        "warnings in rule at line 1, column 1:",
+        "  ‘e’ was referenced but wasn't defined yet" ]
 
   , testCase "Warn when no value can be provided for a variable" $ do
       (_, warnings) <- testReadRulesAndWarnings $ T.unlines [
         "a  : 1 2 3",
         "() : x y z" ]
-      unlines ["warnings in rule at line 1, column 1:",
-               "  there's a variable in the rule but no value provided for it" ]
-        @=? warnings
+      warnings @?= unlines [
+        "warnings in rule at line 1, column 1:",
+        "  there's a variable in the rule but no value provided for it" ]
 
   , testCase "Warn when empty patterns are encountered" $ do
       (_, warnings) <- testReadRulesAndWarnings $ T.unlines [
         "a  : 1 2 3",
         "'' : x y z" ]
-      unlines ["warnings in rule at line 1, column 1:",
-               "  matcher #2 contains an empty pattern" ]
-        @=? warnings
+      warnings @?= unlines [
+        "warnings in rule at line 1, column 1:",
+        "  matcher #2 contains an empty pattern" ]
 
   , testCase "Warn when priorities aren't satisfied" $ do
       (_, warnings) <- testReadRulesAndWarnings $ T.unlines [
@@ -243,26 +243,26 @@ warningTests = testGroup "warnings"
         "     2: y",
         "e3 = 2: x",
         "     1: y" ]
-      unlines ["‘x’ finds:",
-               "  2 entities with priority 1 or less: e1 e2",
-               "  3 entities with priority 2 or less: e1 e2 e3",
-               "",
-               "‘y’ finds:",
-               "  3 entities with priority 2 or less: e3 e1 e2" ]
-        @=? warnings
+      warnings @?= unlines [
+        "‘x’ finds:",
+        "  2 entities with priority 1 or less: e1 e2",
+        "  3 entities with priority 2 or less: e1 e2 e3",
+        "",
+        "‘y’ finds:",
+        "  3 entities with priority 2 or less: e3 e1 e2" ]
 
   , testCase "Warn when an entity can't be found using only ASCII" $ do
       (_, warnings) <- testReadRulesAndWarnings $ T.unlines [
-        "bad1 = 1: x€y",     -- bad because non-ASCII
-        "bad2 = 1: ä",       -- bad because ASCII only encodes lower 128 and not <256
-        "okay1 = 1: ₮ ***",  -- okay because there's a good pattern available
-        "okay2 = 1: ₹",      -- okay because there's a good pattern in another rule
+        "bad1 = 1: x€y",     -- bad (non-ASCII)
+        "bad2 = 1: ä",       -- bad (non-ASCII too)
+        "okay1 = 1: ₮ ***",  -- okay (there's a good pattern available)
+        "okay2 = 1: ₹",      -- okay (there's a good pattern in another rule)
         "",
         "okay2 = 1: rupee" ]
-      unlines ["‘bad1’ can't be found using only ASCII; patterns that find it are: x€y",
-               "",
-               "‘bad2’ can't be found using only ASCII; patterns that find it are: ä" ]
-        @=? warnings
+      warnings @?= unlines [
+        "‘bad1’ can't be found using only ASCII; patterns that find it are: x€y",
+        "",
+        "‘bad2’ can't be found using only ASCII; patterns that find it are: ä" ]
   ]
 
 testReadRules :: Text -> IO [Rule]
