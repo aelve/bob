@@ -22,16 +22,15 @@ import Bob
 main :: IO ()
 main = do
   (_, _, mbErrors) <- readData
-  defaultMain $ testGroup "tests"
-    [ testCase "No warnings when loading rules" $
-        null mbErrors @? unlines mbErrors
-    , parsingTests
-    , searchTests
-    , behaviorTests
-    , matcherTests
-    , generatorTests
-    , warningTests
-    ]
+  defaultMain $ testGroup "tests" [
+    parsingTests,
+    searchTests,
+    behaviorTests,
+    matcherTests,
+    generatorTests,
+    warningTests,
+    testCase "No warnings when loading rules" $
+      null mbErrors @? unlines mbErrors ]
 
 parsingTests :: TestTree
 parsingTests = testGroup "parsing"
