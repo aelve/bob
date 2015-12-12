@@ -6,7 +6,7 @@ cache:
   - $HOME/.cabal
 
 env:
-- CABALVER=1.22 GHCVER=7.10.2 ALEXVER=3.1.4 HAPPYVER=1.19.5
+- CABALVER=1.22 GHCVER=7.10.3 ALEXVER=3.1.4 HAPPYVER=1.19.5
 
 addons:
   apt:
@@ -14,7 +14,7 @@ addons:
     - hvr-ghc
     packages:
     - libgtk-3-dev
-    - ghc-7.10.2
+    - ghc-7.10.3
     - cabal-install-1.22
     - alex-3.1.4
     - happy-1.19.5
