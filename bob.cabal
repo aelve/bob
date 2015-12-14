@@ -29,8 +29,7 @@ library
                      , directory == 1.2.*
                      , filepath == 1.4.*
                      , megaparsec == 4.0.*
-                     , microlens-ghc == 0.3.*
-                     , microlens-th == 0.2.*
+                     , microlens-platform >= 0.1.1
                      , mtl == 2.2.*
                      , text == 1.2.*
   hs-source-dirs:      lib

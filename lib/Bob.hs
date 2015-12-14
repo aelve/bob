@@ -33,8 +33,7 @@ import Numeric.Natural
 -- Monads
 import Control.Monad.Writer
 -- Lenses
-import Lens.Micro.GHC hiding ((&))
-import Lens.Micro.TH
+import Lens.Micro.Platform hiding ((&))
 -- Text
 import Text.Printf
 import qualified Data.Text as T
