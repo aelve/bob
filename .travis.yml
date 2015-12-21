@@ -13,6 +13,7 @@ addons:
     sources:
     - hvr-ghc
     packages:
+    - libxtst-dev
     - libgtk-3-dev
     - ghc-7.10.3
     - cabal-install-1.22
