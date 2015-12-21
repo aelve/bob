@@ -39,6 +39,8 @@ import Data.Aeson as Aeson                                  -- aeson
 import Data.Aeson.Encode.Pretty as Aeson hiding (Config)    -- aeson-pretty
 -- Browser
 import Web.Browser
+-- Key-sending
+import FakeType
 -- Bob-specific
 import Bob
 
@@ -63,6 +65,17 @@ instance ToJSON Config where
 
 runGUI :: Config -> [Rule] -> Map Entity Text -> IO ()
 runGUI Config{..} rules names = do
+  -- When the user presses Enter on a row, we send it to the topmost
+  -- background window, except that there's a problem – it's hard to get the
+  -- topmost background window. So, instead we just send the string *after*
+  -- our window has been closed (because after that the topmost background
+  -- window will become simply the topmost window).
+  --
+  -- To do this, we use an IORef that collects actions that should be done
+  -- when the GUI stops working.
+  actionsAfterGUIStops <- newIORef []
+  let scheduleAfterGUIStops act = modifyIORef actionsAfterGUIStops (act:)
+
   initGUI
 
   window <- windowNew
@@ -147,10 +160,9 @@ runGUI Config{..} rules names = do
   let choose mbIndex = do
         variantsCount <- getVariantsCount
         unless (variantsCount == 0) $ do
-          row <- listStoreGetValue model (fromMaybe 0 mbIndex)
-          clipboard <- clipboardGet selectionClipboard
-          clipboardSetText clipboard (snd row)
-          clipboardStore clipboard
+          (_, entity) <- listStoreGetValue model (fromMaybe 0 mbIndex)
+          scheduleAfterGUIStops $
+            sendString (T.unpack entity)
           widgetDestroy window
 
   view `on` rowActivated $ \path _ -> choose (listToMaybe path)
@@ -216,6 +228,8 @@ runGUI Config{..} rules names = do
 
   widgetShowAll window
   mainGUI
+
+  sequence_ =<< readIORef actionsAfterGUIStops
 
 main :: IO ()
 main = do
