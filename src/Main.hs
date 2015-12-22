@@ -87,6 +87,11 @@ runGUI Config{..} rules names = do
     windowDefaultWidth := fst _windowSize,
     windowDefaultHeight := snd _windowSize ]
 
+  -- On Escape, exit.
+  window `on` keyPressEvent $ tryEvent $ do
+    "Escape" <- eventKeyName
+    liftIO mainQuit
+
   -- On exit, save window size.
   window `on` deleteEvent $ liftIO $ do
     Rectangle _ _ width height <- widgetGetAllocation window
