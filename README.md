@@ -1,5 +1,9 @@
 # Bob
 
+[![Hackage](https://img.shields.io/hackage/v/bob.svg)](https://hackage.haskell.org/package/bob)
+[![Build status](https://travis-ci.org/aelve/bob.svg)](https://travis-ci.org/aelve/bob)
+[![BSD3 license](https://img.shields.io/badge/license-BSD3-blue.svg)](https://github.com/aelve/bob/blob/master/LICENSE)
+
 ## How do people search for characters?
 
 1. **Google:** I'm looking for the rupee sign and I don't even know how it looks. I type `rupee sign`.
