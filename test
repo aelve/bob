@@ -1,3 +1,0 @@
-#!/bin/sh
-
-cabal test --test-options="--hide-successes"
