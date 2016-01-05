@@ -14,7 +14,6 @@ import Control.Monad.IO.Class (liftIO)
 -- Text
 import Data.Text (Text)
 import qualified Data.Text.ICU.Char as T
-import Text.Printf
 -- Catching exceptions
 import Control.Spoon
 -- Random

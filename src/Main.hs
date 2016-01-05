@@ -24,8 +24,6 @@ import qualified Data.Map as M
 import qualified Data.Text as T
 import Data.Text (Text)
 import qualified Data.Text.ICU.Char as T
-import Text.Printf
-import Numeric (showHex)
 -- ByteString
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Lazy as BSL

@@ -35,7 +35,6 @@ import Control.Monad.Writer
 -- Lenses
 import Lens.Micro.Platform hiding ((&))
 -- Text
-import Text.Printf
 import qualified Data.Text as T
 import qualified Data.Text.IO as T
 import Data.Text (Text)
